@@ -1,0 +1,51 @@
+// wit/whamm-server.wit
+package vscode:example;
+
+interface types {
+	record options {
+		as-monitor-module: bool
+	}
+
+	variant mode {
+		before,
+		after,
+		alt,
+		entry,
+		exit
+	}
+
+	record script-loc {
+		l: u32,
+		c: u32
+	}
+
+	record app-loc {
+		byte-offset: u64,
+		mode: mode
+	}
+
+	record probe {
+    	app-loc: app-loc,
+		script-loc: script-loc,
+		wat: string
+	}
+
+	// variant operation {
+	// 	add(operands),
+	// 	sub(operands),
+	// 	mul(operands),
+	// 	div(operands)
+	// }
+
+	enum error-code {
+		invalid,
+		unexpected
+	}
+}
+world whamm-server {
+	use types.{ options, probe, error-code };
+	import log: func(msg: string);
+
+	export setup: func(app: string, script: string, opts: options) -> result<string, error-code>;
+	export run: func() -> result<list<probe>, error-code>;
+}

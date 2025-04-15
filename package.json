@@ -24,7 +24,7 @@
 			{
 				"command": "vscode-samples.wasm-component-model.run",
 				"category": "Samples",
-				"title": "Run Calc Service"
+				"title": "Run Whamm Service"
 			}
 		]
 	},
