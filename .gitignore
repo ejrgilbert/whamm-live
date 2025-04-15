@@ -1,0 +1,11 @@
+dist/
+out/
+
+# Rust
+Cargo.lock
+target/
+
+# npm
+package-lock.json
+node_modules/
+tsconfig.tsbuildinfo
