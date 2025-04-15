@@ -78,7 +78,7 @@ function handleError(error: unknown, channel: vscode.OutputChannel) {
 		name = error.cause.tag;
 		message = error.cause.value;
 	}
-	// we'll proceed, but let's report it
+	
 	channel.appendLine(`${name}: ${message}`);
 }
 

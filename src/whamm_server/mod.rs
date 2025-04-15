@@ -2,7 +2,6 @@ use crate::vscode::example::types::{AppLoc, ErrorCode, Mode, Options, Probe, Scr
 use crate::log;
 use orca_wasm::ir::module::Module;
 use std::cell::RefCell;
-use std::fs;
 
 thread_local! {
     static APP_BYTES: RefCell<Vec<u8>> = RefCell::new(Vec::new());
@@ -58,33 +57,3 @@ impl Options {
         }
     }
 }
-
-// pub struct Probe {
-//     app_loc: AppLoc,
-//     script_loc: ScriptLoc,
-//     wat: Wat
-// }
-
-// pub type Wat = String;
-// pub type Wasm = Vec<u8>;
-
-// pub struct AppLoc {
-//     byte_offset: u64,
-//     mode: Mode
-// }
-// pub struct ScriptLoc {
-//     line: u32,
-//     char: u32
-// }
-
-// pub enum Mode {
-//     Before,
-//     After,
-//     Alt,
-//     Entry,
-//     Exit
-// }
-
-// pub struct Options {
-//     as_monitor_module: bool
-// }
