@@ -10,7 +10,7 @@ import { Types, whammServer } from './whammServer';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	// The channel for printing the result.
-	const channel = vscode.window.createOutputChannel('WhammServer');
+	const channel = vscode.window.createOutputChannel('WhammClient');
 	context.subscriptions.push(channel);
 
 	// The channel for printing the log.
@@ -43,28 +43,43 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	// Bind the TypeScript Api
 	const api = whammServer._.exports.bind(instance.exports as whammServer._.Exports, wasmContext);
 
+	// Load the files
+	const app_path = "demo/cf.wasm";
+	const script_path = "demo/script.mm";
+	const app_bytes = await loadFileAsBytes(app_path, context);
+	const script_content = await loadFileAsString(script_path, context);
+
 	context.subscriptions.push(vscode.commands.registerCommand('vscode-samples.wasm-component-model.run', () => {
 		channel.show();
 		channel.appendLine('Running WhammServer example');
+
 		try {
-			api.setup("app.wasm", "script.mm", {asMonitorModule: false});
+			const result = api.setup(app_bytes, {asMonitorModule: false});
+			channel.appendLine(`whamm setup success: ${result}`)
 		} catch (error) {
-			channel.appendLine(`whamm setup failed: ${error}`);
-			// if (error instanceof Types.ErrorCode.Error_ && error.cause === Types.ErrorCode.divideByZero) {
-			// 	channel.appendLine('Division by zero not allowed');
-			// }
+			channel.appendLine(`whamm setup failed`)
+			handleError(error, channel);
 		}
 
-		// TODO: this should be split out to a different async func callback!
+		// TODO: this should be split out to a different async func callback! (should update script content each time)
 		try {
-			printProbe(api.run(), channel);
+			printProbe(api.run(script_content), channel);
 		} catch (error) {
-			channel.appendLine(`whamm run failed: ${error}`);
-			// if (error instanceof Types.ErrorCode.Error_ && error.cause === Types.ErrorCode.divideByZero) {
-			// 	channel.appendLine('Division by zero not allowed');
-			// }
+			channel.appendLine(`whamm run failed`)
+			handleError(error, channel);
 		}
 	}));
+}
+
+function handleError(error: unknown, channel: vscode.OutputChannel) {
+	let name = 'UnknownError'
+	let message = 'Failed due to some unknown reason.'
+	if (error instanceof Types.ErrorCode.Error_) {
+		name = error.cause.tag;
+		message = error.cause.value;
+	}
+	// we'll proceed, but let's report it
+	channel.appendLine(`${name}: ${message}`);
 }
 
 function printProbe(probes: Types.Probe[], channel: vscode.OutputChannel) {
@@ -74,8 +89,18 @@ function printProbe(probes: Types.Probe[], channel: vscode.OutputChannel) {
 		wat
 	}, i) => {
 		channel.appendLine(`probe${i}:`);
-		channel.appendLine(`  app_loc -> ${appLoc.byteOffset}:${appLoc.mode.tag}`);
+		channel.appendLine(`  app_loc -> ${appLoc.byteOffset}:${appLoc.mode}`);
 		channel.appendLine(`  script_loc -> ${scriptLoc.l}:${scriptLoc.c}`);
 		channel.appendLine(`  wat -> ${wat}`);
 	});
+	channel.appendLine(`whamm run success!`)
+}
+
+async function loadFileAsString(path: string, context: vscode.ExtensionContext): Promise<string> {
+	const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
+	return new TextDecoder('utf-8').decode(encoded);
+}
+
+async function loadFileAsBytes(path: string, context: vscode.ExtensionContext): Promise<Uint8Array> {
+	return await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
 }

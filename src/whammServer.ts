@@ -11,74 +11,13 @@ export namespace Types {
 		asMonitorModule: boolean;
 	};
 
-	export namespace Mode {
-		export const before = 'before' as const;
-		export type Before = { readonly tag: typeof before } & _common;
-		export function Before(): Before {
-			return new VariantImpl(before, undefined) as Before;
-		}
-
-		export const after = 'after' as const;
-		export type After = { readonly tag: typeof after } & _common;
-		export function After(): After {
-			return new VariantImpl(after, undefined) as After;
-		}
-
-		export const alt = 'alt' as const;
-		export type Alt = { readonly tag: typeof alt } & _common;
-		export function Alt(): Alt {
-			return new VariantImpl(alt, undefined) as Alt;
-		}
-
-		export const entry = 'entry' as const;
-		export type Entry = { readonly tag: typeof entry } & _common;
-		export function Entry(): Entry {
-			return new VariantImpl(entry, undefined) as Entry;
-		}
-
-		export const exit = 'exit' as const;
-		export type Exit = { readonly tag: typeof exit } & _common;
-		export function Exit(): Exit {
-			return new VariantImpl(exit, undefined) as Exit;
-		}
-
-		export type _tt = typeof before | typeof after | typeof alt | typeof entry | typeof exit;
-		export type _vt = undefined;
-		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): Mode {
-			return new VariantImpl(t, v) as Mode;
-		}
-		class VariantImpl {
-			private readonly _tag: _tt;
-			private readonly _value?: _vt;
-			constructor(t: _tt, value: _vt) {
-				this._tag = t;
-				this._value = value;
-			}
-			get tag(): _tt {
-				return this._tag;
-			}
-			get value(): _vt {
-				return this._value;
-			}
-			isBefore(): this is Before {
-				return this._tag === Mode.before;
-			}
-			isAfter(): this is After {
-				return this._tag === Mode.after;
-			}
-			isAlt(): this is Alt {
-				return this._tag === Mode.alt;
-			}
-			isEntry(): this is Entry {
-				return this._tag === Mode.entry;
-			}
-			isExit(): this is Exit {
-				return this._tag === Mode.exit;
-			}
-		}
+	export enum Mode {
+		before = 'before',
+		after = 'after',
+		alt = 'alt',
+		entry = 'entry',
+		exit = 'exit'
 	}
-	export type Mode = Mode.Before | Mode.After | Mode.Alt | Mode.Entry | Mode.Exit;
 
 	export type ScriptLoc = {
 		l: u32;
@@ -104,10 +43,56 @@ export namespace Types {
 	 * 	div(operands)
 	 * }
 	 */
-	export enum ErrorCode {
-		invalid = 'invalid',
-		unexpected = 'unexpected'
+	export namespace ErrorCode {
+		export const invalid = 'invalid' as const;
+		export type Invalid = { readonly tag: typeof invalid; readonly value: string } & _common;
+		export function Invalid(value: string): Invalid {
+			return new VariantImpl(invalid, value) as Invalid;
+		}
+
+		export const unexpected = 'unexpected' as const;
+		export type Unexpected = { readonly tag: typeof unexpected; readonly value: string } & _common;
+		export function Unexpected(value: string): Unexpected {
+			return new VariantImpl(unexpected, value) as Unexpected;
+		}
+
+		export const noChange = 'noChange' as const;
+		export type NoChange = { readonly tag: typeof noChange; readonly value: string } & _common;
+		export function NoChange(value: string): NoChange {
+			return new VariantImpl(noChange, value) as NoChange;
+		}
+
+		export type _tt = typeof invalid | typeof unexpected | typeof noChange;
+		export type _vt = string | string | string;
+		type _common = Omit<VariantImpl, 'tag' | 'value'>;
+		export function _ctor(t: _tt, v: _vt): ErrorCode {
+			return new VariantImpl(t, v) as ErrorCode;
+		}
+		class VariantImpl {
+			private readonly _tag: _tt;
+			private readonly _value: _vt;
+			constructor(t: _tt, value: _vt) {
+				this._tag = t;
+				this._value = value;
+			}
+			get tag(): _tt {
+				return this._tag;
+			}
+			get value(): _vt {
+				return this._value;
+			}
+			isInvalid(): this is Invalid {
+				return this._tag === ErrorCode.invalid;
+			}
+			isUnexpected(): this is Unexpected {
+				return this._tag === ErrorCode.unexpected;
+			}
+			isNoChange(): this is NoChange {
+				return this._tag === ErrorCode.noChange;
+			}
+		}
 	}
+	export type ErrorCode = ErrorCode.Invalid | ErrorCode.Unexpected | ErrorCode.NoChange;
 	export namespace ErrorCode {
 		export class Error_ extends $wcm.ResultError<ErrorCode> {
 			constructor(cause: ErrorCode) {
@@ -136,11 +121,11 @@ export namespace whammServer {
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		setup: (app: string, script: string, opts: Options) => string;
+		setup: (appBytes: Uint8Array, opts: Options) => string;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		run: () => Probe[];
+		run: (script: string) => Probe[];
 	};
 	export namespace Exports {
 		export type Promisified = $wcm.$exports.Promisify<Exports>;
@@ -154,7 +139,7 @@ export namespace Types.$ {
 	export const Options = new $wcm.RecordType<Types.Options>([
 		['asMonitorModule', $wcm.bool],
 	]);
-	export const Mode = new $wcm.VariantType<Types.Mode, Types.Mode._tt, Types.Mode._vt>([['before', undefined], ['after', undefined], ['alt', undefined], ['entry', undefined], ['exit', undefined]], Types.Mode._ctor);
+	export const Mode = new $wcm.EnumType<Types.Mode>(['before', 'after', 'alt', 'entry', 'exit']);
 	export const ScriptLoc = new $wcm.RecordType<Types.ScriptLoc>([
 		['l', $wcm.u32],
 		['c', $wcm.u32],
@@ -168,7 +153,7 @@ export namespace Types.$ {
 		['scriptLoc', ScriptLoc],
 		['wat', $wcm.wstring],
 	]);
-	export const ErrorCode = new $wcm.EnumType<Types.ErrorCode>(['invalid', 'unexpected']);
+	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
 }
 export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
@@ -195,11 +180,12 @@ export namespace whammServer.$ {
 	}
 	export namespace exports {
 		export const setup = new $wcm.FunctionType<whammServer.Exports['setup']>('setup',[
-			['app', $wcm.wstring],
-			['script', $wcm.wstring],
+			['appBytes', new $wcm.Uint8ArrayType()],
 			['opts', Options],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
-		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run', [], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
+		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
+			['script', $wcm.wstring],
+		], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
 	}
 }
 export namespace whammServer._ {
@@ -235,8 +221,8 @@ export namespace whammServer._ {
 		}
 	}
 	export type Exports = {
-		'setup': (app_ptr: i32, app_len: i32, script_ptr: i32, script_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (result: ptr<result<Probe[], ErrorCode>>) => void;
+		'setup': (appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'run': (script_ptr: i32, script_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
 	};
 	export function bind(service: whammServer.Imports, code: $wcm.Code, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports>;
 	export function bind(service: whammServer.Imports.Promisified, code: $wcm.Code, port: $wcm.RAL.ConnectionPort, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports.Promisified>;

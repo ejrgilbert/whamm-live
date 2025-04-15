@@ -6,7 +6,7 @@ interface types {
 		as-monitor-module: bool
 	}
 
-	variant mode {
+	enum mode {
 		before,
 		after,
 		alt,
@@ -37,15 +37,16 @@ interface types {
 	// 	div(operands)
 	// }
 
-	enum error-code {
-		invalid,
-		unexpected
+	variant error-code {
+		invalid(string),
+		unexpected(string),
+		no-change(string)
 	}
 }
 world whamm-server {
 	use types.{ options, probe, error-code };
 	import log: func(msg: string);
 
-	export setup: func(app: string, script: string, opts: options) -> result<string, error-code>;
-	export run: func() -> result<list<probe>, error-code>;
+	export setup: func(app-bytes: list<u8>, opts: options) -> result<string, error-code>;
+	export run: func(script: string) -> result<list<probe>, error-code>;
 }

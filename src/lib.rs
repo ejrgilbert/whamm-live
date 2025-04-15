@@ -1,4 +1,4 @@
-use whamm_server::run;
+use whamm_server::{run, setup};
 
 mod whamm_server;
 
@@ -13,25 +13,18 @@ struct WhammServer;
 
 impl Guest for WhammServer {
 
-	fn setup(_app: String, _script: String, _opts: Options) -> Result<String, ErrorCode> {
-		// TODO: read in and cache app
-		// TODO: read in and cache script
-		// TODO: read in and cache opts
-		Result::Ok("setup: success".to_string())
+	fn setup(app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
+		log("Starting whamm setup");
+		// Result::Ok("done".to_string())
+		setup(app_bytes, opts)
 	}
 
-	fn run() -> Result<Vec<Probe>, ErrorCode> {
-		// log(&format!("Starting whamm run on application: {:?}", app));
+	fn run(script: String) -> Result<Vec<Probe>, ErrorCode> {
 		log("Starting whamm run");
-		let result = Result::Ok(run());
-		// let result: Result<Vec<u32>, ErrorCode> = match op {
-		// 	Operation::Add(operands) => Result::Ok(vec![operands.left + operands.right, 0]),
-		// 	Operation::Sub(operands) => Result::Ok(vec![operands.left - operands.right, 1]),
-		// 	Operation::Mul(operands) => Result::Ok(vec![operands.left * operands.right, 2]),
-		// 	Operation::Div(operands) => if operands.right == 0 { Result::Err(ErrorCode::DivideByZero) } else { Result::Ok(vec![operands.left / operands.right, 3]) }
-		// };
+		let result = run(script);
 		log("Finished whamm run");
 		result
+		// Result::Ok(vec![])
 	}
 }
 

@@ -14,3 +14,7 @@ npm run compile
 ./bin/wit2ts
 ```
 3. Add `wit2ts` to `PATH`
+
+## To work on ##
+
+- Execute Wasm code in a worker (make it async): [tutorial](https://code.visualstudio.com/blogs/2024/06/07/wasm-part2)
