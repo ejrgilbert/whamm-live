@@ -7,13 +7,26 @@ Live programming with the [`Whamm` DSL](https://github.com/ejrgilbert/whamm)!
 1. Clone: https://github.com/microsoft/vscode-wasm
 2. Build
 ```bash
+cd vscode-wasm
+npm install
 cd wasm-component-model
 npm run clean
 npm run compile
+chmod +x ./bin/wit2s
 # Test running the binary
 ./bin/wit2ts
 ```
 3. Add `wit2ts` to `PATH`
+
+### Setup `whamm-live` extension
+1. Clone this repo `git clone git@github.com:ejrgilbert/whamm-live.git`
+2. Setup
+```bash
+npm install
+cargo build
+```
+3. Run extension using `F5` key
+
 
 ## To work on ##
 
