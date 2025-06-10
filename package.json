@@ -19,6 +19,26 @@
 	"main": "./out/extension",
 	"browser": "./dist/web/extension",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "live-whamm-activitybar",
+					"icon": "media/live-whamm.svg",
+					"title": "Live Whamm"
+				}
+			]
+		},
+		"views": {
+			"live-whamm-activitybar":[
+				{
+					"type": "webview",
+					"id": "live-whamm-webview",
+					"icon": "media/live-whamm.svg",
+					"name": "webview",
+					"contextualTitle": "Live Whamm"
+				}
+		]
+		},
 		"commands": [
 			{
 				"command": "vscode-samples.wasm-component-model.run",
