@@ -6,5 +6,29 @@ target/
 
 # npm
 package-lock.json
-node_modules/
+**node_modules/
 tsconfig.tsbuildinfo
+
+## Svelte related
+# Logs
+svelte/logs
+svelte/*.log
+svelte/npm-debug.log*
+svelte/yarn-debug.log*
+svelte/yarn-error.log*
+svelte/pnpm-debug.log*
+svelte/lerna-debug.log*
+svelte/node_modules
+svelte/dist-ssr
+svelte/*.local
+
+# Editor directories and files
+svelte/.vscode/*
+!svelte/.vscode/extensions.json
+svelte/.idea
+svelte/.DS_Store
+svelte/*.suo
+svelte/*.ntvs*
+svelte/*.njsproj
+svelte/*.sln
+svelte/*.sw?

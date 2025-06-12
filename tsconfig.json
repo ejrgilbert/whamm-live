@@ -22,5 +22,8 @@
         "declarationMap": true,
         "noUnusedLocals": false,
         "noUnusedParameters": false
-    }
+    },
+    "exclude": [
+        "svelte/"
+    ]
 }
