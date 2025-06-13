@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { helper_open_whamm_file } from './sidebarProviderHelper';
 
 // Need to implement webview provider with `resolveWebviewView` method to show any webview in the sidebar
 export class SidebarProvider implements vscode.WebviewViewProvider{
@@ -49,8 +50,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         (message) =>{
              switch (message.command) {
             case 'open-whamm-file':
-              vscode.window.showInformationMessage(message.command);
-              return;
+                
+                // Will open the file dialog, if user selects a file, opens the file
+                // and saves the file info in workspace state with the key 'whamm-file'
+                // returns true if user selects a whamm file, false otherwise
+                // does nothing otherwise
+                const success = helper_open_whamm_file();
+                return;
           }},
           undefined,
           this.context.subscriptions,
