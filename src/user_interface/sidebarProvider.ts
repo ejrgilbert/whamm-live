@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { helper_open_whamm_file } from './sidebarProviderHelper';
+import { helper_open_whamm_file, helper_restore_sidebar_webview_state } from './sidebarProviderHelper';
 
 // Need to implement webview provider with `resolveWebviewView` method to show any webview in the sidebar
 export class SidebarProvider implements vscode.WebviewViewProvider{
@@ -35,12 +35,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         webviewView.webview.options = {
             enableScripts: true,
             localResourceRoots: [vscode.Uri.joinPath(this.extension_uri, 'media'),
-                                vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist') ]
+                                vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist') ],
         }
 
         this._addListeners(webviewView);
 
         webviewView.webview.html = this._get_html_content(webviewView);
+
+        // restore any information when webview becomes visible
+        webviewView.onDidChangeVisibility(()=>{
+            if (webviewView.visible) helper_restore_sidebar_webview_state(webviewView.webview);
+        })
     }
 
     // Listeners to handle messages from .svelte files
@@ -56,7 +61,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 // and saves the file info in workspace state with the key 'whamm-file'
                 // returns true if user selects a whamm file, false otherwise
                 // does nothing otherwise
-                const success = helper_open_whamm_file();
+                const success = helper_open_whamm_file(webviewView.webview);
                 return;
           }},
           undefined,
@@ -107,7 +112,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 </style>
                 <script>
                     const vscode = acquireVsCodeApi();
-                    console.log(vscode);
                 </script>
                 <script type="module" crossorigin src=${script_src}></script>
                 <title>Live Whamm</title>

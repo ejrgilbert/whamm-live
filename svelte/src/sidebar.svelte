@@ -1,6 +1,5 @@
 <script lang="ts">
   import WhammFileSidebar from './lib/WhammFileSidebar.svelte';
-  // Ignore this because vscode is a constant defined for the window when the webview is rendered
 </script>
 
 <main>
