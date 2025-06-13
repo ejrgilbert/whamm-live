@@ -6,10 +6,10 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
     lib: {
-      entry: './src/App.ts',
+      entry: './src/sidebar.ts',
       formats: ['iife'],
-      name: 'App',
-      fileName: () => `App.js`
+      name: 'sidebar',
+      fileName: () => `sidebar.js`
     },
     rollupOptions: {
       output: {

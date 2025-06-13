@@ -4,17 +4,19 @@ import * as vscode from 'vscode';
 export class SidebarProvider implements vscode.WebviewViewProvider{
     id: string;
     extension_uri : vscode.Uri;
+    context : vscode.ExtensionContext;
 
-    constructor(id: string, uri : vscode.Uri){
+    constructor(id: string, context : vscode.ExtensionContext){
         this.id = id;
-        this.extension_uri = uri;
+        this.extension_uri = context.extensionUri;
+        this.context = context;
     }
 
     // Static method(s):
 
     // Create a new SidebarProvider instance and register a webview view provider
     static createAndRegisterWebViewProvider(context: vscode.ExtensionContext, id: string){
-        const sidebarProvider = new SidebarProvider(id, context.extensionUri);
+        const sidebarProvider = new SidebarProvider(id, context);
         context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
                 id,
@@ -31,20 +33,45 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         // Enable JS to run and set '/media' as path to load local content from
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [vscode.Uri.joinPath(this.extension_uri, 'media')]
+            localResourceRoots: [vscode.Uri.joinPath(this.extension_uri, 'media'),
+                                vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist') ]
         }
+
+        webviewView.webview.onDidReceiveMessage(
+        (message) =>{
+             switch (message.command) {
+            case 'svelte':
+              vscode.window.showInformationMessage(message.command);
+              return;
+          }},
+          undefined,
+          this.context.subscriptions,
+        );
 
         webviewView.webview.html = this._get_html_content(webviewView);
     }
 
     private _get_html_content(webviewView: vscode.WebviewView) : string {
+
         const img_src = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this.extension_uri, 'media', 'whamm-logo.png'));
+
+        const css_src_1 = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extension_uri, 'media', 'vscode.css'));
+
+        const css_src_2 = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extension_uri, 'media', 'reset.css'));
+        
+        const script_src = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist', 'sidebar.js'));
+
         return `
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link rel="stylesheet" href=${css_src_1}>
+                <link rel="stylesheet" href=${css_src_2}>
                 <style>
                     img:hover {
                     animation: shake 0.5s;
@@ -65,12 +92,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                     100% { transform: translate(1px, -2px) rotate(-1deg); }
                     }
                 </style>
+                <script>
+                    const vscode = acquireVsCodeApi();
+                    console.log(vscode);
+                </script>
+                <script type="module" crossorigin src=${script_src}></script>
                 <title>Live Whamm</title>
             </head>
             <body>
-            <h1>Live Whamm!!</h1>
             <img id="whamm" src=${img_src} alt="whamm">
-            <img
+            <div id="main-body"></div>
             </body>
             <script> 
             </script>
