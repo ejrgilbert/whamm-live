@@ -37,18 +37,24 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                                 vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist') ]
         }
 
+        this._addListeners(webviewView);
+
+        webviewView.webview.html = this._get_html_content(webviewView);
+    }
+
+    private _addListeners(webviewView: vscode.WebviewView){
+
+        // Setup listeners
         webviewView.webview.onDidReceiveMessage(
         (message) =>{
              switch (message.command) {
-            case 'svelte':
+            case 'open-whamm-file':
               vscode.window.showInformationMessage(message.command);
               return;
           }},
           undefined,
           this.context.subscriptions,
         );
-
-        webviewView.webview.html = this._get_html_content(webviewView);
     }
 
     private _get_html_content(webviewView: vscode.WebviewView) : string {
