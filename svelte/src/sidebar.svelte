@@ -4,7 +4,7 @@
 </script>
 
 <main>
-  <h1>Live Whamm</h1>
+  <h1 style="margin: auto">Live Whamm</h1>
 
   <div class="card">
     <WhammFileSidebar />

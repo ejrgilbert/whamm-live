@@ -43,6 +43,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         webviewView.webview.html = this._get_html_content(webviewView);
     }
 
+    // Listeners to handle messages from .svelte files
     private _addListeners(webviewView: vscode.WebviewView){
 
         // Setup listeners
