@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { helper_open_whamm_file, helper_restore_sidebar_webview_state } from './sidebarProviderHelper';
+import {Helper_sidebar_provider} from './sidebarProviderHelper';
 
 // Need to implement webview provider with `resolveWebviewView` method to show any webview in the sidebar
 export class SidebarProvider implements vscode.WebviewViewProvider{
@@ -11,6 +11,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         this.id = id;
         this.extension_uri = context.extensionUri;
         this.context = context;
+        SidebarProvider.create_status_bar_command_button(context);
+    }
+
+    static create_status_bar_command_button(context: vscode.ExtensionContext){
+        
+        // Create status bar item to display on the bottom
+        let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 50);
+        statusBarItem.tooltip = "Make this current Whamm file active for Live-Whamm"
+        statusBarItem.text = "[Live Whamm] Select Whamm(.mm) file";
+        statusBarItem.command = "live-whamm:select-wasm-file";
+        context.subscriptions.push(statusBarItem);
+
+        // Show or hide depending on active editor
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor?.document?.fileName.endsWith(".mm")) {
+                statusBarItem.show();
+            } else {
+                statusBarItem.hide();
+            }
+            }, null, context.subscriptions);
     }
 
     // Static method(s):
@@ -31,6 +51,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
     // Main method that renders the webview(html) for the sidebar when the user clicks on the 'live-whamm' icon
     resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken): Thenable<void> | void {
         
+        Helper_sidebar_provider.webview = webviewView.webview;
+
         // Enable JS to run and set '/media' as path to load local content from
         webviewView.webview.options = {
             enableScripts: true,
@@ -44,7 +66,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
 
         // restore any information when webview becomes visible
         webviewView.onDidChangeVisibility(()=>{
-            if (webviewView.visible) helper_restore_sidebar_webview_state(webviewView.webview);
+            if (webviewView.visible) Helper_sidebar_provider.helper_restore_sidebar_webview_state(webviewView.webview);
         })
     }
 
@@ -61,7 +83,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 // and saves the file info in workspace state with the key 'whamm-file'
                 // returns true if user selects a whamm file, false otherwise
                 // does nothing otherwise
-                const success = helper_open_whamm_file(webviewView.webview);
+                const success = Helper_sidebar_provider.helper_open_whamm_file();
                 return;
           }},
           undefined,

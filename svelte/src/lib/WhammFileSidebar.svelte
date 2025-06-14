@@ -2,7 +2,6 @@
     import {fade} from 'svelte/transition';
 
     let whamm_file = $state(null);
-    let whamm_file_active = $state(false);
     const openWhammFile = (event: Event) =>{
         // @ts-ignore
         vscode.postMessage({
@@ -15,7 +14,6 @@
             if (message) {
                 if (message.command == 'workspace-whamm-update'){
                     whamm_file = message.whamm_file;
-                    whamm_file_active = message.whamm_file_active;
                 }
             }
     });
