@@ -59,6 +59,10 @@ export class WhammWebviewPanel{
 
         const css_src_2 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'reset.css'));
+
+        const script_src = this.webviewPanel.webview.asWebviewUri(
+            vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'svelte', 'dist', 'webview.js'));
+
         this.webviewPanel.webview.html =  `
             <html lang="en">
             <head>
@@ -69,11 +73,11 @@ export class WhammWebviewPanel{
                 <script>
                     const vscode = acquireVsCodeApi();
                 </script>
+                <script type="module" crossorigin src=${script_src}></script>
                 <title>Live Whamm</title>
             </head>
             <body>
             <div id="main-body"></div>
-            <h1>Hi ${this.fileName} </h1>
             </body>
             <script> 
             </script>
