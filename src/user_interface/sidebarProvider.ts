@@ -21,6 +21,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         statusBarItem.tooltip = "Make this current Whamm file active for Live-Whamm"
         statusBarItem.text = "[Live Whamm] Select Whamm(.mm) file";
         statusBarItem.command = "live-whamm:select-wasm-file";
+        if (vscode.window.activeTextEditor?.document?.fileName.endsWith(".mm"))
+                statusBarItem.show();
+
         context.subscriptions.push(statusBarItem);
 
         // Show or hide depending on active editor
@@ -84,6 +87,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 // returns true if user selects a whamm file, false otherwise
                 // does nothing otherwise
                 const success = Helper_sidebar_provider.helper_open_whamm_file();
+                if (!success) vscode.window.showErrorMessage("Could not open .mm file");
+                return;
+            case 'open-wat/wasm-file':{
+                const success = Helper_sidebar_provider.helper_open_webview(message.wasm_wizard_engine);
+                if (!success) vscode.window.showErrorMessage("Could not open webview");
+            }
                 return;
           }},
           undefined,

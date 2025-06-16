@@ -10,10 +10,18 @@
         show_wat_button = (show_wat_button) ? false : true;
     };
 
+    const openWatWasmFile = (event: Event)=>{
+        // @ts-ignore
+        vscode.postMessage({
+            command: "open-wat/wasm-file",
+            wasm_wizard_engine: !show_wat_button,
+        });
+    }
+
 </script>
 
 <div class="webview-display-button-div" transition:slide>
-    <button class="webview-display-button" type="button">{@html wat_button_text}</button>   
+    <button class="webview-display-button" type="button" onclick={openWatWasmFile}>{@html wat_button_text}</button>   
     <button class="webview-display-button-inline" onclick={changeShowWatButton}>{arrow_value}</button>
 </div>
 
