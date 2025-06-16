@@ -11,6 +11,8 @@ export class WhammWebviewPanel{
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
+        
+        // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
             `live-whamm-webview-${WhammWebviewPanel.getNone()}`,
             'Live Whamm',
@@ -20,8 +22,12 @@ export class WhammWebviewPanel{
                 "retainContextWhenHidden": true,
             }
         );
-        this.webviewPanel.webview.html = this.__loadHTML(fileName);
         WhammWebviewPanel.addPanel(this);
+        
+        // Handle disposing of the panel afterwards
+        this.webviewPanel.onDidDispose(()=>{
+                WhammWebviewPanel.removePanel(this);
+        })
     }
 
     // Static methods
@@ -46,14 +52,14 @@ export class WhammWebviewPanel{
         return text; 
     }
 
-    // Private method
-    private __loadHTML(fileName: string | undefined){
+    // Main method to load the html
+    loadHTML(){
         const css_src_1 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'vscode.css'));
 
         const css_src_2 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'reset.css'));
-        return `
+        this.webviewPanel.webview.html =  `
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
@@ -67,7 +73,7 @@ export class WhammWebviewPanel{
             </head>
             <body>
             <div id="main-body"></div>
-            <h1>Hi ${fileName} </h1>
+            <h1>Hi ${this.fileName} </h1>
             </body>
             <script> 
             </script>

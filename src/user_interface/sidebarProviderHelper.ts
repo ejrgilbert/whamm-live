@@ -1,6 +1,7 @@
 // Helper functions for sidebar provider for user interace event handling
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
+import { WhammWebviewPanel } from './webviewPanel'; 
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -29,13 +30,10 @@ export class Helper_sidebar_provider{
     static async helper_open_webview(wasm_wizard_engine: boolean): Promise<boolean> {
         
         if (wasm_wizard_engine){
-                console.log("HERE");
-                //TODO
-                // Check if just a wizard-engine exists. Show if it does exist rather than creating a new one
-
+            let panel = new WhammWebviewPanel(undefined);
+            panel.loadHTML();
         } else {
-            // Create a new webview even if the file exists
-            // open file dialog and only allow user to select .mm files
+
             const fileURI = await vscode.window.showOpenDialog({
 
                 canSelectMany: false,
@@ -44,9 +42,8 @@ export class Helper_sidebar_provider{
                     'Wat/Wasm files': ['*\.wat', '*\.wasm'],}})
             
             if (fileURI && fileURI[0]) {
-                let filePath = vscode.Uri.file(fileURI[0].fsPath);
-                console.log(fileURI[0].fsPath);
-                return true;
+                let panel = new WhammWebviewPanel(fileURI[0].fsPath);
+                panel.loadHTML();
             } else 
                 return false;
     }
