@@ -11,29 +11,56 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
         this.id = id;
         this.extension_uri = context.extensionUri;
         this.context = context;
-        SidebarProvider.create_status_bar_command_button(context);
+        SidebarProvider.create_status_bar_command_buttons(context);
     }
 
-    static create_status_bar_command_button(context: vscode.ExtensionContext){
-        
-        // Create status bar item to display on the bottom
-        let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 50);
-        statusBarItem.tooltip = "Make this current Whamm file active for Live-Whamm"
-        statusBarItem.text = "[Live Whamm] Select Whamm(.mm) file";
-        statusBarItem.command = "live-whamm:select-wasm-file";
-        if (vscode.window.activeTextEditor?.document?.fileName.endsWith(".mm"))
-                statusBarItem.show();
+    static create_status_bar_command_buttons(context: vscode.ExtensionContext){
+        const create_status_bar_command_button = (information: status_bar_information)=>{
 
-        context.subscriptions.push(statusBarItem);
-
-        // Show or hide depending on active editor
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            if (editor?.document?.fileName.endsWith(".mm")) {
-                statusBarItem.show();
-            } else {
-                statusBarItem.hide();
+            // Create status bar item to display on the bottom
+            let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 50);
+            statusBarItem.tooltip = information.tooltip;
+            statusBarItem.text = information.text;
+            statusBarItem.command =information.command;
+            for (let fileType of information.fileTypes){
+                if (vscode.window.activeTextEditor?.document?.fileName.endsWith(fileType))
+                    { statusBarItem.show(); break;}
             }
-            }, null, context.subscriptions);
+            context.subscriptions.push(statusBarItem);
+
+            // Show or hide depending on active editor
+            vscode.window.onDidChangeActiveTextEditor(editor => {
+                for (let fileType of information.fileTypes){
+                    if (vscode.window.activeTextEditor?.document?.fileName.endsWith(fileType))
+                        { statusBarItem.show(); return;}
+                }
+                statusBarItem.hide();
+                }, null, context.subscriptions);
+        }
+
+        type status_bar_information = {
+            tooltip: string,
+            text: string,
+            command: string,
+            fileTypes: string[],
+        }
+
+        const information_whamm : status_bar_information = {
+            tooltip: "Make this current Whamm file active for Live-Whamm",
+            text: "[Live Whamm] Select Whamm(.mm) file",
+            command: "live-whamm:select-whamm-file",
+            fileTypes: [".mm"]
+        }
+
+        const information_wat_wasm = {
+            tooltip: "Make this current .wat/.wasm file active for Live-Whamm",
+            text: "[Live Whamm] Select .wat/.wasm file",
+            command: "live-whamm:select-wasm-file",
+            fileTypes: [".wat", ".wasm"]
+        }
+
+        create_status_bar_command_button(information_whamm);
+        create_status_bar_command_button(information_wat_wasm);
     }
 
     // Static method(s):
@@ -55,6 +82,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
     resolveWebviewView(webviewView: vscode.WebviewView, context: vscode.WebviewViewResolveContext, token: vscode.CancellationToken): Thenable<void> | void {
         
         Helper_sidebar_provider.webview = webviewView.webview;
+        Helper_sidebar_provider.helper_reset_sidebar_webview_state();
 
         // Enable JS to run and set '/media' as path to load local content from
         webviewView.webview.options = {
@@ -69,7 +97,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
 
         // restore any information when webview becomes visible
         webviewView.onDidChangeVisibility(()=>{
-            if (webviewView.visible) Helper_sidebar_provider.helper_restore_sidebar_webview_state(webviewView.webview);
+            if (webviewView.visible) Helper_sidebar_provider.helper_restore_sidebar_webview_state();
         })
     }
 

@@ -47,6 +47,10 @@
 			},
 			{
 				"command": "live-whamm:select-wasm-file",
+				"title": "[Live Whamm]: Select .wat or .wasm file"
+			},
+			{
+				"command": "live-whamm:select-whamm-file",
 				"title": "[Live Whamm]: Select .mm file"
 			}
 		]

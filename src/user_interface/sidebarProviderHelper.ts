@@ -30,8 +30,7 @@ export class Helper_sidebar_provider{
     static async helper_open_webview(wasm_wizard_engine: boolean): Promise<boolean> {
         
         if (wasm_wizard_engine){
-            let panel = new WhammWebviewPanel(undefined);
-            panel.loadHTML();
+            Helper_sidebar_provider.helper_show_wasm_file(undefined);
         } else {
 
             const fileURI = await vscode.window.showOpenDialog({
@@ -39,17 +38,20 @@ export class Helper_sidebar_provider{
                 canSelectMany: false,
                 openLabel: 'Open wat/wasm file',
                 filters: {
-                    'Wat/Wasm files': ['*\.wat', '*\.wasm'],}})
+                    'Wat/Wasm files': ['.*\.wat', '.*\.wasm'],}})
             
             if (fileURI && fileURI[0]) {
-                let panel = new WhammWebviewPanel(fileURI[0].fsPath);
-                panel.loadHTML();
+                Helper_sidebar_provider.helper_show_wasm_file(fileURI[0].fsPath);
             } else 
                 return false;
     }
         return true;
     }
 
+    static helper_show_wasm_file(path: string | undefined){
+        let panel = new WhammWebviewPanel(path);
+        panel.loadHTML();
+    }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
             
@@ -89,7 +91,14 @@ export class Helper_sidebar_provider{
             });
     }
 
-    static helper_restore_sidebar_webview_state(webview: vscode.Webview){
+    static helper_reset_sidebar_webview_state(){
+        Helper_sidebar_provider.helper_update_whamm_workspace_state(
+            undefined
+        )
+
+    }
+
+    static helper_restore_sidebar_webview_state(){
         Helper_sidebar_provider.helper_update_whamm_workspace_state(
             ExtensionContext.context.workspaceState.get('whamm-file'),
         )

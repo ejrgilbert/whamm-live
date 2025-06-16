@@ -59,9 +59,23 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const script_content = await loadFileAsString(script_path, context);
 
 	// Register vscode commands
-	context.subscriptions.push(vscode.commands.registerCommand("live-whamm:select-wasm-file", ()=>{
+	context.subscriptions.push(vscode.commands.registerCommand("live-whamm:select-whamm-file", ()=>{
 		if (vscode.window.activeTextEditor?.document?.fileName.endsWith(".mm")) {
 			Helper_sidebar_provider.helper_show_whamm_file(vscode.window.activeTextEditor.document.uri);
+		}
+		else{
+			vscode.window.showErrorMessage("[Live Whamm]: Cannot select a non .mm file");
+		}
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand("live-whamm:select-wasm-file", ()=>{
+		const re = new RegExp(".*(\.wat|\.wasm)");
+		const document : vscode.TextDocument | undefined= vscode.window.activeTextEditor?.document;
+		if (document && document.fileName && re.test(document.fileName)){
+			if (ExtensionContext.context.workspaceState.get('whamm-file'))
+				Helper_sidebar_provider.helper_show_wasm_file(document.uri.fsPath);
+			else 
+				vscode.window.showWarningMessage("[Live Whamm]: Open a Whamm(.mm) file first");
 		}
 		else{
 			vscode.window.showErrorMessage("[Live Whamm]: Cannot select a non .mm file");
