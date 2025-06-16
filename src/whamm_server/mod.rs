@@ -2,6 +2,7 @@ use crate::vscode::example::types::{AppLoc, ErrorCode, Mode, Options, Probe, Scr
 use crate::log;
 use orca_wasm::ir::module::Module;
 use std::cell::RefCell;
+use whamm::common::instr::run;
 
 thread_local! {
     static APP_BYTES: RefCell<Vec<u8>> = RefCell::new(Vec::new());
@@ -22,6 +23,12 @@ pub fn run(new_script: String) -> Result<Vec<Probe>, ErrorCode> {
     return APP_BYTES.with(|bytes| {
         let bytes = & *bytes.borrow();
         let wasm = Module::parse(bytes, true).unwrap();
+
+        // TODO:
+        //   - create a `dry_run` function that returns metadata
+        //   - clean up the exported stuff (bare minimum)
+        //   - clean up where whamm is located, just put at `../whamm`
+
 
         log("HEEEYYYYYY");
         log(&format!("number of module globals: {:?}", wasm.globals.len()));

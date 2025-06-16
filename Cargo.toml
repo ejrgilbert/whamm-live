@@ -11,3 +11,4 @@ crate-type = ["cdylib"]
 [dependencies]
 orca-wasm = "0.9.0"
 wit-bindgen = "0.21.0"
+whamm = { path = "../../../compilers/whamm/" }
