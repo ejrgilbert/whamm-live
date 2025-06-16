@@ -44,6 +44,14 @@
 				"command": "vscode-samples.wasm-component-model.run",
 				"category": "Samples",
 				"title": "Run Whamm Service"
+			},
+			{
+				"command": "live-whamm:select-wasm-file",
+				"title": "[Live Whamm]: Select .wat or .wasm file"
+			},
+			{
+				"command": "live-whamm:select-whamm-file",
+				"title": "[Live Whamm]: Select .mm file"
 			}
 		]
 	},

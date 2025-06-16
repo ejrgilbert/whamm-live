@@ -24,6 +24,7 @@
         "noUnusedParameters": false
     },
     "exclude": [
-        "svelte/"
+        "svelte/",
+        "out/" 
     ]
 }
