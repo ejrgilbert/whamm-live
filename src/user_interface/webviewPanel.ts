@@ -83,6 +83,12 @@ export class WhammWebviewPanel{
             </script>
             </html>
         `
+
+        this.webviewPanel.webview.postMessage({
+                show_wizard: this.fileName === undefined,
+                // fileName for now
+                wasm_file_contents: this.fileName,
+        });
     }
 
 }
