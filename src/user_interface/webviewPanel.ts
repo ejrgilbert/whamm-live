@@ -96,11 +96,13 @@ export class WhammWebviewPanel{
             </html>
         `
 
+        // Post message to webview so that it can render the file
         this.webviewPanel.webview.postMessage({
                 show_wizard: this.fileName === undefined,
                 wasm_file_contents: this.contents,
                 wat_file_contents: this.string_contents,
-                is_wasm: this.is_wasm
+                is_wasm: this.is_wasm,
+                file_name: this.fileName
         });
     }
 
@@ -120,8 +122,9 @@ export class WhammWebviewPanel{
     private async getFileStringContents(): Promise<string>{
         var text ="";
         if (this.fileName){
-            const file = await fetch(this.fileName);
-            text = await file.text()
+            const fileUri = vscode.Uri.file(this.fileName);
+            let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
+            text = new TextDecoder().decode(fileBytes_);
         }
         return text;
     }

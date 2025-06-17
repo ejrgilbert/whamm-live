@@ -31,7 +31,11 @@
                 else {
                     // Get wat text from wasm content
                     // and pass the code view
-                    let string_contents = get_wat_from_wasm(message.wasm_file_contents);
+                    var string_contents = get_wat(
+                        (message.is_wasm) ? true: false,
+                        (message.is_wasm) ? message.wasm_file_contents : message.wat_file_contents,
+                        message.file_name);
+
                     //Create codemirror code block for the parsed wat content
                     view = new EditorView({
                         parent: document.getElementById("wasm-webview-code-editor") || document.body,
@@ -43,9 +47,13 @@
     });
 
     // Helper functions
-    const get_wat_from_wasm = function(file_contents: Uint8Array | undefined): string{ 
+    const get_wat = function(is_in_wasm: boolean, file_contents: string | Uint8Array | undefined, file_name: string): string{ 
         if (file_contents && WABT){
-            module = WABT.readWasm(file_contents, {readDebugNames: true});
+            if (is_in_wasm){
+                module = WABT.readWasm(file_contents, {readDebugNames: true});
+            } else{
+                module = WABT.parseWat(file_name, file_contents, {readDebugNames: true});
+            }
             module.applyNames();
             return module.toText({ foldExprs: false, inlineExport: false });
         }
