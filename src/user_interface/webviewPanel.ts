@@ -5,13 +5,15 @@ export class WhammWebviewPanel{
 
     fileName: string | undefined;
     webviewPanel: vscode.WebviewPanel;
+    contents: Uint8Array<ArrayBuffer> | undefined;
 
     static number_of_webviews: number;
     static webviews: WhammWebviewPanel[] = [];
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
-        
+        this.contents = undefined;
+
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
             `live-whamm-webview-${WhammWebviewPanel.getNone()}`,
@@ -53,7 +55,9 @@ export class WhammWebviewPanel{
     }
 
     // Main method to load the html
-    loadHTML(){
+    async loadHTML(){
+        this.contents = await this.getFileContents();
+
         const css_src_1 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'vscode.css'));
 
@@ -87,8 +91,21 @@ export class WhammWebviewPanel{
         this.webviewPanel.webview.postMessage({
                 show_wizard: this.fileName === undefined,
                 // fileName for now
-                wasm_file_contents: this.fileName,
+                wasm_file_contents: this.contents,
         });
+    }
+
+    private async getFileContents(): Promise<Uint8Array>{
+        var fileBytes = new Uint8Array();
+
+        if (this.fileName){
+            const fileUri = vscode.Uri.file(this.fileName);
+            let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
+            fileBytes = new Uint8Array(fileBytes_);
+            console.log(fileBytes);
+        };
+
+        return fileBytes;
     }
 
 }
