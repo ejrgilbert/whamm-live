@@ -1,9 +1,22 @@
 <script lang="ts">
     import WizardWebview from './lib/WizardWebview.svelte';
     import WasmWebview from './lib/WasmWebview.svelte';
-    // Current value
+    import {wast} from "@codemirror/lang-wast";
+    import {EditorView, basicSetup} from "codemirror"
+    import wabt from 'wabt';
+
+    // Init WABT
+    // @ts-ignore
+    var WABT : WabtModule | undefined = undefined;
+    // @ts-ignore
+    var module : WasmModule;
+    wabt().then(wabt_=>{
+        WABT = wabt_;});
+
     let wizard_tab = $state(false);
-    let file_contents : string | undefined = $state(undefined);
+
+    // svelte-ignore non_reactive_update
+    var view : EditorView | undefined = undefined;
 
     const changeTabSelected = () => {
         wizard_tab = !wizard_tab;
@@ -16,11 +29,28 @@
                 if (message.show_wizard)
                     wizard_tab = true;
                 else {
-                    file_contents = message.wasm_file_contents;
+                    // Get wat text from wasm content
+                    // and pass the code view
+                    let string_contents = get_wat_from_wasm(message.wasm_file_contents);
+                    //Create codemirror code block for the parsed wat content
+                    view = new EditorView({
+                        parent: document.getElementById("wasm-webview-code-editor") || document.body,
+                        doc: string_contents,
+                        extensions: [basicSetup, wast(), EditorView.editable.of(false)]
+                    })
                 }
             }
     });
 
+    // Helper functions
+    const get_wat_from_wasm = function(file_contents: Uint8Array | undefined): string{ 
+        if (file_contents && WABT){
+            module = WABT.readWasm(file_contents, {readDebugNames: true});
+            module.applyNames();
+            return module.toText({ foldExprs: false, inlineExport: false });
+        }
+        return "No file loaded";
+    }
 </script>
 
 <main>
@@ -30,7 +60,7 @@
     {#if wizard_tab}
        <WizardWebview />
     {:else}
-       <WasmWebview contents={file_contents}/>
+       <WasmWebview view={view}/>
     {/if}
 
 </main>

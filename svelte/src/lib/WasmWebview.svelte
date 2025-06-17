@@ -1,27 +1,15 @@
 <script lang="ts">
-    import wabt from 'wabt';
-
     // content here should be array of all the bytes for our wasm file
-    let { contents } = $props();
-    
-    // Init WABT
-    // @ts-ignore
-    var WABT : WabtModule | undefined = undefined;
-    wabt().then(wabt_=>{
-        WABT = wabt_;});
-
-    let loadContent = ()=>{
-            if (contents && WABT){
-                var myModule = WABT.readWasm(contents, {readDebugNames: true});
-                myModule.applyNames();
-                return myModule.toText({ foldExprs: false, inlineExport: false });
-            }
-            return "hiii";
-        };
-    // Function to load the content
-    let html_content = $derived(contents ? loadContent() : "hi");
-
+    let { view } = $props();
+    const load_html = function(node: HTMLElement){
+        // Remove focus highlight
+        if (view) document.getElementById("wasm-webview-code-editor")?.appendChild(view.dom);
+    }
 </script>
-<p>{html_content}</p>
+<div use:load_html id="wasm-webview-code-editor"></div>
 <style>
+    div{
+        width: 90%;
+        margin: auto;
+    }
 </style>
