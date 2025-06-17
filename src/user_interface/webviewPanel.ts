@@ -95,6 +95,7 @@ export class WhammWebviewPanel{
         });
     }
 
+    // gets the bytes from the selected .wasm file
     private async getFileContents(): Promise<Uint8Array>{
         var fileBytes = new Uint8Array();
 
@@ -102,7 +103,6 @@ export class WhammWebviewPanel{
             const fileUri = vscode.Uri.file(this.fileName);
             let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
             fileBytes = new Uint8Array(fileBytes_);
-            console.log(fileBytes);
         };
 
         return fileBytes;
