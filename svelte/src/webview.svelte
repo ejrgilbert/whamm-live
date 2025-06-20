@@ -17,6 +17,7 @@
 
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
+    var file_name : string | undefined = $state(undefined);
 
     const changeTabSelected = () => {
         wizard_tab = !wizard_tab;
@@ -26,6 +27,8 @@
     window.addEventListener("message" , (event)=>{
             const message = event.data;
             if (message) {
+                file_name = message.file_name;
+
                 if (message.show_wizard)
                     wizard_tab = true;
                 else {
@@ -62,9 +65,12 @@
 </script>
 
 <main>
+    {#if file_name}
     <div class="tab">
         <button onclick={changeTabSelected} class="tab-option">Switch to {wizard_tab? "static bytecode": "Wizard"}</button>
     </div>
+    {/if}
+
     {#if wizard_tab}
        <WizardWebview />
     {:else}
