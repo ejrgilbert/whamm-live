@@ -3,6 +3,7 @@ import { isExtensionActive, DiagnosticCollection} from './listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { Model } from '../model/model';
 import { sample_whamm_api_error_response, sample_whamm_api_response } from '../model/sampleAPIData';
+import { handleCursorChange } from './cursorChangesListener';
 
 export function shouldUpdateModel(): boolean{
     // The extension should be active and we must be making changes 
@@ -14,6 +15,7 @@ export function shouldUpdateModel(): boolean{
 
 // Is only called when we NEED to update the model
 export function handleDocumentChanges(){
+    Model.whamm_file_changing = true;
     // TODO [ fetch from the actual WHAMM API ]
     Model.response = sample_whamm_api_error_response;
     DiagnosticCollection.collection.clear();
@@ -26,19 +28,18 @@ export function handleDocumentChanges(){
         // Only update the model, no need to update the view
         Model.no_error_response = Model.response;
     }
+    Model.whamm_file_changing = false;
 }
 
 function displayErrorInWhammFile(){
 
-    if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.uri.fsPath
-            == ExtensionContext.context.workspaceState.get('whamm-file')){
-
-        let textEditor = vscode.window.activeTextEditor;
+    let path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
+    if (path !== undefined){
+        let textEditor = vscode.Uri.file(path);
         let diagnostics: vscode.Diagnostic[] = [];
 
         // For each error from our API response, create a new diagnostic
         // based on the line and column information
-        console.log(Model.response.error);
         Model.response.error?.forEach(error =>{
             let script_start = error.err_loc?.script_start;
             let script_end = error.err_loc?.script_end;
@@ -55,6 +56,6 @@ function displayErrorInWhammFile(){
                 ));
             }
         })
-        DiagnosticCollection.collection.set(textEditor.document.uri, diagnostics);
+        DiagnosticCollection.collection.set(textEditor, diagnostics);
     }
 }
