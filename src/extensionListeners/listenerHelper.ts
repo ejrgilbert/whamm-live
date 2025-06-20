@@ -18,3 +18,12 @@ export function isExtensionActive():boolean{
     return ((ExtensionContext.context.workspaceState.get('whamm-file') !== undefined)
             && (WhammWebviewPanel.number_of_webviews >= 1))
 }
+
+export class DiagnosticCollection{
+  static collection: vscode.DiagnosticCollection;
+
+  static create_collection(){
+    DiagnosticCollection.collection = vscode.languages.createDiagnosticCollection();
+    ExtensionContext.context.subscriptions.push(DiagnosticCollection.collection);
+  }
+}

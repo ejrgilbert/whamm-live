@@ -1,7 +1,7 @@
 import { WhammResponse, ScriptLoc, Probe, ModeKind, InjectType } from "./types";
 
 // Sample example response
-const whamm_api_response : WhammResponse = {
+const sample_whamm_api_response : WhammResponse = {
     error: undefined,
     response: new Map(),
 }
@@ -38,10 +38,10 @@ let createProbes = ():Probe[] => {
     return [probe1, probe2];
 }
 
-if (whamm_api_response) whamm_api_response.response?.set(InjectType.probe, createProbes());
+if (sample_whamm_api_response) sample_whamm_api_response.response?.set(InjectType.probe, createProbes());
 
 // Sample example error response
-const whamm_api_error_response : WhammResponse = {
+const sample_whamm_api_error_response: WhammResponse = {
     response: undefined,
     error: [
         {
