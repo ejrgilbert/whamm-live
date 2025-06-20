@@ -46,6 +46,7 @@ code {
 
 button {
 	border: none;
+	border-radius: 2px;
 	padding: var(--input-padding-vertical) var(--input-padding-horizontal);
 	width: 100%;
 	text-align: center;
