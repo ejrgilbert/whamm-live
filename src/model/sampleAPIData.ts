@@ -1,42 +1,4 @@
-// Different API types
-type ScriptLoc = {
-    l: number,
-    c: number,
-}
-
-type Metadata = {
-    script_start: ScriptLoc;
-    script_end: ScriptLoc | undefined;
-}
-
-enum InjectType{
-    probe,
-}
-
-enum ModeKind{
-    before,
-    after,
-    alt
-}
-
-type Probe = {
-    target_fid: number,
-    target_opcode_idx: number,
-    mode: ModeKind,
-    body: string[],
-    metadata: Metadata | undefined
-}
-
-type WhammError = {
-    msg: string,
-    // script start (line number and column) and script end(line number and column)
-    err_loc: Metadata | undefined;
-}
-
-type WhammResponse = {
-    response: undefined | Map<InjectType, Probe[]>;
-    error: WhammError[] | undefined;
-}
+import { WhammResponse, ScriptLoc, Probe, ModeKind, InjectType } from "./types";
 
 // Sample example response
 const whamm_api_response : WhammResponse = {
@@ -96,4 +58,4 @@ const whamm_api_error_response : WhammResponse = {
     ]
 }
 
-export {whamm_api_response, whamm_api_error_response};
+export {sample_whamm_api_response, sample_whamm_api_error_response};
