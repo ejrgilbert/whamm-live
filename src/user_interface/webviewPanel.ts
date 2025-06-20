@@ -9,7 +9,7 @@ export class WhammWebviewPanel{
     string_contents: string | undefined;
     is_wasm: boolean;
 
-    static number_of_webviews: number;
+    static number_of_webviews: number = 0;
     static webviews: WhammWebviewPanel[] = [];
 
     constructor(fileName: string | undefined){

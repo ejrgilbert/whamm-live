@@ -12,7 +12,9 @@ export function debounce(callback: Function, delay: number){
   }    
 }
 
+// The workspace state must have a whamm-live selected and there must be at least
+// one webview open for our extension to be "active"
 export function isExtensionActive():boolean{
-    return ((ExtensionContext.context.workspaceState.get('whamm-live') !== undefined)
+    return ((ExtensionContext.context.workspaceState.get('whamm-file') !== undefined)
             && (WhammWebviewPanel.number_of_webviews >= 1))
 }
