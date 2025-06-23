@@ -38,6 +38,13 @@
                         (message.is_wasm) ? true: false,
                         (message.is_wasm) ? message.wasm_file_contents : message.wat_file_contents,
                         message.file_name);
+                    
+                    // Send the information back to extension so that the infromation is saved
+                    // @ts-ignore
+                    vscode.postMessage({
+                        command: 'store_wat',
+                        wat_content: string_contents,
+                    })
 
                     //Create codemirror code block for the parsed wat content
                     view = new EditorView({

@@ -9,11 +9,16 @@ export class WhammWebviewPanel{
     string_contents: string | undefined;
     is_wasm: boolean;
 
+    // content sent back from svelte frontend
+    // will be null if wizard option chosen
+    valid_wat_content: string | null;
+
     static number_of_webviews: number = 0;
     static webviews: WhammWebviewPanel[] = [];
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
+        this.valid_wat_content = null;
         this.contents, this.string_contents = undefined;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
 
@@ -28,6 +33,7 @@ export class WhammWebviewPanel{
             }
         );
         WhammWebviewPanel.addPanel(this);
+        this.addListenerToStoreWAT();
         
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
@@ -127,6 +133,18 @@ export class WhammWebviewPanel{
             text = new TextDecoder().decode(fileBytes_);
         }
         return text;
+    }
+
+    
+    private addListenerToStoreWAT(){
+        // Store wat content recieved from svelte(webview)
+        this.webviewPanel.webview.onDidReceiveMessage(message=>{
+            switch (message.command){
+                case 'store_wat':
+                    this.valid_wat_content = message.wat_content;
+                    break;
+            }
+        })
     }
 
 }
