@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
+import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
 
 export class WhammWebviewPanel{
 
@@ -50,6 +51,7 @@ export class WhammWebviewPanel{
     private static addPanel(webview: WhammWebviewPanel){
         WhammWebviewPanel.number_of_webviews++;
         WhammWebviewPanel.webviews.push(webview);
+        handleDocumentChanges();
     }
 
     static removePanel(webview: WhammWebviewPanel){

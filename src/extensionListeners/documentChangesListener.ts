@@ -36,7 +36,7 @@ export function handleDocumentChanges(){
 function displayErrorInWhammFile(){
 
     let path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
-    if (path !== undefined){
+    if (path !== undefined && isExtensionActive()){
         let textEditor = vscode.Uri.file(path);
         let diagnostics: vscode.Diagnostic[] = [];
 
