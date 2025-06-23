@@ -4,6 +4,8 @@ import { ExtensionContext } from '../extensionContext';
 import { Model } from '../model/model';
 import { sample_whamm_api_error_response, sample_whamm_api_response } from '../model/sampleAPIData';
 import { handleCursorChange } from './cursorChangesListener';
+import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { WhammResponse } from '../model/types';
 
 export function shouldUpdateModel(): boolean{
     // The extension should be active and we must be making changes 
@@ -18,6 +20,7 @@ export function handleDocumentChanges(){
     Model.whamm_file_changing = true;
     // TODO [ fetch from the actual WHAMM API ]
     Model.response = sample_whamm_api_error_response;
+    update_webview_model(Model.response);
     DiagnosticCollection.collection.clear();
     
     // If there is an error, we want to act like a LSP
@@ -57,5 +60,15 @@ function displayErrorInWhammFile(){
             }
         })
         DiagnosticCollection.collection.set(textEditor, diagnostics);
+    }
+}
+
+// Update the model for the webviews
+function update_webview_model(response: WhammResponse){
+    // TODO
+    // reset if error
+    for (let webview of WhammWebviewPanel.webviews){
+        webview.line_to_probe_mapping.set(8, ["i32.const 10", [1,5]]);
+        webview.line_to_probe_mapping.set(0, ["i32.const 10", [3,6]]);
     }
 }

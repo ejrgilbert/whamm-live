@@ -25,34 +25,40 @@
 
     // event listener to update html on change to workspace data
     window.addEventListener("message" , (event)=>{
-            const message = event.data;
-            if (message) {
-                file_name = message.file_name;
+            let message = event.data;
+            switch(message.command){
+                    case 'init-data':
+                        {const message = event.data;
+                        if (message) {
+                            file_name = message.file_name;
 
-                if (message.show_wizard)
-                    wizard_tab = true;
-                else {
-                    // Get wat text from wasm content
-                    // and pass the code view
-                    var string_contents = get_wat(
-                        (message.is_wasm) ? true: false,
-                        (message.is_wasm) ? message.wasm_file_contents : message.wat_file_contents,
-                        message.file_name);
-                    
-                    // Send the information back to extension so that the infromation is saved
-                    // @ts-ignore
-                    vscode.postMessage({
-                        command: 'store_wat',
-                        wat_content: string_contents,
-                    })
+                            if (message.show_wizard)
+                                wizard_tab = true;
+                            else {
+                                // Get wat text from wasm content
+                                // and pass the code view
+                                var string_contents = get_wat(
+                                    (message.is_wasm) ? true: false,
+                                    (message.is_wasm) ? message.wasm_file_contents : message.wat_file_contents,
+                                    message.file_name);
+                                
+                                // Send the information back to extension so that the infromation is saved
+                                // @ts-ignore
+                                vscode.postMessage({
+                                    command: 'store_wat',
+                                    wat_content: string_contents,
+                                })
 
-                    //Create codemirror code block for the parsed wat content
-                    view = new EditorView({
-                        parent: document.getElementById("wasm-webview-code-editor") || document.body,
-                        doc: string_contents,
-                        extensions: [basicSetup, wast(), EditorView.editable.of(false)]
-                    })
-                }
+                                //Create codemirror code block for the parsed wat content
+                                view = new EditorView({
+                                    parent: document.getElementById("wasm-webview-code-editor") || document.body,
+                                    doc: string_contents,
+                                    extensions: [basicSetup, wast(), EditorView.editable.of(false)]
+                                })
+                            }
+                        }
+                        }
+                    break;
             }
     });
 

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { isExtensionActive } from './listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { Model } from '../model/model';
+import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -20,5 +21,18 @@ export function handleCursorChange(){
     if (cursor){
         let line = cursor.line;
         let column = cursor.character;
+        
+        // send data to highlight in frontend
+        for (let webview of WhammWebviewPanel.webviews){
+            let probe_info = webview.line_to_probe_mapping.get(line);
+            console.log(probe_info);
+
+            if (probe_info){
+                webview.webviewPanel.webview.postMessage({
+                    command: 'highlight',
+                    data: probe_info,
+                })
+            }
+        }
     }
 }
