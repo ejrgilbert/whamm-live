@@ -3,7 +3,6 @@ import { isExtensionActive, DiagnosticCollection} from './listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { Model } from '../model/model';
 import { sample_whamm_api_error_response, sample_whamm_api_response } from '../model/sampleAPIData';
-import { handleCursorChange } from './cursorChangesListener';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { WhammResponse } from '../model/types';
 
@@ -19,7 +18,7 @@ export function shouldUpdateModel(): boolean{
 export function handleDocumentChanges(){
     Model.whamm_file_changing = true;
     // TODO [ fetch from the actual WHAMM API ]
-    Model.response = sample_whamm_api_error_response;
+    Model.response = sample_whamm_api_response;
     update_webview_model(Model.response);
     DiagnosticCollection.collection.clear();
     
@@ -66,9 +65,18 @@ function displayErrorInWhammFile(){
 // Update the model for the webviews
 function update_webview_model(response: WhammResponse){
     // TODO
-    // reset if error
+    if (response.error !== undefined){
+        reset_webview_model();
+    } else{
+        for (let webview of WhammWebviewPanel.webviews){
+            webview.line_to_probe_mapping.set(8, ["i32.const 10", [1,5]]);
+            webview.line_to_probe_mapping.set(0, ["i32.const 10", [3,6]]);
+        }
+    }
+}
+
+function reset_webview_model(){
     for (let webview of WhammWebviewPanel.webviews){
-        webview.line_to_probe_mapping.set(8, ["i32.const 10", [1,5]]);
-        webview.line_to_probe_mapping.set(0, ["i32.const 10", [3,6]]);
+        webview.line_to_probe_mapping.clear();
     }
 }

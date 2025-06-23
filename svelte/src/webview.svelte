@@ -23,6 +23,9 @@
         wizard_tab = !wizard_tab;
     }
 
+    // injected-data related variables
+    var probe_data = $state(null);
+
     // event listener to update html on change to workspace data
     window.addEventListener("message" , (event)=>{
             let message = event.data;
@@ -87,7 +90,7 @@
     {#if wizard_tab}
        <WizardWebview />
     {:else}
-       <WasmWebview view={view}/>
+       <WasmWebview view={view} probe_data={probe_data}/>
     {/if}
 
 </main>

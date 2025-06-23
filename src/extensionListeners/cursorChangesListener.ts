@@ -25,14 +25,10 @@ export function handleCursorChange(){
         // send data to highlight in frontend
         for (let webview of WhammWebviewPanel.webviews){
             let probe_info = webview.line_to_probe_mapping.get(line);
-            console.log(probe_info);
-
-            if (probe_info){
-                webview.webviewPanel.webview.postMessage({
-                    command: 'highlight',
-                    data: probe_info,
-                })
-            }
+            webview.webviewPanel.webview.postMessage({
+                command: 'highlight',
+                data: probe_info,
+            })
         }
     }
 }

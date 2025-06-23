@@ -147,7 +147,7 @@ export class WhammWebviewPanel{
         this.webviewPanel.webview.onDidReceiveMessage(message=>{
             switch (message.command){
                 case 'store_wat':
-                this.valid_wat_content = message.wat_content;
+                    this.valid_wat_content = message.wat_content;
                     break;
             }
         })
