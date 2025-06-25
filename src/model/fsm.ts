@@ -1,4 +1,5 @@
-import { InjectType } from "./types";
+import { InjectType, stringToInjectType } from "./types";
+import { FSMHelper } from "./fsm_helper";
 
 // Consider looking at https://github.com/ejrgilbert/whamm-live/issues/12 to
 // We have 5 states in our FSM: start_state, main_state, function_state, local_state, default_state, null_state
@@ -12,15 +13,16 @@ enum State{
 }
 
 // Finite state machine code implementation for mapping inject types to wasm line
-class FSM{
+export class FSM{
     // Stack values
     stack: string[];
-    popped_value : string | null;
+    popped_value : string | undefined;
 
     // wat file related variables
     current_index: number;
     wat_string: string;
     func_id : number;
+    current_line_number : number;
 
     // different types of mappings
     // Mapping for all the following types: type, import, table, memory, tag, global, export, elem, func, data
@@ -48,8 +50,9 @@ class FSM{
     constructor(wat: string){
         this.wat_string = wat;
         this.current_index = this.func_id = 0;
+        this.current_line_number = 1;
         this.stack = [];
-        this.popped_value = null;
+        this.popped_value = undefined;
 
         this.current_state = State.start_state;
 
@@ -60,30 +63,74 @@ class FSM{
     }   
 
     run(){
-
-        
+       while (this.current_index < this.wat_string.length && this.current_state !== State.null_state){
+            // call the function for the required state
+            FSM.state_to_method_mapping[this.current_state](this);
+       }
     }
 
     // Function handler for each state so that we can perform actions 
     // and transition to the next state
     private static start_state_method(instance: FSM){
+        // will skip over empty spaces and will return me the required word only
+        FSMHelper.consume_empty_spaces(instance);
+        let inject_type : string = FSMHelper.get_word(instance);
 
+        if (inject_type == 'module'){
+            instance.stack.push(inject_type);
+            instance.current_state = State.main_state;
+            console.log('here');
+        }
+        else throw new Error("FSM parse Error: Expected 'module'!");
     }
 
     private static main_state_method(instance: FSM){
+        FSMHelper.consume_empty_spaces(instance);
 
+        // Handle '(' case
+        if (instance.wat_string[instance.current_index] == '('){
+            let inject_type : string = FSMHelper.get_word(instance);
+            if (Object.keys(stringToInjectType).includes(inject_type)){
+                // push the value on the stack
+                instance.stack.push(inject_type);
+                // check if tos == instance.popped_value
+                // if they aren't the same, it means we are in a new wasm section
+                // so we need to update the appropriate mappings
+                if (instance.popped_value != instance.stack[instance.stack.length - 1]){
+                    FSMHelper.update_mappings(instance);
+                }
+
+                // Handle `func` seperately
+                if (inject_type == 'func'){
+                    instance.func_id++;
+                    FSMHelper.update_function_state_mappings(instance);
+                    instance.current_state = State.function_state;
+                    
+                } else {
+                    instance.current_state = State.default_state;
+                }
+
+            } else throw new Error(`FSM parse Error: Expected one of '${Object.keys(stringToInjectType)}'!`);
+        
+        // Handle ')' case
+        } else{
+            // module gets popped
+            instance.popped_value = instance.stack.pop();
+            instance.current_state = State.null_state;
+        }
     }
 
     private static default_state_method(instance: FSM){
-
+        instance.current_index++;
     }
 
     private static function_state_method(instance: FSM){
-
+        instance.current_index++;
     }
 
     private static local_state_method(instance: FSM){
-
+        instance.current_index++;
     }
 
 }
+

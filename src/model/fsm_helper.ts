@@ -17,11 +17,11 @@ export class FSMHelper{
         }
     }
 
+    // gets the next word and skips over empty spaces in the meantime
     static get_word(instance: FSM): string{
         let word_regex = /[a-zA-Z]/;
         let chars : string[] = [];
 
-        FSMHelper.consume_empty_spaces(instance);
         if (!FSMHelper.end_of_file(instance)){
             // Expected '('
             if (instance.wat_string[instance.current_index] === '('){

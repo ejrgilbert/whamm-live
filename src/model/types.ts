@@ -20,6 +20,22 @@ export enum InjectType{
     FuncBodyProbe,
 }
 
+export const stringToInjectType: Record<string, InjectType> = {
+    // Lined up in order in terms of sections as well 
+    // until the last 2(Local and Probe)
+    //  which would depend on their function IDs
+    'type': InjectType.Type,
+    'import': InjectType.Import,
+    'table': InjectType.Table,
+    'memory': InjectType.Memory,
+    'tag': InjectType.Tag,
+    'global': InjectType.Global,
+    'export': InjectType.Export,
+    'elem': InjectType.Element,
+    'func': InjectType.Func,
+    'data': InjectType.Data,
+}
+
 export enum ModeKind{
     before,
     after,
