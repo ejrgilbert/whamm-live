@@ -23,15 +23,67 @@ export class FSMHelper{
 
     static update_function_state_mappings(instance: FSM){
         let line = instance.current_line_number;
-
         instance.func_mapping.set(instance.func_id, line);
-        instance.local_mapping.set(instance.func_id, line + 1);
-
-        let probe_map = instance.probe_mapping.get(instance.func_id);
-        if (probe_map) probe_map[0] = line + 1;
     }
 
     // helper static methods for character consuming purposes
+
+    // consumes UPTO the closing parenthesis but not the closing parenthesis itself
+    static consume_until_closing_parenthesis(instance: FSM){
+        let closing_parentheses_found = false;
+        let number_of_parentheses = 1;
+
+        while (!FSMHelper.end_of_file(instance) && !closing_parentheses_found){
+            switch(FSMHelper.get_char(instance)){
+
+                case '"':
+                case "'":
+                    instance.current_index++;
+                    FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
+                    instance.current_index++;
+                    break;
+                
+                case '(':
+                    number_of_parentheses++;
+                    instance.current_index++;
+                    break;
+
+                case ')':
+                    number_of_parentheses--;
+                    if (number_of_parentheses == 0) closing_parentheses_found=true;
+                    else instance.current_index++;
+                    break;
+                
+                // fall through
+                case '\n':
+                    instance.current_line_number++;
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+
+    }
+
+    static consume_until(char: string, instance: FSM){
+        let closing_char_found = false;
+        while (!FSMHelper.end_of_file(instance) && !closing_char_found){
+            switch(FSMHelper.get_char(instance)){
+                case char:
+                    {
+                        // check if previous character is '/'
+                        if (instance.wat_string[instance.current_index-1] != '\\')
+                            closing_char_found = true;
+                        else
+                            instance.current_index++;
+                    }
+                    break;
+
+                default:
+                    instance.current_index++;
+            }
+        }
+    }
 
     static end_of_file(instance: FSM):boolean{
         return instance.current_index >= instance.wat_string.length;
@@ -40,37 +92,57 @@ export class FSMHelper{
     static consume_empty_spaces(instance: FSM) {
         let space_regex = /\s/;
         while (instance.current_index < instance.wat_string.length &&
-             space_regex.test(instance.wat_string[instance.current_index])){
-                if (instance.wat_string[instance.current_index] === '\n') {
+             space_regex.test(FSMHelper.get_char(instance))){
+                if (FSMHelper.consume_char(instance) === '\n') {
                     instance.current_line_number++;
                 }
-                instance.current_index++;
         }
+    }
+
+    static get_char(instance: FSM): string{
+        if (!FSMHelper.end_of_file(instance)){
+            return instance.wat_string[instance.current_index];
+        } else return '\0'
+    }
+
+    static consume_char(instance: FSM): string{
+        let char = FSMHelper.get_char(instance);
+        instance.current_index++;
+        return char;
     }
 
     // gets the next word and skips over empty spaces in the meantime
     static get_word(instance: FSM): string{
+        FSMHelper.consume_empty_spaces(instance);
         let word_regex = /[a-zA-Z]/;
         let chars : string[] = [];
 
         if (!FSMHelper.end_of_file(instance)){
             // Expected '('
-            if (instance.wat_string[instance.current_index] === '('){
+            if (FSMHelper.get_char(instance) === '('){
                 instance.current_index++;
                 FSMHelper.consume_empty_spaces(instance);
                 // get the next word
                 while (instance.current_index < instance.wat_string.length &&
-                    word_regex.test(instance.wat_string[instance.current_index])){
-                        chars.push(instance.wat_string[instance.current_index++]);
+                    word_regex.test(FSMHelper.get_char(instance))){
+                        chars.push(FSMHelper.consume_char(instance));
                 }
                 FSMHelper.consume_empty_spaces(instance);
                 return chars.join('');
 
             } else{
-                throw new Error(`FSM parse error: Expected '(', got ${instance.wat_string[instance.current_index]}`)
+                throw new Error(`FSM parse error: Expected '(', got ${FSMHelper.get_char(instance)}`)
             }
         } else{
             return '';
+        }
+    }
+
+    static consume_until_not_whitespace(instance:FSM){
+        let space_regex = /\s/;
+        while (!FSMHelper.end_of_file(instance) &&
+             !space_regex.test(FSMHelper.get_char(instance))){
+                    instance.current_index++;
         }
     }
 }
