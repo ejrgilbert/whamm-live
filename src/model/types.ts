@@ -16,7 +16,8 @@ export enum InjectType{
     Func,
     Data,
     Local,
-    Probe,
+    FuncProbe,
+    FuncBodyProbe,
 }
 
 export enum ModeKind{
