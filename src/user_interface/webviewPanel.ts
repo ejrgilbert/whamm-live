@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
+import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
 
 export class WhammWebviewPanel{
 
@@ -9,13 +10,23 @@ export class WhammWebviewPanel{
     string_contents: string | undefined;
     is_wasm: boolean;
 
-    static number_of_webviews: number;
+    // content sent back from svelte frontend
+    // will be null if wizard option chosen
+    valid_wat_content: string | null;
+    
+    // Mapping from whamm script line number to
+    // a tuple of injected content and lines in webview where it is injected
+    line_to_probe_mapping: Map<number, [string, number[]]>
+
+    static number_of_webviews: number = 0;
     static webviews: WhammWebviewPanel[] = [];
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
+        this.valid_wat_content = null;
         this.contents, this.string_contents = undefined;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
+        this.line_to_probe_mapping = new Map();
 
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
@@ -28,6 +39,7 @@ export class WhammWebviewPanel{
             }
         );
         WhammWebviewPanel.addPanel(this);
+        this.addListenerToStoreWAT();
         
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
@@ -39,6 +51,7 @@ export class WhammWebviewPanel{
     private static addPanel(webview: WhammWebviewPanel){
         WhammWebviewPanel.number_of_webviews++;
         WhammWebviewPanel.webviews.push(webview);
+        handleDocumentChanges();
     }
 
     static removePanel(webview: WhammWebviewPanel){
@@ -98,6 +111,7 @@ export class WhammWebviewPanel{
 
         // Post message to webview so that it can render the file
         this.webviewPanel.webview.postMessage({
+                command: 'init-data',
                 show_wizard: this.fileName === undefined,
                 wasm_file_contents: this.contents,
                 wat_file_contents: this.string_contents,
@@ -127,6 +141,18 @@ export class WhammWebviewPanel{
             text = new TextDecoder().decode(fileBytes_);
         }
         return text;
+    }
+
+    
+    private addListenerToStoreWAT(){
+        // Store wat content recieved from svelte(webview)
+        this.webviewPanel.webview.onDidReceiveMessage(message=>{
+            switch (message.command){
+                case 'store_wat':
+                    this.valid_wat_content = message.wat_content;
+                    break;
+            }
+        })
     }
 
 }
