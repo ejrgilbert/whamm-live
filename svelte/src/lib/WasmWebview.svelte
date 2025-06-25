@@ -1,10 +1,11 @@
 <script lang="ts">
     import { onDestroy, onMount } from "svelte";
+    import { probe_data} from "./probe_data.svelte";
 
     var observer: MutationObserver;
 
     // content here should be array of all the bytes for our wasm file
-    let { view, probe_data } = $props();
+    let { view } = $props();
     const load_html = function(node: HTMLElement){
         // Remove focus highlight
         if (view) document.getElementById("wasm-webview-code-editor")?.appendChild(view.dom);
@@ -21,13 +22,14 @@
                 {
                     // reset any existing highlights
                     display_data(true);
-                    probe_data=message.data;
+                    probe_data.data=message.data;
                     display_data();
                 }
                 break;
             }
         };
        window.addEventListener("message", probe_data_update_function);
+       display_data();
     });
 
     onDestroy(()=>{
@@ -37,9 +39,10 @@
 
     // Function that displays the data
     var display_data = (reset: boolean = false)=>{
-        if (probe_data){
+        if (probe_data.data){
             // Show the highlight if probe data is not null
-            for (let line of probe_data[1]){
+            // @ts-ignore
+            for (let line of probe_data.data[1]){
                 let div = (document.querySelectorAll(".cm-line")[line] as HTMLElement);
                 div.style.background = (reset) ? '' : 'cadetblue';
             }

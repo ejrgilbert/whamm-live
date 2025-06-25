@@ -2,7 +2,21 @@
 
 // Enums
 export enum InjectType{
-    probe,
+    // Lined up in order in terms of sections as well 
+    // until the last 2(Local and Probe)
+    //  which would depend on their function IDs
+    Type,
+    Import,
+    Table,
+    Memory,
+    Tag,
+    Global,
+    Export,
+    Element,
+    Func,
+    Data,
+    Local,
+    Probe,
 }
 
 export enum ModeKind{
