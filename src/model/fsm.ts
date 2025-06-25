@@ -63,7 +63,7 @@ export class FSM{
     }   
 
     run(){
-       while (this.current_index < this.wat_string.length && this.current_state !== State.null_state){
+       while (!FSMHelper.end_of_file(this) && this.current_state !== State.null_state){
             // call the function for the required state
             FSM.state_to_method_mapping[this.current_state](this);
        }
@@ -79,7 +79,6 @@ export class FSM{
         if (inject_type == 'module'){
             instance.stack.push(inject_type);
             instance.current_state = State.main_state;
-            console.log('here');
         }
         else throw new Error("FSM parse Error: Expected 'module'!");
     }
@@ -88,8 +87,11 @@ export class FSM{
         FSMHelper.consume_empty_spaces(instance);
 
         // Handle '(' case
-        if (instance.wat_string[instance.current_index] == '('){
+        if (FSMHelper.get_char(instance) == '('){
+
+            FSMHelper.consume_empty_spaces(instance);
             let inject_type : string = FSMHelper.get_word(instance);
+
             if (Object.keys(stringToInjectType).includes(inject_type)){
                 // push the value on the stack
                 instance.stack.push(inject_type);
@@ -102,10 +104,9 @@ export class FSM{
 
                 // Handle `func` seperately
                 if (inject_type == 'func'){
-                    instance.func_id++;
                     FSMHelper.update_function_state_mappings(instance);
                     instance.current_state = State.function_state;
-                    
+
                 } else {
                     instance.current_state = State.default_state;
                 }
@@ -113,24 +114,73 @@ export class FSM{
             } else throw new Error(`FSM parse Error: Expected one of '${Object.keys(stringToInjectType)}'!`);
         
         // Handle ')' case
-        } else{
+        } else if (FSMHelper.consume_char(instance) == ')'){
             // module gets popped
             instance.popped_value = instance.stack.pop();
             instance.current_state = State.null_state;
+        } else{
+            throw new Error(`FSM parse Error: Expected '(' or ')'!`);
         }
     }
 
     private static default_state_method(instance: FSM){
-        instance.current_index++;
+        FSMHelper.consume_empty_spaces(instance);
+        FSMHelper.consume_until_closing_parenthesis(instance);
+        // check if ')' is there
+        if (FSMHelper.consume_char(instance) === ')'){
+            instance.popped_value = instance.stack.pop();
+            instance.current_state = State.main_state;
+        } else{
+            throw new Error("FSM parse error: ')' expected while moving into main state")
+        }
     }
 
     private static function_state_method(instance: FSM){
-        instance.current_index++;
+        FSMHelper.consume_empty_spaces(instance);
+        // check for potential names
+        if (FSMHelper.get_char(instance) == '$'){
+            let word = FSMHelper.consume_until_whitespace(instance);
+            FSMHelper.consume_empty_spaces(instance);
+        }
+
+        // handle any potential locals and other stuff like params and result
+        if (FSMHelper.get_char(instance) === '('){
+            if (FSMHelper.get_word(instance) == 'local'){
+                instance.current_state = State.local_state;
+            } else{
+                FSMHelper.consume_until_closing_parenthesis(instance);
+                instance.current_index++;
+                // recursive calling
+                FSM.function_state_method(instance);
+                return;
+            }
+        // consume characters until the ending parenthesis
+        } else{
+            // update the mapping(s)
+            if (!instance.local_mapping.get(instance.func_id)) instance.local_mapping.set(instance.func_id, instance.current_line_number -1);
+            let probe_map = instance.probe_mapping.get(instance.func_id);
+            if (probe_map === undefined) instance.probe_mapping.set(instance.func_id, [instance.current_line_number, -1]);
+
+            FSMHelper.consume_until_closing_parenthesis(instance);
+            instance.current_index++;
+
+            // update the mapping
+            probe_map = instance.probe_mapping.get(instance.func_id);
+            if (probe_map) probe_map[1] = instance.current_line_number;
+
+            FSMHelper.consume_empty_spaces(instance);
+
+            instance.func_id++;
+            instance.popped_value = instance.stack.pop();
+            instance.current_state = State.main_state;
+        }
     }
 
     private static local_state_method(instance: FSM){
+        FSMHelper.consume_until_closing_parenthesis(instance);
         instance.current_index++;
+        instance.local_mapping.set(instance.func_id, instance.current_line_number);
+        instance.current_state = State.function_state;
     }
 
 }
-

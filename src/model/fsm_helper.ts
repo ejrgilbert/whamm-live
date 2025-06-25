@@ -29,7 +29,7 @@ export class FSMHelper{
     // helper static methods for character consuming purposes
 
     // consumes UPTO the closing parenthesis but not the closing parenthesis itself
-    static consume_until_closing_parenthesis(instance: FSM){
+    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
         let closing_parentheses_found = false;
         let number_of_parentheses = 1;
 
@@ -39,8 +39,10 @@ export class FSMHelper{
                 case '"':
                 case "'":
                     instance.current_index++;
-                    FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
-                    instance.current_index++;
+                    if (string_handling){
+                        FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
+                        instance.current_index++;
+                    }
                     break;
                 
                 case '(':
@@ -138,7 +140,7 @@ export class FSMHelper{
         }
     }
 
-    static consume_until_not_whitespace(instance:FSM){
+    static consume_until_whitespace(instance:FSM){
         let space_regex = /\s/;
         while (!FSMHelper.end_of_file(instance) &&
              !space_regex.test(FSMHelper.get_char(instance))){
