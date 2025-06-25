@@ -5,7 +5,7 @@ export enum InjectType{
     // Lined up in order in terms of sections as well 
     // until the last 2(Local and Probe)
     //  which would depend on their function IDs
-    Type,
+    Type = 1,
     Import,
     Table,
     Memory,
