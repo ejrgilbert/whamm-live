@@ -1,6 +1,8 @@
 // Different types and enums for API responses
 
 // Enums
+// Enum values of these types MATTER!
+// values based on the order of sections in a .wat file
 export enum InjectType{
     // Lined up in order in terms of sections as well 
     // until the last 2(Local and Probe)
