@@ -28,74 +28,6 @@ export class FSMHelper{
 
     // helper static methods for character consuming purposes
 
-    // consumes UPTO the closing parenthesis but not the closing parenthesis itself
-    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
-        let closing_parentheses_found = false;
-        let number_of_parentheses = 1;
-
-        while (!FSMHelper.end_of_file(instance) && !closing_parentheses_found){
-            switch(FSMHelper.get_char(instance)){
-
-                case '"':
-                case "'":
-                {
-                    instance.current_index++;
-                    if (string_handling){
-                        FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
-                        instance.current_index++;
-                    }
-                }
-                    break;
-                
-                case '(':
-                    number_of_parentheses++;
-                    instance.current_index++;
-                    break;
-
-                case ')':
-                    number_of_parentheses--;
-                    if (number_of_parentheses == 0) closing_parentheses_found=true;
-                    else instance.current_index++;
-                    break;
-                
-                // fall through
-                case '\n':
-                    instance.current_line_number++;
-                default:
-                    instance.current_index++;
-                    break;
-            }
-        }
-
-    }
-
-    static consume_until(char: string, instance: FSM){
-        let closing_char_found = false;
-        while (!FSMHelper.end_of_file(instance) && !closing_char_found){
-            switch(FSMHelper.get_char(instance)){
-                case '"':
-                case "'":
-                    {
-                        let this_char = FSMHelper.get_char(instance);
-                        if (this_char != char){
-                            instance.current_index++;
-                        } else{
-                            //TODO
-                            // need to see if there is a way to handle escaped strings
-                            closing_char_found = true;
-                            // check if previous character is '\'
-                            instance.current_index++;
-                        }
-                    }
-                    break;
-
-                default:
-                    instance.current_index++;
-                    break;
-            }
-        }
-    }
-
     static end_of_file(instance: FSM):boolean{
         return instance.current_index >= instance.wat_string.length;
     }
@@ -148,6 +80,75 @@ export class FSMHelper{
             return '';
         }
     }
+
+    // consumes UPTO the closing parenthesis but not the closing parenthesis itself
+    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
+        let closing_parentheses_found = false;
+        let number_of_parentheses = 1;
+
+        while (!FSMHelper.end_of_file(instance) && !closing_parentheses_found){
+            switch(FSMHelper.get_char(instance)){
+
+                case '"':
+                case "'":
+                {
+                    instance.current_index++;
+                    if (string_handling){
+                        FSMHelper.consume_until_string_ends(instance.wat_string[instance.current_index-1], instance);
+                        instance.current_index++;
+                    }
+                }
+                    break;
+                
+                case '(':
+                    number_of_parentheses++;
+                    instance.current_index++;
+                    break;
+
+                case ')':
+                    number_of_parentheses--;
+                    if (number_of_parentheses == 0) closing_parentheses_found=true;
+                    else instance.current_index++;
+                    break;
+                
+                // fall through
+                case '\n':
+                    instance.current_line_number++;
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+
+    }
+
+    static consume_until_string_ends(char: string, instance: FSM){
+        let closing_char_found = false;
+        while (!FSMHelper.end_of_file(instance) && !closing_char_found){
+            switch(FSMHelper.get_char(instance)){
+                case '"':
+                case "'":
+                    {
+                        let this_char = FSMHelper.get_char(instance);
+                        if (this_char != char){
+                            instance.current_index++;
+                        } else{
+                            // check if previous character is '\'
+                            if (instance.wat_string[instance.current_index-1] != '\\')
+                                closing_char_found = true;
+                            else
+                                instance.current_index++;
+                        }
+                    }
+                    break;
+
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+    }
+
 
     static consume_until_whitespace(instance:FSM){
         let space_regex = /\s/;
