@@ -111,7 +111,18 @@ export class FSM{
                     instance.current_state = State.default_state;
                 }
 
-            } else throw new Error(`FSM parse Error: Expected one of '${Object.keys(stringToInjectType)}'!`);
+            } else {
+                if (FSMHelper.consume_char(instance) == '@') {
+                    FSMHelper.update_mappings(instance);
+                    // handle stuff like "@custom" and "@producers"
+                    FSMHelper.consume_until_closing_parenthesis(instance);
+                    instance.current_index++;
+                    // stay in main state
+                    instance.current_state = State.main_state;
+                } else{
+                    throw new Error(`Unexpected keyword, got ${FSMHelper.get_word(instance)}`);
+                }
+            }
         
         // Handle ')' case
         } else if (FSMHelper.consume_char(instance) == ')'){

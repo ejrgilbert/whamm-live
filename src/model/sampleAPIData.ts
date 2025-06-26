@@ -38,7 +38,7 @@ let createProbes = ():Probe[] => {
     return [probe1, probe2];
 }
 
-if (sample_whamm_api_response) sample_whamm_api_response.response?.set(InjectType.probe, createProbes());
+if (sample_whamm_api_response) sample_whamm_api_response.response?.set(InjectType.FuncBodyProbe, createProbes());
 
 // Sample example error response
 const sample_whamm_api_error_response: WhammResponse = {
