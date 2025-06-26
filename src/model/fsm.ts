@@ -115,6 +115,7 @@ export class FSM{
         
         // Handle ')' case
         } else if (FSMHelper.consume_char(instance) == ')'){
+            FSMHelper.update_mappings(instance);
             // module gets popped
             instance.popped_value = instance.stack.pop();
             instance.current_state = State.null_state;

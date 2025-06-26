@@ -15,6 +15,8 @@ export enum InjectType{
     Element = 8,
     Func = 9,
     Data = 10,
+    // Module will never be used
+    Module = 11,
     Local,
     FuncProbe,
     FuncBodyProbe,
@@ -34,6 +36,7 @@ export const stringToInjectType: Record<string, InjectType> = {
     'elem': InjectType.Element,
     'func': InjectType.Func,
     'data': InjectType.Data,
+    'module': InjectType.Module,
 }
 
 export enum ModeKind{

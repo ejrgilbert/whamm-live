@@ -38,11 +38,13 @@ export class FSMHelper{
 
                 case '"':
                 case "'":
+                {
                     instance.current_index++;
                     if (string_handling){
                         FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
                         instance.current_index++;
                     }
+                }
                     break;
                 
                 case '(':
@@ -71,18 +73,25 @@ export class FSMHelper{
         let closing_char_found = false;
         while (!FSMHelper.end_of_file(instance) && !closing_char_found){
             switch(FSMHelper.get_char(instance)){
-                case char:
+                case '"':
+                case "'":
                     {
-                        // check if previous character is '/'
-                        if (instance.wat_string[instance.current_index-1] != '\\')
-                            closing_char_found = true;
-                        else
+                        let this_char = FSMHelper.get_char(instance);
+                        if (this_char != char){
                             instance.current_index++;
+                        } else{
+                            //TODO
+                            // need to see if there is a way to handle escaped strings
+                            closing_char_found = true;
+                            // check if previous character is '\'
+                            instance.current_index++;
+                        }
                     }
                     break;
 
                 default:
                     instance.current_index++;
+                    break;
             }
         }
     }
