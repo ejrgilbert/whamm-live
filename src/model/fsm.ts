@@ -1,3 +1,8 @@
+/// VVIP ::: TWO BIG ASSUMPTIONS
+    // We assume that the wat content is ordered in sections in the following order : type, import, table, memory, tag, global ,export, elem, func, data
+    // We assume that the wat content doesn't fold expressions
+///
+
 import { InjectType, stringToInjectType } from "./types";
 import { FSMHelper } from "./fsm_helper";
 
@@ -112,13 +117,20 @@ export class FSM{
                 }
 
             } else {
-                if (FSMHelper.consume_char(instance) == '@') {
+                if (FSMHelper.get_char(instance) == '@') {
                     FSMHelper.update_mappings(instance);
                     // handle stuff like "@custom" and "@producers"
                     FSMHelper.consume_until_closing_parenthesis(instance);
                     instance.current_index++;
                     // stay in main state
                     instance.current_state = State.main_state;
+
+                } else if (inject_type == 'start'){
+                    // treat it like an `elem` because the mappings will stay the same
+                    instance.stack.push('elem');
+                    FSMHelper.update_mappings(instance);
+                    instance.current_state = State.default_state;
+
                 } else{
                     throw new Error(`Unexpected keyword, got ${FSMHelper.get_word(instance)}`);
                 }
@@ -169,7 +181,15 @@ export class FSM{
         // consume characters until the ending parenthesis
         } else{
             // update the mapping(s)
-            if (!instance.local_mapping.get(instance.func_id)) instance.local_mapping.set(instance.func_id, instance.current_line_number -1);
+
+            // update local mapping first
+            if (!instance.local_mapping.get(instance.func_id)){
+                let local_mapping_value = instance.current_line_number;
+                if (local_mapping_value != instance.func_mapping.get(instance.func_id))
+                    local_mapping_value--;
+                instance.local_mapping.set(instance.func_id, local_mapping_value);
+            }
+
             let probe_map = instance.probe_mapping.get(instance.func_id);
             if (probe_map === undefined) instance.probe_mapping.set(instance.func_id, [instance.current_line_number, -1]);
 

@@ -1,0 +1,14 @@
+# No support for components, so that should give an error
+[component]
+file_name="component.wat"
+error=true
+
+# No support for fold expressions
+[fold_expression]
+file_name="fold_expression.wat"
+# not error, but answer should be invalid
+error=false
+func_mapping = {0=2}
+local_mapping = {0=2}
+probe_mapping = {0=[3,4]}
+section_to_line_mapping = {1= 1, 2= 1, 3= 1, 4= 1, 5= 1, 6=1, 7= 1, 8=1 , 9=4, 10=4}

@@ -1,6 +1,8 @@
 // Different types and enums for API responses
 
 // Enums
+// Enum values of these types MATTER!
+// values based on the order of sections in a .wat file
 export enum InjectType{
     // Lined up in order in terms of sections as well 
     // until the last 2(Local and Probe)
@@ -12,6 +14,8 @@ export enum InjectType{
     Tag = 5,
     Global = 6,
     Export = 7,
+    // We don't support start as an inject type but the wat content can have this so necessary to handle it
+    // Start = 7.5
     Element = 8,
     Func = 9,
     Data = 10,
