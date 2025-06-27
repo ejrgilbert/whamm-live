@@ -112,13 +112,20 @@ export class FSM{
                 }
 
             } else {
-                if (FSMHelper.consume_char(instance) == '@') {
+                if (FSMHelper.get_char(instance) == '@') {
                     FSMHelper.update_mappings(instance);
                     // handle stuff like "@custom" and "@producers"
                     FSMHelper.consume_until_closing_parenthesis(instance);
                     instance.current_index++;
                     // stay in main state
                     instance.current_state = State.main_state;
+
+                } else if (inject_type == 'start'){
+                    // treat it like an `elem` because the mappings will stay the same
+                    instance.stack.push('elem');
+                    FSMHelper.update_mappings(instance);
+                    instance.current_state = State.default_state;
+
                 } else{
                     throw new Error(`Unexpected keyword, got ${FSMHelper.get_word(instance)}`);
                 }

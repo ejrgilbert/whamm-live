@@ -14,6 +14,8 @@ export enum InjectType{
     Tag = 5,
     Global = 6,
     Export = 7,
+    // We don't support start as an inject type but the wat content can have this so necessary to handle it
+    // Start = 7.5
     Element = 8,
     Func = 9,
     Data = 10,
