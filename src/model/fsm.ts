@@ -176,7 +176,15 @@ export class FSM{
         // consume characters until the ending parenthesis
         } else{
             // update the mapping(s)
-            if (!instance.local_mapping.get(instance.func_id)) instance.local_mapping.set(instance.func_id, instance.current_line_number -1);
+
+            // update local mapping first
+            if (!instance.local_mapping.get(instance.func_id)){
+                let local_mapping_value = instance.current_line_number;
+                if (local_mapping_value != instance.func_mapping.get(instance.func_id))
+                    local_mapping_value--;
+                instance.local_mapping.set(instance.func_id, local_mapping_value);
+            }
+
             let probe_map = instance.probe_mapping.get(instance.func_id);
             if (probe_map === undefined) instance.probe_mapping.set(instance.func_id, [instance.current_line_number, -1]);
 
