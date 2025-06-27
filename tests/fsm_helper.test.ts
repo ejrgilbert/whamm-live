@@ -3,7 +3,7 @@ import {FSMHelper} from '../src/model/fsm_helper';
 
 // DO NOT CHANGE THE CONTENTS OF THE STRING UNLESS YOU KNOW WHAT YOU ARE DOING
 function create_fsm_instance(){
-  return new FSM('\t\r \n(module (memory 1) (func $f1 (param $p1 i32)) (data (i32.const 0) "hello" ))')
+  return new FSM('\t\r \n(module\n\t(memory 1)\n\t(func $f1 (param $p1 i32))\n\t(data (i32.const 0) "hello" )\n)')
 }
 
 describe('test FSMHelper char consumption methods', () => {
@@ -44,16 +44,16 @@ describe('test FSMHelper char consumption methods', () => {
 
   test('consume_until_string_ends test', () => {
     instance = create_fsm_instance();
-    instance.current_index = 71;
+    instance.current_index = 74;
     FSMHelper.consume_until_string_ends('"', instance);
-    expect(instance.current_index).toBe(76);
+    expect(instance.current_index).toBe(79);
   });
 
   test('consume_until_closing_parenthesis test', () => {
     instance = create_fsm_instance();
-    instance.current_index = 51;
+    instance.current_index = 54;
     FSMHelper.consume_until_closing_parenthesis(instance);
-    expect(instance.current_index).toBe(78);
+    expect(instance.current_index).toBe(81);
   });
 
   test('consume_until_whitespace test', () => {
