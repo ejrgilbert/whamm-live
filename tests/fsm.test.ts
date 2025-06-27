@@ -3,10 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import toml from 'toml';
 
-const file_path = path.resolve(__dirname, 'fsm.test.toml'); 
+const toml_file_path = path.resolve(__dirname, 'fsm.test.toml'); 
+const error_toml_file_path = path.resolve(__dirname, 'fsm_errors.test.toml'); 
 describe('testing FSM', () => {
 
-  const config = toml.parse(fs.readFileSync(file_path, 'utf-8'));
+  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
   
   // test each file
   for (let key of Object.keys(config)) {
@@ -22,6 +23,7 @@ describe('testing FSM', () => {
         const temp_map = objToMap(config[key][mapping_type]);
         let expected_map = mapWithNumberKeys(temp_map);
         let instance = load_instance(key, config);
+        instance.run();
 
         expect(instance[mapping_type]).
           toMatchObject(
@@ -32,14 +34,48 @@ describe('testing FSM', () => {
 }
 });
 
+// Test for errors
+describe('testing FSM errors', () => {
+
+  const config = toml.parse(fs.readFileSync(error_toml_file_path, 'utf-8'));
+  
+  // test each file
+  for (let key of Object.keys(config)) {
+      if (config[key]["error"])
+        test('test for error', () => {
+            let instance = load_instance(key, config);
+            expect(()=>{instance.run()}).toThrow(Error);
+        });
+}
+});
+
+// Test for folding expressions
+describe('testing FSM fold expressions', () => {
+
+  const config = toml.parse(fs.readFileSync(error_toml_file_path, 'utf-8'));
+  
+  // test 'fold_expression.wat'
+  // should be no errors in running but mapped values should be wrong
+  test('test for error', () => {
+            let instance = load_instance('fold_expression', config);
+            instance.run();
+            
+          for (let mapping_type of ["probe_mapping", "local_mapping"]){
+                const temp_map = objToMap(config['fold_expression'][mapping_type]);
+                let expected_map = mapWithNumberKeys(temp_map);
+                expect(instance[mapping_type]).not.toMatchObject(expected_map);
+          }
+        });
+});
+
+
+
 // Test helper methods
 function load_instance(toml_key: string, config: any){
 
   const wat_file_path = path.resolve(__dirname, 'wat', config[toml_key]["file_name"]); 
   let file_string = fs.readFileSync(wat_file_path, 'utf-8')
   let instance = new FSM(file_string);
-  instance.run();
-
   return instance;
 }
 
