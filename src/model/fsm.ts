@@ -1,3 +1,8 @@
+/// VVIP ::: TWO BIG ASSUMPTIONS
+    // We assume that the wat content is ordered in sections in the following order : type, import, table, memory, tag, global ,export, elem, func, data
+    // We assume that the wat content doesn't fold expressions
+///
+
 import { InjectType, stringToInjectType } from "./types";
 import { FSMHelper } from "./fsm_helper";
 

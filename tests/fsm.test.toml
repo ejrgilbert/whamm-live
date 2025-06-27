@@ -70,3 +70,11 @@ func_mapping = {0=5, 1=8, 2=30, 3=31, 4=34}
 local_mapping = {0=5, 1=9, 2=30, 3=31, 4=34}
 probe_mapping = {0=[6,7], 1=[10,29], 2=[30,30], 3=[32,33], 4=[34, 34]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 4, 8=4 , 9= 34, 10=34}
+
+[escaped_string]
+file_name = "escaped_string.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[5,7]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 3, 8=3 , 9=7, 10=8}
