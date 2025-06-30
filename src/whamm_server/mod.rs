@@ -46,6 +46,11 @@ pub fn run(new_script: String) -> Result<Vec<Probe>, ErrorCode> {
     });
 }
 
+pub fn getwat(_filename: String) -> Result<String, ErrorCode>{
+    // TODO use wat and wasmprinter
+    Ok(String::from("sjsj"))
+}
+
 // ===============
 // ==== TYPES ====
 // ===============

@@ -1,4 +1,4 @@
-use whamm_server::{run, setup};
+use whamm_server::{run, setup, getwat};
 
 mod whamm_server;
 
@@ -23,6 +23,11 @@ impl Guest for WhammServer {
 		log("Starting whamm run");
 		let result = run(script);
 		log("Finished whamm run");
+		result
+	}
+
+	fn getwat(_filename: String) -> Result<String, ErrorCode> {
+		let result = getwat(_filename);
 		result
 	}
 }

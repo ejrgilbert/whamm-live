@@ -49,4 +49,5 @@ world whamm-server {
 
 	export setup: func(app-bytes: list<u8>, opts: options) -> result<string, error-code>;
 	export run: func(script: string) -> result<list<probe>, error-code>;
+	export getwat: func(filename: string) -> result<string, error-code>;
 }

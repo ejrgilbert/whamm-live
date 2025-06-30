@@ -126,6 +126,10 @@ export namespace whammServer {
 		 * @throws ErrorCode.Error_
 		 */
 		run: (script: string) => Probe[];
+		/**
+		 * @throws ErrorCode.Error_
+		 */
+		getwat: (filename: string) => string;
 	};
 	export namespace Exports {
 		export type Promisified = $wcm.$exports.Promisify<Exports>;
@@ -186,6 +190,9 @@ export namespace whammServer.$ {
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
 		], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
+		export const getwat = new $wcm.FunctionType<whammServer.Exports['getwat']>('getwat',[
+			['filename', $wcm.wstring],
+		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
 	}
 }
 export namespace whammServer._ {
@@ -214,7 +221,8 @@ export namespace whammServer._ {
 	export namespace exports {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
 			['setup', $.exports.setup],
-			['run', $.exports.run]
+			['run', $.exports.run],
+			['getwat', $.exports.getwat]
 		]);
 		export function bind(exports: Exports, context: $wcm.WasmContext): whammServer.Exports {
 			return $wcm.$exports.bind<whammServer.Exports>(_, exports, context);
@@ -223,6 +231,7 @@ export namespace whammServer._ {
 	export type Exports = {
 		'setup': (appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'run': (script_ptr: i32, script_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
+		'getwat': (filename_ptr: i32, filename_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 	};
 	export function bind(service: whammServer.Imports, code: $wcm.Code, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports>;
 	export function bind(service: whammServer.Imports.Promisified, code: $wcm.Code, port: $wcm.RAL.ConnectionPort, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports.Promisified>;
