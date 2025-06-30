@@ -53,16 +53,13 @@ impl From<wat::Error> for ErrorCode{
 }
 
 pub fn wat2wat(content: String) -> Result<String, ErrorCode>{
-    let mut _wat;
     let binary = wat::parse_str(content)?;
-    _wat = wasmprinter::print_bytes(&binary)
-            .expect("Problem parsing the .wat file");
-    Ok(_wat)
+    wasm2wat(binary)
 }
 
 pub fn wasm2wat(content: Vec<u8>) -> Result<String, ErrorCode>{
     let _wat = wasmprinter::print_bytes(content)
-                    .expect("Problem parsing the .wasm file");
+                    .expect("Problem parsing the wasm module");
     Ok(_wat)
 }
 // ===============

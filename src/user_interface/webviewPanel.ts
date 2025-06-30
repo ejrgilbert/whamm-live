@@ -23,6 +23,7 @@ export class WhammWebviewPanel{
         this.fileName = fileName;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
         this.line_to_probe_mapping = new Map();
+        this.valid_wat_content = null;
     }
 
     async init(){
@@ -38,12 +39,16 @@ export class WhammWebviewPanel{
             }
         );
         WhammWebviewPanel.addPanel(this);
-        this.valid_wat_content = await this.getWat();
 
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
         })
+        let success = await this.getWat();
+        if (!success) {
+            vscode.window.showErrorMessage("Error parsing the wasm module! Make sure the file is valid");
+            this.webviewPanel.dispose();
+        }
     }
 
     // Static methods
@@ -111,17 +116,20 @@ export class WhammWebviewPanel{
         });
     }
 
-    private async getWat(): Promise<string | null>{
-        let wat = null;
+    private async getWat(): Promise<boolean>{
         if (this.fileName){
 
-		    let file_content = await vscode.workspace.fs.readFile(vscode.Uri.file(this.fileName));
-            if (this.is_wasm){
-                wat = ExtensionContext.api.wasm2wat(file_content);
-            } else
-                wat = ExtensionContext.api.wat2wat(
-                    new TextDecoder('utf-8').decode(file_content));
+            try{
+                let file_content = await vscode.workspace.fs.readFile(vscode.Uri.file(this.fileName));
+                if (this.is_wasm){
+                    this.valid_wat_content = ExtensionContext.api.wasm2wat(file_content);
+                } else
+                    this.valid_wat_content= ExtensionContext.api.wat2wat(
+                        new TextDecoder('utf-8').decode(file_content));
+            } catch(error){
+                return false;
+            }
         }
-        return wat;
+        return true;
     }
 }
