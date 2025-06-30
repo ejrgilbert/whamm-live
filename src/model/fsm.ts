@@ -1,5 +1,10 @@
+/// VVIP ::: TWO BIG ASSUMPTIONS
+    // We assume that the wat content is ordered in sections in the following order : type, import, table, memory, tag, global ,export, elem, func, data
+    // We assume that the wat content doesn't fold expressions
+///
+
 import { InjectType, stringToInjectType } from "./types";
-import { FSMHelper } from "./fsm_helper";
+import { FSMHelper, stack_value } from "./fsm_helper";
 
 // Consider looking at https://github.com/ejrgilbert/whamm-live/issues/12 to
 // We have 5 states in our FSM: start_state, main_state, function_state, local_state, default_state, null_state
@@ -15,8 +20,8 @@ enum State{
 // Finite state machine code implementation for mapping inject types to wasm line
 export class FSM{
     // Stack values
-    stack: string[];
-    popped_value : string | undefined;
+    stack: stack_value[];
+    popped_value : stack_value | undefined;
 
     // wat file related variables
     current_index: number;
@@ -77,7 +82,7 @@ export class FSM{
         let inject_type : string = FSMHelper.get_word(instance);
 
         if (inject_type == 'module'){
-            instance.stack.push(inject_type);
+            instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
             instance.current_state = State.main_state;
         }
         else throw new Error("FSM parse Error: Expected 'module'!");
@@ -94,11 +99,11 @@ export class FSM{
 
             if (Object.keys(stringToInjectType).includes(inject_type)){
                 // push the value on the stack
-                instance.stack.push(inject_type);
+                instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
                 // check if tos == instance.popped_value
                 // if they aren't the same, it means we are in a new wasm section
                 // so we need to update the appropriate mappings
-                if (instance.popped_value != instance.stack[instance.stack.length - 1]){
+                if (instance.popped_value?.value != instance.stack[instance.stack.length - 1].value){
                     FSMHelper.update_mappings(instance);
                 }
 
@@ -112,13 +117,20 @@ export class FSM{
                 }
 
             } else {
-                if (FSMHelper.consume_char(instance) == '@') {
+                if (FSMHelper.get_char(instance) == '@') {
                     FSMHelper.update_mappings(instance);
                     // handle stuff like "@custom" and "@producers"
                     FSMHelper.consume_until_closing_parenthesis(instance);
                     instance.current_index++;
                     // stay in main state
                     instance.current_state = State.main_state;
+
+                } else if (inject_type == 'start'){
+                    // treat it like an `elem` because the mappings will stay the same
+                    instance.stack.push(FSMHelper.wrap_stack_value(instance, 'elem'));
+                    FSMHelper.update_mappings(instance);
+                    instance.current_state = State.default_state;
+
                 } else{
                     throw new Error(`Unexpected keyword, got ${FSMHelper.get_word(instance)}`);
                 }
@@ -129,6 +141,7 @@ export class FSM{
             FSMHelper.update_mappings(instance);
             // module gets popped
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
             instance.current_state = State.null_state;
         } else{
             throw new Error(`FSM parse Error: Expected '(' or ')'!`);
@@ -141,6 +154,7 @@ export class FSM{
         // check if ')' is there
         if (FSMHelper.consume_char(instance) === ')'){
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
             instance.current_state = State.main_state;
         } else{
             throw new Error("FSM parse error: ')' expected while moving into main state")
@@ -151,7 +165,8 @@ export class FSM{
         FSMHelper.consume_empty_spaces(instance);
         // check for potential names
         if (FSMHelper.get_char(instance) == '$'){
-            let word = FSMHelper.consume_until_whitespace(instance);
+            // consume until whitespace or ')' 
+            let word = FSMHelper.consume_until_whitespace_or(instance, ")");
             FSMHelper.consume_empty_spaces(instance);
         }
 
@@ -169,7 +184,15 @@ export class FSM{
         // consume characters until the ending parenthesis
         } else{
             // update the mapping(s)
-            if (!instance.local_mapping.get(instance.func_id)) instance.local_mapping.set(instance.func_id, instance.current_line_number -1);
+
+            // update local mapping first
+            if (!instance.local_mapping.get(instance.func_id)){
+                let local_mapping_value = instance.current_line_number;
+                if (local_mapping_value != instance.func_mapping.get(instance.func_id))
+                    local_mapping_value--;
+                instance.local_mapping.set(instance.func_id, local_mapping_value);
+            }
+
             let probe_map = instance.probe_mapping.get(instance.func_id);
             if (probe_map === undefined) instance.probe_mapping.set(instance.func_id, [instance.current_line_number, -1]);
 
@@ -180,11 +203,14 @@ export class FSM{
             probe_map = instance.probe_mapping.get(instance.func_id);
             if (probe_map) probe_map[1] = instance.current_line_number;
 
-            FSMHelper.consume_empty_spaces(instance);
-
             instance.func_id++;
+
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
+
             instance.current_state = State.main_state;
+
+            FSMHelper.consume_empty_spaces(instance);
         }
     }
 

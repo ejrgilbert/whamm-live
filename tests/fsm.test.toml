@@ -1,0 +1,103 @@
+# func_mapping: funcID to line number where the given function starts
+# local_mapping: funcID to line number where injected locals should be inserted
+# probe_mapping: funcID to a tuple of first opcode's line number, last opcode's line number
+# section_to_line_mapping: sectionID to where that section should be injected
+    ## Check src/model/types.ts to understand the ID's
+#### Section to id mapping ###
+# Type      : 1
+# Import    : 2
+# Table     : 3
+# Memory    : 4
+# Tag       : 5
+# Global    : 6
+# Export    : 7
+# Element   : 8
+# Func      : 9
+# Data      : 10
+
+[add]
+file_name = "add.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[5,8]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6= 2, 7= 3, 8= 3, 9= 8, 10= 8}
+
+[hello]
+file_name = "hello.wat"
+func_id = 1
+func_mapping = {0=8}
+local_mapping = {0=8}
+probe_mapping = {0=[9,12]}
+section_to_line_mapping = {1= 3, 2= 4, 3= 4, 4= 5, 5= 5, 6= 5, 7= 7, 8= 7, 9= 12, 10= 13}
+
+[producers]
+file_name = "producers.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[5,8]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6= 2, 7= 3, 8= 3, 9= 8, 10= 8}
+
+[start]
+file_name = "start.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[5,6]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6= 2, 7= 2, 8= 3, 9= 6, 10= 6}
+current_line_number = 7
+
+[something]
+file_name = "something.wat"
+func_id = 1
+func_mapping = {0=8}
+local_mapping = {0=10}
+probe_mapping = {0=[11,14]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 3, 4= 3, 5= 4, 6=5, 7= 5, 8= 7, 9= 14, 10= 15}
+current_line_number = 16
+
+[everything]
+file_name = "everything.wat"
+func_id = 1
+func_mapping = {0=13}
+local_mapping = {0=14}
+probe_mapping = {0=[15,18]}
+section_to_line_mapping = {1= 2, 2= 4, 3= 5, 4= 6, 5= 7, 6=8, 7= 10, 8= 12, 9= 18, 10= 20}
+current_line_number = 25
+
+[functions]
+file_name = "functions.wat"
+func_id = 5
+func_mapping = {0=5, 1=8, 2=30, 3=31, 4=34}
+local_mapping = {0=5, 1=9, 2=30, 3=31, 4=34}
+probe_mapping = {0=[6,7], 1=[10,29], 2=[30,30], 3=[32,33], 4=[34, 34]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 4, 8=4 , 9= 34, 10=34}
+current_line_number = 35
+
+[escaped_string]
+file_name = "escaped_string.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[5,7]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 3, 8=3 , 9=7, 10=8}
+current_line_number = 9
+
+[very_simple]
+file_name = "very_simple.wat"
+func_id = 1
+func_mapping = {0=1}
+local_mapping = {0=1}
+probe_mapping = {0=[1,1]}
+section_to_line_mapping = {1= 1, 2= 1, 3= 1, 4=1, 5= 1, 6=1, 7= 1, 8=1 , 9=1, 10=1}
+current_line_number = 1
+
+[simple]
+file_name = "simple.wat"
+func_id = 1
+func_mapping = {0=4}
+local_mapping = {0=4}
+probe_mapping = {0=[4,4]}
+section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4=2, 5=2, 6=3, 7= 3, 8=3 , 9=4, 10=4}
+current_line_number = 5

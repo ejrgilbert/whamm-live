@@ -7,7 +7,9 @@ export class FSMHelper{
     static update_mappings(instance: FSM){
         // We only might need to update mappings for inject types with lower enum value
         // than the current one because of the section ordering
-        let inj_type = stringToInjectType[instance.stack[instance.stack.length - 1]];
+        let inject = instance.stack[instance.stack.length - 1];
+        let inj_type = stringToInjectType[inject.value];
+
         let inj_types_less_than_current = Object.values(InjectType).filter(
             v => (v as number) < inj_type 
         )
@@ -15,8 +17,14 @@ export class FSMHelper{
         // do nothing if a mapping exists because there already exists a min line number mapped value
         for (let inj_type_less_than_current of inj_types_less_than_current){
             if (!instance.section_to_line_mapping.has(inj_type_less_than_current as number)){
+                let line_value;
+                if (instance.popped_value !== undefined){
+                    line_value = Math.max(instance.popped_value.end_line, instance.current_line_number -1);
+                } else{
+                    line_value = Math.max(1, instance.current_line_number -1);
+                }
                 // @ts-ignore
-                instance.section_to_line_mapping.set(inj_type_less_than_current, instance.current_line_number-1);
+                instance.section_to_line_mapping.set(inj_type_less_than_current, line_value);
             }
         }
     }
@@ -27,74 +35,6 @@ export class FSMHelper{
     }
 
     // helper static methods for character consuming purposes
-
-    // consumes UPTO the closing parenthesis but not the closing parenthesis itself
-    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
-        let closing_parentheses_found = false;
-        let number_of_parentheses = 1;
-
-        while (!FSMHelper.end_of_file(instance) && !closing_parentheses_found){
-            switch(FSMHelper.get_char(instance)){
-
-                case '"':
-                case "'":
-                {
-                    instance.current_index++;
-                    if (string_handling){
-                        FSMHelper.consume_until(instance.wat_string[instance.current_index-1], instance);
-                        instance.current_index++;
-                    }
-                }
-                    break;
-                
-                case '(':
-                    number_of_parentheses++;
-                    instance.current_index++;
-                    break;
-
-                case ')':
-                    number_of_parentheses--;
-                    if (number_of_parentheses == 0) closing_parentheses_found=true;
-                    else instance.current_index++;
-                    break;
-                
-                // fall through
-                case '\n':
-                    instance.current_line_number++;
-                default:
-                    instance.current_index++;
-                    break;
-            }
-        }
-
-    }
-
-    static consume_until(char: string, instance: FSM){
-        let closing_char_found = false;
-        while (!FSMHelper.end_of_file(instance) && !closing_char_found){
-            switch(FSMHelper.get_char(instance)){
-                case '"':
-                case "'":
-                    {
-                        let this_char = FSMHelper.get_char(instance);
-                        if (this_char != char){
-                            instance.current_index++;
-                        } else{
-                            //TODO
-                            // need to see if there is a way to handle escaped strings
-                            closing_char_found = true;
-                            // check if previous character is '\'
-                            instance.current_index++;
-                        }
-                    }
-                    break;
-
-                default:
-                    instance.current_index++;
-                    break;
-            }
-        }
-    }
 
     static end_of_file(instance: FSM):boolean{
         return instance.current_index >= instance.wat_string.length;
@@ -149,6 +89,83 @@ export class FSMHelper{
         }
     }
 
+    // consumes UPTO the closing parenthesis but not the closing parenthesis itself
+    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
+        let closing_parentheses_found = false;
+        let number_of_parentheses = 1;
+
+        while (!FSMHelper.end_of_file(instance) && !closing_parentheses_found){
+            switch(FSMHelper.get_char(instance)){
+
+                case '"':
+                case "'":
+                {
+                    instance.current_index++;
+                    if (string_handling){
+                        FSMHelper.consume_until_string_ends(instance.wat_string[instance.current_index-1], instance);
+                        instance.current_index++;
+                    }
+                }
+                    break;
+                
+                case '(':
+                    number_of_parentheses++;
+                    instance.current_index++;
+                    break;
+
+                case ')':
+                    number_of_parentheses--;
+                    if (number_of_parentheses == 0) closing_parentheses_found=true;
+                    else instance.current_index++;
+                    break;
+                
+                // fall through
+                case '\n':
+                    instance.current_line_number++;
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+
+    }
+
+    static consume_until_string_ends(char: string, instance: FSM){
+        let closing_char_found = false;
+        while (!FSMHelper.end_of_file(instance) && !closing_char_found){
+            switch(FSMHelper.get_char(instance)){
+                case '"':
+                case "'":
+                    {
+                        let this_char = FSMHelper.get_char(instance);
+                        if (this_char != char){
+                            instance.current_index++;
+                        } else{
+                            // check if previous character is '\'
+                            if (instance.wat_string[instance.current_index-1] != '\\')
+                                closing_char_found = true;
+                            else
+                                instance.current_index++;
+                        }
+                    }
+                    break;
+
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+    }
+
+    static consume_until_whitespace_or(instance:FSM, char: string){
+        let space_regex = /\s/;
+        while (!FSMHelper.end_of_file(instance) &&
+             !space_regex.test(FSMHelper.get_char(instance)) &&
+            FSMHelper.get_char(instance) !== char){
+                    instance.current_index++;
+        }
+    }
+
     static consume_until_whitespace(instance:FSM){
         let space_regex = /\s/;
         while (!FSMHelper.end_of_file(instance) &&
@@ -156,4 +173,20 @@ export class FSMHelper{
                     instance.current_index++;
         }
     }
+
+
+    // stack value wrappers
+    static wrap_stack_value(instance: FSM, value: string): stack_value{
+        return {
+            value: value,
+            start_line: instance.current_line_number,
+            end_line: -1,
+        }
+    }
+}
+
+export type stack_value= {
+    value: string,
+    start_line: number,
+    end_line: number,
 }
