@@ -6,8 +6,6 @@ export class WhammWebviewPanel{
 
     fileName: string | undefined;
     webviewPanel!: vscode.WebviewPanel;
-    contents: Uint8Array<ArrayBuffer> | undefined;
-    string_contents: string | undefined;
     is_wasm: boolean;
 
     // content sent back from svelte frontend
@@ -23,7 +21,6 @@ export class WhammWebviewPanel{
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
-        this.contents, this.string_contents = undefined;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
         this.line_to_probe_mapping = new Map();
     }
@@ -74,12 +71,6 @@ export class WhammWebviewPanel{
 
     // Main method to load the html
     async loadHTML(){
-        if (this.fileName){
-            if (this.is_wasm)
-                this.contents = await this.getFileContents();
-            else 
-                this.string_contents = await this.getFileStringContents();
-        }
 
         const css_src_1 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'vscode.css'));
@@ -115,34 +106,9 @@ export class WhammWebviewPanel{
         this.webviewPanel.webview.postMessage({
                 command: 'init-data',
                 show_wizard: this.fileName === undefined,
-                wasm_file_contents: this.contents,
-                wat_file_contents: this.string_contents,
-                is_wasm: this.is_wasm,
+                wat_content: this.valid_wat_content,
                 file_name: this.fileName
         });
-    }
-
-    // gets the bytes from the selected .wasm file
-    private async getFileContents(): Promise<Uint8Array>{
-        var fileBytes = new Uint8Array();
-
-        if (this.fileName){
-                const fileUri = vscode.Uri.file(this.fileName);
-                let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
-                fileBytes = new Uint8Array(fileBytes_);
-        }
-
-        return fileBytes;
-    }
-
-    private async getFileStringContents(): Promise<string>{
-        var text ="";
-        if (this.fileName){
-            const fileUri = vscode.Uri.file(this.fileName);
-            let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
-            text = new TextDecoder().decode(fileBytes_);
-        }
-        return text;
     }
 
     private async getWat(): Promise<string | null>{
