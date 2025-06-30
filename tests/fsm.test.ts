@@ -20,15 +20,18 @@ describe('testing FSM', () => {
       // test the func mappings [ for each funcID, which line is the func declaration]
       for (let mapping_type of ["section_to_line_mapping", "func_mapping", "probe_mapping", "local_mapping"]){
 
-        const temp_map = objToMap(config[key][mapping_type]);
-        let expected_map = mapWithNumberKeys(temp_map);
-        let instance = load_instance(key, config);
-        instance.run();
+        let mapping_value =  config[key][mapping_type];
+        if (mapping_value){
+          const temp_map = objToMap(mapping_value);
+          let expected_map = mapWithNumberKeys(temp_map);
+          let instance = load_instance(key, config);
+          instance.run();
 
-        expect(instance[mapping_type]).
-          toMatchObject(
-            expected_map);
-      }
+          expect(instance[mapping_type]).
+            toMatchObject(
+              expected_map);
+        }
+    }
     });
 
 }
@@ -66,6 +69,30 @@ describe('testing FSM fold expressions', () => {
                 expect(instance[mapping_type]).not.toMatchObject(expected_map);
           }
         });
+});
+
+// Test other values like current_line_number if present in test files 
+describe('testing FSM field values', () => {
+
+  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
+  
+  for (let key of Object.keys(config)) {
+
+    test('test for current_line_number', () => {
+
+      for (let mapping_type of ["current_line_number"]){
+
+        let mapping_value =  config[key][mapping_type];
+        if (mapping_value){
+          let instance = load_instance(key, config);
+          instance.run();
+          expect(instance[mapping_type]).
+            toBe(
+              mapping_value);
+        }
+    }
+    });
+  }
 });
 
 

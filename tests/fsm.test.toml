@@ -46,6 +46,7 @@ func_mapping = {0=4}
 local_mapping = {0=4}
 probe_mapping = {0=[5,6]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6= 2, 7= 2, 8= 3, 9= 6, 10= 6}
+current_line_number = 7
 
 [something]
 file_name = "something.wat"
@@ -54,6 +55,7 @@ func_mapping = {0=8}
 local_mapping = {0=10}
 probe_mapping = {0=[11,14]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 3, 4= 3, 5= 4, 6=5, 7= 5, 8= 7, 9= 14, 10= 15}
+current_line_number = 16
 
 [everything]
 file_name = "everything.wat"
@@ -62,6 +64,7 @@ func_mapping = {0=13}
 local_mapping = {0=14}
 probe_mapping = {0=[15,18]}
 section_to_line_mapping = {1= 2, 2= 4, 3= 5, 4= 6, 5= 7, 6=8, 7= 10, 8= 12, 9= 18, 10= 20}
+current_line_number = 25
 
 [functions]
 file_name = "functions.wat"
@@ -70,6 +73,7 @@ func_mapping = {0=5, 1=8, 2=30, 3=31, 4=34}
 local_mapping = {0=5, 1=9, 2=30, 3=31, 4=34}
 probe_mapping = {0=[6,7], 1=[10,29], 2=[30,30], 3=[32,33], 4=[34, 34]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 4, 8=4 , 9= 34, 10=34}
+current_line_number = 35
 
 [escaped_string]
 file_name = "escaped_string.wat"
@@ -78,3 +82,4 @@ func_mapping = {0=4}
 local_mapping = {0=4}
 probe_mapping = {0=[5,7]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6=2, 7= 3, 8=3 , 9=7, 10=8}
+current_line_number = 9
