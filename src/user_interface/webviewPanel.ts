@@ -5,14 +5,14 @@ import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/
 export class WhammWebviewPanel{
 
     fileName: string | undefined;
-    webviewPanel: vscode.WebviewPanel;
+    webviewPanel!: vscode.WebviewPanel;
     contents: Uint8Array<ArrayBuffer> | undefined;
     string_contents: string | undefined;
     is_wasm: boolean;
 
     // content sent back from svelte frontend
     // will be null if wizard option chosen
-    valid_wat_content: string | null;
+    valid_wat_content!: string | null;
     
     // Mapping from whamm script line number to
     // a tuple of injected content and lines in webview where it is injected
@@ -23,10 +23,12 @@ export class WhammWebviewPanel{
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
-        this.valid_wat_content = null;
         this.contents, this.string_contents = undefined;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
         this.line_to_probe_mapping = new Map();
+    }
+
+    async init(){
 
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
@@ -39,8 +41,8 @@ export class WhammWebviewPanel{
             }
         );
         WhammWebviewPanel.addPanel(this);
-        this.addListenerToStoreWAT();
-        
+        this.valid_wat_content = await this.getWat();
+
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
@@ -143,16 +145,17 @@ export class WhammWebviewPanel{
         return text;
     }
 
-    
-    private addListenerToStoreWAT(){
-        // Store wat content recieved from svelte(webview)
-        this.webviewPanel.webview.onDidReceiveMessage(message=>{
-            switch (message.command){
-                case 'store_wat':
-                    this.valid_wat_content = message.wat_content;
-                    break;
-            }
-        })
-    }
+    private async getWat(): Promise<string | null>{
+        let wat = null;
+        if (this.fileName){
 
+		    let file_content = await vscode.workspace.fs.readFile(vscode.Uri.file(this.fileName));
+            if (this.is_wasm){
+                wat = ExtensionContext.api.wasm2wat(file_content);
+            } else
+                wat = ExtensionContext.api.wat2wat(
+                    new TextDecoder('utf-8').decode(file_content));
+        }
+        return wat;
+    }
 }

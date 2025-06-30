@@ -54,6 +54,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Bind the TypeScript Api
 	const api = whammServer._.exports.bind(instance.exports as whammServer._.Exports, wasmContext);
+	ExtensionContext.api = api;
 
 	// Load the files
 	const app_path = "demo/cf.wasm";
