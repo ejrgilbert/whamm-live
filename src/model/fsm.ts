@@ -141,6 +141,7 @@ export class FSM{
             FSMHelper.update_mappings(instance);
             // module gets popped
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
             instance.current_state = State.null_state;
         } else{
             throw new Error(`FSM parse Error: Expected '(' or ')'!`);
@@ -153,6 +154,7 @@ export class FSM{
         // check if ')' is there
         if (FSMHelper.consume_char(instance) === ')'){
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
             instance.current_state = State.main_state;
         } else{
             throw new Error("FSM parse error: ')' expected while moving into main state")
@@ -163,7 +165,8 @@ export class FSM{
         FSMHelper.consume_empty_spaces(instance);
         // check for potential names
         if (FSMHelper.get_char(instance) == '$'){
-            let word = FSMHelper.consume_until_whitespace(instance);
+            // consume until whitespace or ')' 
+            let word = FSMHelper.consume_until_whitespace_or(instance, ")");
             FSMHelper.consume_empty_spaces(instance);
         }
 
@@ -200,11 +203,14 @@ export class FSM{
             probe_map = instance.probe_mapping.get(instance.func_id);
             if (probe_map) probe_map[1] = instance.current_line_number;
 
-            FSMHelper.consume_empty_spaces(instance);
-
             instance.func_id++;
+
             instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
+
             instance.current_state = State.main_state;
+
+            FSMHelper.consume_empty_spaces(instance);
         }
     }
 
