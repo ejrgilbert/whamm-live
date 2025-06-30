@@ -41,15 +41,16 @@ export class Helper_sidebar_provider{
                     'Wat/Wasm files': ['.*\.wat', '.*\.wasm'],}})
             
             if (fileURI && fileURI[0]) {
-                Helper_sidebar_provider.helper_show_wasm_file(fileURI[0].fsPath);
+                await Helper_sidebar_provider.helper_show_wasm_file(fileURI[0].fsPath);
             } else 
                 return false;
     }
         return true;
     }
 
-    static helper_show_wasm_file(path: string | undefined){
+    static async helper_show_wasm_file(path: string | undefined){
         let panel = new WhammWebviewPanel(path);
+        await panel.init();
         panel.loadHTML();
     }
 

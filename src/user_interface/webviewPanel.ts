@@ -5,14 +5,12 @@ import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/
 export class WhammWebviewPanel{
 
     fileName: string | undefined;
-    webviewPanel: vscode.WebviewPanel;
-    contents: Uint8Array<ArrayBuffer> | undefined;
-    string_contents: string | undefined;
+    webviewPanel!: vscode.WebviewPanel;
     is_wasm: boolean;
 
     // content sent back from svelte frontend
     // will be null if wizard option chosen
-    valid_wat_content: string | null;
+    valid_wat_content!: string | null;
     
     // Mapping from whamm script line number to
     // a tuple of injected content and lines in webview where it is injected
@@ -23,10 +21,12 @@ export class WhammWebviewPanel{
 
     constructor(fileName: string | undefined){
         this.fileName = fileName;
-        this.valid_wat_content = null;
-        this.contents, this.string_contents = undefined;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
         this.line_to_probe_mapping = new Map();
+        this.valid_wat_content = null;
+    }
+
+    async init(){
 
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
@@ -39,12 +39,16 @@ export class WhammWebviewPanel{
             }
         );
         WhammWebviewPanel.addPanel(this);
-        this.addListenerToStoreWAT();
-        
+
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
         })
+        let success = await this.getWat();
+        if (!success) {
+            vscode.window.showErrorMessage("Error parsing the wasm module! Make sure the file is valid");
+            this.webviewPanel.dispose();
+        }
     }
 
     // Static methods
@@ -72,12 +76,6 @@ export class WhammWebviewPanel{
 
     // Main method to load the html
     async loadHTML(){
-        if (this.fileName){
-            if (this.is_wasm)
-                this.contents = await this.getFileContents();
-            else 
-                this.string_contents = await this.getFileStringContents();
-        }
 
         const css_src_1 = this.webviewPanel.webview.asWebviewUri(
             vscode.Uri.joinPath(ExtensionContext.context.extensionUri, 'media', 'vscode.css'));
@@ -113,46 +111,25 @@ export class WhammWebviewPanel{
         this.webviewPanel.webview.postMessage({
                 command: 'init-data',
                 show_wizard: this.fileName === undefined,
-                wasm_file_contents: this.contents,
-                wat_file_contents: this.string_contents,
-                is_wasm: this.is_wasm,
+                wat_content: this.valid_wat_content,
                 file_name: this.fileName
         });
     }
 
-    // gets the bytes from the selected .wasm file
-    private async getFileContents(): Promise<Uint8Array>{
-        var fileBytes = new Uint8Array();
-
+    private async getWat(): Promise<boolean>{
         if (this.fileName){
-                const fileUri = vscode.Uri.file(this.fileName);
-                let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
-                fileBytes = new Uint8Array(fileBytes_);
-        }
 
-        return fileBytes;
-    }
-
-    private async getFileStringContents(): Promise<string>{
-        var text ="";
-        if (this.fileName){
-            const fileUri = vscode.Uri.file(this.fileName);
-            let fileBytes_: Uint8Array<ArrayBufferLike> = await vscode.workspace.fs.readFile(fileUri);
-            text = new TextDecoder().decode(fileBytes_);
-        }
-        return text;
-    }
-
-    
-    private addListenerToStoreWAT(){
-        // Store wat content recieved from svelte(webview)
-        this.webviewPanel.webview.onDidReceiveMessage(message=>{
-            switch (message.command){
-                case 'store_wat':
-                    this.valid_wat_content = message.wat_content;
-                    break;
+            try{
+                let file_content = await vscode.workspace.fs.readFile(vscode.Uri.file(this.fileName));
+                if (this.is_wasm){
+                    this.valid_wat_content = ExtensionContext.api.wasm2wat(file_content);
+                } else
+                    this.valid_wat_content= ExtensionContext.api.wat2wat(
+                        new TextDecoder('utf-8').decode(file_content));
+            } catch(error){
+                return false;
             }
-        })
+        }
+        return true;
     }
-
 }

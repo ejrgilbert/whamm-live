@@ -19,7 +19,7 @@ export class FSMHelper{
             if (!instance.section_to_line_mapping.has(inj_type_less_than_current as number)){
                 let line_value;
                 if (instance.popped_value !== undefined){
-                    line_value = Math.max(instance.popped_value.end_line, instance.current_line_number -1);
+                    line_value = instance.popped_value.end_line;
                 } else{
                     line_value = Math.max(1, instance.current_line_number -1);
                 }

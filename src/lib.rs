@@ -1,4 +1,4 @@
-use whamm_server::{run, setup};
+use whamm_server::{run, setup, wat2wat, wasm2wat};
 
 mod whamm_server;
 
@@ -23,6 +23,16 @@ impl Guest for WhammServer {
 		log("Starting whamm run");
 		let result = run(script);
 		log("Finished whamm run");
+		result
+	}
+
+	fn wat2wat(content: String) -> Result<String, ErrorCode> {
+		let result = wat2wat(content);
+		result
+	}
+
+	fn wasm2wat(content: Vec<u8>) -> Result<String, ErrorCode> {
+		let result = wasm2wat(content);
 		result
 	}
 }

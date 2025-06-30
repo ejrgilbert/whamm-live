@@ -46,6 +46,22 @@ pub fn run(new_script: String) -> Result<Vec<Probe>, ErrorCode> {
     });
 }
 
+impl From<wat::Error> for ErrorCode{
+    fn from(_: wat::Error) -> Self {
+        ErrorCode::Unexpected("Error reading file".to_string())
+    }
+}
+
+pub fn wat2wat(content: String) -> Result<String, ErrorCode>{
+    let binary = wat::parse_str(content)?;
+    wasm2wat(binary)
+}
+
+pub fn wasm2wat(content: Vec<u8>) -> Result<String, ErrorCode>{
+    let _wat = wasmprinter::print_bytes(content)
+                    .expect("Problem parsing the wasm module");
+    Ok(_wat)
+}
 // ===============
 // ==== TYPES ====
 // ===============
