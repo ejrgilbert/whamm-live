@@ -4,7 +4,7 @@
 ///
 
 import { InjectType, stringToInjectType } from "./types";
-import { FSMHelper } from "./fsm_helper";
+import { FSMHelper, stack_value } from "./fsm_helper";
 
 // Consider looking at https://github.com/ejrgilbert/whamm-live/issues/12 to
 // We have 5 states in our FSM: start_state, main_state, function_state, local_state, default_state, null_state
@@ -20,8 +20,8 @@ enum State{
 // Finite state machine code implementation for mapping inject types to wasm line
 export class FSM{
     // Stack values
-    stack: string[];
-    popped_value : string | undefined;
+    stack: stack_value[];
+    popped_value : stack_value | undefined;
 
     // wat file related variables
     current_index: number;
@@ -82,7 +82,7 @@ export class FSM{
         let inject_type : string = FSMHelper.get_word(instance);
 
         if (inject_type == 'module'){
-            instance.stack.push(inject_type);
+            instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
             instance.current_state = State.main_state;
         }
         else throw new Error("FSM parse Error: Expected 'module'!");
@@ -99,11 +99,11 @@ export class FSM{
 
             if (Object.keys(stringToInjectType).includes(inject_type)){
                 // push the value on the stack
-                instance.stack.push(inject_type);
+                instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
                 // check if tos == instance.popped_value
                 // if they aren't the same, it means we are in a new wasm section
                 // so we need to update the appropriate mappings
-                if (instance.popped_value != instance.stack[instance.stack.length - 1]){
+                if (instance.popped_value?.value != instance.stack[instance.stack.length - 1].value){
                     FSMHelper.update_mappings(instance);
                 }
 
@@ -127,7 +127,7 @@ export class FSM{
 
                 } else if (inject_type == 'start'){
                     // treat it like an `elem` because the mappings will stay the same
-                    instance.stack.push('elem');
+                    instance.stack.push(FSMHelper.wrap_stack_value(instance, 'elem'));
                     FSMHelper.update_mappings(instance);
                     instance.current_state = State.default_state;
 

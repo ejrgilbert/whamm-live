@@ -7,7 +7,7 @@ export class FSMHelper{
     static update_mappings(instance: FSM){
         // We only might need to update mappings for inject types with lower enum value
         // than the current one because of the section ordering
-        let inj_type = stringToInjectType[instance.stack[instance.stack.length - 1]];
+        let inj_type = stringToInjectType[instance.stack[instance.stack.length - 1].value];
         let inj_types_less_than_current = Object.values(InjectType).filter(
             v => (v as number) < inj_type 
         )
@@ -157,4 +157,18 @@ export class FSMHelper{
                     instance.current_index++;
         }
     }
+
+
+    // stack value wrappers
+    static wrap_stack_value(instance: FSM, value: string): stack_value{
+        return {
+            value: value,
+            line: instance.current_line_number
+        }
+    }
+}
+
+export type stack_value= {
+    value: string,
+    line: number
 }
