@@ -47,8 +47,8 @@ world whamm-server {
 	use types.{ options, probe, error-code };
 	import log: func(msg: string);
 
-	export setup: func(app-bytes: list<u8>, opts: options) -> result<string, error-code>;
-	export run: func(script: string) -> result<list<probe>, error-code>;
+	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
+	export run: func(script: string, app-name: string) -> result<list<probe>, error-code>;
 	export wat2wat: func(content: string) -> result<string, error-code>;
 	export wasm2wat: func(content: list<u8>) -> result<string, error-code>;
 }

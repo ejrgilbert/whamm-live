@@ -91,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		channel.appendLine('Running WhammServer example');
 
 		try {
-			const result = api.setup(app_bytes, {asMonitorModule: false});
+			const result = api.setup(app_path,app_bytes, {asMonitorModule: false});
 			channel.appendLine(`whamm setup success: ${result}`)
 		} catch (error) {
 			channel.appendLine(`whamm setup failed`)
@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// TODO: this should be split out to a different async func callback! (should update script content each time)
 		try {
-			printProbe(api.run(script_content), channel);
+			printProbe(api.run(script_content, app_path), channel);
 		} catch (error) {
 			channel.appendLine(`whamm run failed`)
 			handleError(error, channel);

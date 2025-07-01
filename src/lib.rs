@@ -12,16 +12,16 @@ struct WhammServer;
 
 impl Guest for WhammServer {
 
-	fn setup(app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
+	fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
 		log("Starting whamm setup");
-		let result = setup(app_bytes, opts);
+		let result = setup(app_name, app_bytes, opts);
 		log("Finished whamm setup");
 		result
 	}
 
-	fn run(script: String) -> Result<Vec<Probe>, ErrorCode> {
+	fn run(script: String, app_name: String) -> Result<Vec<Probe>, ErrorCode> {
 		log("Starting whamm run");
-		let result = run(script);
+		let result = run(script, app_name);
 		log("Finished whamm run");
 		result
 	}

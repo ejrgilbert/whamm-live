@@ -121,11 +121,11 @@ export namespace whammServer {
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		setup: (appBytes: Uint8Array, opts: Options) => string;
+		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		run: (script: string) => Probe[];
+		run: (script: string, appName: string) => Probe[];
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -188,11 +188,13 @@ export namespace whammServer.$ {
 	}
 	export namespace exports {
 		export const setup = new $wcm.FunctionType<whammServer.Exports['setup']>('setup',[
+			['appName', $wcm.wstring],
 			['appBytes', new $wcm.Uint8ArrayType()],
 			['opts', Options],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
+			['appName', $wcm.wstring],
 		], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
 		export const wat2wat = new $wcm.FunctionType<whammServer.Exports['wat2wat']>('wat2wat',[
 			['content', $wcm.wstring],
@@ -237,8 +239,8 @@ export namespace whammServer._ {
 		}
 	}
 	export type Exports = {
-		'setup': (appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (script_ptr: i32, script_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
+		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 	};
