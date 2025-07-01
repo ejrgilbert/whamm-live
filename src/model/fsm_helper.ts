@@ -130,6 +130,13 @@ export class FSMHelper{
 
     }
 
+    static consume_until(char: string, instance: FSM){
+        while (!FSMHelper.end_of_file(instance) &&
+            FSMHelper.get_char(instance) !== char){
+                    instance.current_index++;
+        }
+    }
+
     static consume_until_string_ends(char: string, instance: FSM){
         let closing_char_found = false;
         while (!FSMHelper.end_of_file(instance) && !closing_char_found){
