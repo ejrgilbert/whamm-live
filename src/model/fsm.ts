@@ -13,6 +13,7 @@ enum State{
     main_state, // q1
     default_state, // q2
     function_state, // q3
+    import_state, // q5 : Need to increase funcID when we are importing a func
     local_state, // q4
     null_state,
 }
@@ -48,6 +49,7 @@ export class FSM{
         [State.default_state]: FSM.default_state_method,
         [State.function_state]: FSM.function_state_method,
         [State.local_state]: FSM.local_state_method,
+        [State.import_state]: FSM.import_state_method,
         // the value function will never be executed
         [State.null_state]: ()=>{},
      }
@@ -83,7 +85,7 @@ export class FSM{
 
         if (inject_type == 'module'){
             instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
-            FSMHelper.consume_until('(', instance);
+            FSMHelper.consume_until(['('], instance);
             instance.current_state = State.main_state;
         }
         else throw new Error("FSM parse Error: Expected 'module'!");
@@ -113,7 +115,10 @@ export class FSM{
                     FSMHelper.update_function_state_mappings(instance);
                     instance.current_state = State.function_state;
 
-                } else {
+                } else if (inject_type == 'import'){
+                    instance.current_state = State.import_state;
+                    //instance.current_state = State.default_state;
+                } else{
                     instance.current_state = State.default_state;
                 }
 
@@ -150,7 +155,6 @@ export class FSM{
     }
 
     private static default_state_method(instance: FSM){
-        FSMHelper.consume_empty_spaces(instance);
         FSMHelper.consume_until_closing_parenthesis(instance);
         // check if ')' is there
         if (FSMHelper.consume_char(instance) === ')'){
@@ -159,6 +163,35 @@ export class FSM{
             instance.current_state = State.main_state;
         } else{
             throw new Error("FSM parse error: ')' expected while moving into main state")
+        }
+    }
+
+    private static import_state_method(instance: FSM){
+        FSMHelper.consume_until_parenthesis(instance);
+
+        // end of import
+        if (FSMHelper.get_char(instance) === ')'){
+            instance.current_index++;
+            instance.popped_value = instance.stack.pop();
+            if (instance.popped_value) instance.popped_value.end_line= instance.current_line_number;
+            instance.current_state = State.main_state;
+
+        // check for (func ..) and increase funcID if so
+        } else if (FSMHelper.get_char(instance) === '('){
+            switch (FSMHelper.get_word(instance)){
+                case 'func':
+                    instance.func_id++;
+                // fall through
+                default:
+                    {
+                        FSMHelper.consume_until_closing_parenthesis(instance);
+                        instance.current_index++;
+                        break;
+                    }
+            }
+            instance.current_state = State.import_state;
+        } else{
+            throw new Error("FSM parse error: '(' or')' expected in import state")
         }
     }
 
