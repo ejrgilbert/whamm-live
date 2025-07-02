@@ -85,7 +85,7 @@ export class FSM{
 
         if (inject_type == 'module'){
             instance.stack.push(FSMHelper.wrap_stack_value(instance, inject_type));
-            FSMHelper.consume_until(['('], instance);
+            FSMHelper.consume_until_parenthesis(instance);
             instance.current_state = State.main_state;
         }
         else throw new Error("FSM parse Error: Expected 'module'!");
