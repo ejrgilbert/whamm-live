@@ -13,10 +13,13 @@
     "@codemirror/lang-wast": "^6.0.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
-    "codemirror": "^6.0.1",
+    "codemirror": "^6.0.2",
     "svelte": "^5.28.1",
     "svelte-check": "^4.1.6",
     "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "@codemirror/language": "^6.11.2",
+    "@codemirror/search": "^6.5.11",
+    "@lezer/highlight": "^1.2.1"
   }
 }

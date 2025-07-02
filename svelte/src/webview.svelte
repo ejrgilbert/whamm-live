@@ -3,6 +3,10 @@
     import WasmWebview from './lib/WasmWebview.svelte';
     import {wast} from "@codemirror/lang-wast";
     import {EditorView, basicSetup} from "codemirror"
+    import { foldKeymap, HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+    import { tags as t } from "@lezer/highlight";
+    import { search, searchKeymap } from "@codemirror/search";
+    import { keymap } from "@codemirror/view";
     import {probe_data} from './lib/probe_data.svelte';
 
     let wizard_tab = $state(false);
@@ -30,11 +34,27 @@
                             else {
                                 wat_content = message.wat_content;
 
+                                const highlight_style =  syntaxHighlighting(HighlightStyle.define([
+                                    { tag: t.keyword, color: '#317CD6' },
+                                    { tag: t.typeName, color: '#317CD6' },
+                                    { tag: t.number, color: '#B5CE9B' },
+                                    { tag: t.string, color: '#CE834D' },
+                                    { tag: t.variableName, color: '#53B9FE' },
+                                    { tag: t.lineComment, color: '#549955' },
+                                    { tag: t.blockComment, color: '#549955' },
+                                    { tag: t.paren, color: '#DA70CB' },
+                                ]))                       
                                 //Create codemirror code block for the parsed wat content
                                 view = new EditorView({
                                     parent: document.getElementById("wasm-webview-code-editor") || document.body,
                                     doc: wat_content,
-                                    extensions: [basicSetup, wast(), EditorView.editable.of(false)]
+                                    extensions: [basicSetup, wast(), 
+                                                highlight_style,
+                                                EditorView.editable.of(false),
+                                                EditorView.contentAttributes.of({tabindex: "0"}),
+                                                search({top: false}),
+                                                keymap.of(searchKeymap),
+                                        ],
                                 })
                             }
                         }
