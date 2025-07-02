@@ -26,9 +26,9 @@ section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4= 2, 5= 2, 6= 2, 7= 3, 8= 3, 9= 8,
 [hello]
 file_name = "hello.wat"
 func_id = 1
-func_mapping = {0=8}
-local_mapping = {0=8}
-probe_mapping = {0=[9,12]}
+func_mapping = {1=8}
+local_mapping = {1=8}
+probe_mapping = {1=[9,12]}
 section_to_line_mapping = {1= 3, 2= 4, 3= 4, 4= 5, 5= 5, 6= 5, 7= 7, 8= 7, 9= 12, 10= 13}
 
 [producers]
@@ -60,9 +60,9 @@ current_line_number = 16
 [everything]
 file_name = "everything.wat"
 func_id = 1
-func_mapping = {0=13}
-local_mapping = {0=14}
-probe_mapping = {0=[15,18]}
+func_mapping = {2=13}
+local_mapping = {2=14}
+probe_mapping = {2=[15,18]}
 section_to_line_mapping = {1= 2, 2= 4, 3= 5, 4= 6, 5= 7, 6=8, 7= 10, 8= 12, 9= 18, 10= 20}
 current_line_number = 25
 
@@ -101,3 +101,12 @@ local_mapping = {0=4}
 probe_mapping = {0=[4,4]}
 section_to_line_mapping = {1= 2, 2= 2, 3= 2, 4=2, 5=2, 6=3, 7= 3, 8=3 , 9=4, 10=4}
 current_line_number = 5
+
+[imports]
+file_name = "imports.wat"
+func_id = 5
+func_mapping = {4=8}
+local_mapping = {4=9}
+probe_mapping = {4=[10,12]}
+section_to_line_mapping = {1= 2, 2= 7, 3= 7, 4=7, 5=7, 6=7, 7= 7, 8=7 , 9=12, 10=12}
+current_line_number = 17

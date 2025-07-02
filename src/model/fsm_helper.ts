@@ -89,6 +89,35 @@ export class FSMHelper{
         }
     }
 
+    static consume_until_parenthesis(instance:FSM){
+        while (!FSMHelper.end_of_file(instance)){
+            switch(FSMHelper.get_char(instance)){
+
+                case '"':
+                case "'":
+                {
+                    instance.current_index++;
+                    FSMHelper.consume_until_string_ends(instance.wat_string[instance.current_index-1], instance);
+                    instance.current_index++;
+                }
+                    break;
+                
+                case '(':
+                    return;
+
+                case ')':
+                    return;
+                
+                // fall through
+                case '\n':
+                    instance.current_line_number++;
+                default:
+                    instance.current_index++;
+                    break;
+            }
+        }
+
+    }
     // consumes UPTO the closing parenthesis but not the closing parenthesis itself
     static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
         let closing_parentheses_found = false;
@@ -130,9 +159,9 @@ export class FSMHelper{
 
     }
 
-    static consume_until(char: string, instance: FSM){
+    static consume_until(char: string[], instance: FSM){
         while (!FSMHelper.end_of_file(instance) &&
-            FSMHelper.get_char(instance) !== char){
+                !char.includes(FSMHelper.get_char(instance))){
                     instance.current_index++;
         }
     }
