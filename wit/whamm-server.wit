@@ -50,7 +50,126 @@ interface types {
 		unexpected(string),
 		no-change(string)
 	}
+
+	// injected related tyoes
+
+    record line-col {
+		l: u32,
+		c: u32
+	}
 	
+	record span{
+		lc0: line-col,
+		lc1: line-col
+	}
+	
+	variant cause {
+		user-pos(line-col),
+		user-span(span),
+		user-probe(span),
+		whamm
+	}
+	
+	// injection record types
+
+    record import-record {
+		module: string,
+		name: string,
+		type-ref: string,
+		cause: cause
+	}
+
+	record export-record{
+		name: string,
+		kind: string,
+		index: u32,
+		cause: cause
+	}
+	
+	record type-record{
+		ty: string,
+		cause: cause
+	}
+
+	record memory-record{
+		id: u32, // ToDo -- may not need (it's ordered in a list)
+		initial: u64,
+		maximum: option<u64>,
+		cause: cause
+	}
+
+	record active-data-record{
+		memory-index: u32,
+		offset-expr: list<string>,
+		data: list<u8>,
+		cause: cause
+	}
+
+	record passive-data-record{
+		data: list<u8>,
+		cause: cause
+	}
+
+	record global-record{
+		id: u32, 
+		ty: string,
+		shared: bool,
+		mutable: bool,
+		init-expr: list<string>,
+		cause: cause,
+	}
+
+	record function-record{
+		id: u32,
+		fname: option<string>,
+		sig: tuple<list<string>, list<string>>,
+		locals: list<string>,
+		body: list<string>,
+		cause: cause,
+	}
+
+	record local-record{
+		target-fid: u32,
+		ty: string,
+		cause: cause
+	}
+
+    record table-record{ cause: cause }
+    record element-record{ cause: cause }
+
+	record op-probe-record{
+		target-fid: u32,
+		target-opcode-idx: u32,
+		mode: string,
+		body: list<string>,
+		cause: cause,
+	}
+
+	record func-probe-record {
+		target-fid: u32,
+		mode: string,
+		body: list<string>,
+		cause: cause,
+	}
+
+	variant injection {
+    	import-type(import-record),
+		export-type(export-record),
+		type-type(type-record),
+		memory-type(memory-record),
+		active-data-type(active-data-record),
+		passive-data-type(passive-data-record),
+		global-type(global-record), 
+		function-type(function-record), 
+		local-type(local-record), 
+		table-type(table-record),
+		element-type(element-record),
+		op-probe-type (op-probe-record),
+		func-probe-type (func-probe-record)
+	}
+
+	// whamm error types
+
 	variant line-col-location{
 		pos(tuple<u64, u64>),
 		span(tuple<tuple<u64, u64>, tuple<u64, u64>>)
