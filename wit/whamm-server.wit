@@ -170,34 +170,35 @@ interface types {
 
 	// whamm error types
 
-	variant line-col-location{
+	variant line-column-location{
 		pos(tuple<u64, u64>),
 		span(tuple<tuple<u64, u64>, tuple<u64, u64>>)
 	}
 
-	record code-location{
+	record error-code-location{
 		is-err: bool,
 		message: option<string>,
-		line-col: line-col-location,
+		line-col: line-column-location,
 		line-str: option<string>,
 		line2-str: option<string>,
 	}
 
-	record whamm-error {
+	record whamm-api-error {
     	match-rule: option<string>,
     	fatal: bool,
-    	err-loc: option<code-location>,
-    	info-loc: option<code-location>,
+    	err-loc: option<error-code-location>,
+    	info-loc: option<error-code-location>,
     	ty: string,
 	}
 }
 
 world whamm-server {
-	use types.{ options, probe, error-code};
+	use types.{ options, probe, error-code, whamm-api-error};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
-	export run: func(script: string, app-name: string, script-path: string) -> result<list<probe>, error-code>;
+	export run: func(script: string, app-name: string, script-path: string) -> result<list<probe>, list<whamm-api-error>>;
+	export no-change: func(new-script: string) -> result<bool, error-code>;
 	export wat2wat: func(content: string) -> result<string, error-code>;
 	export wasm2wat: func(content: list<u8>) -> result<string, error-code>;
 }

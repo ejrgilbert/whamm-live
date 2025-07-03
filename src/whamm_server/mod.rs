@@ -1,6 +1,5 @@
-use crate::vscode::example::types::{AppLoc, ErrorCode, Mode, Options, Probe, ScriptLoc};
 use crate::log;
-use orca_wasm::ir::module::Module;
+use crate::vscode::example::types::{ErrorCode,Options,Probe,WhammApiError};
 use std::{cell::RefCell, collections::HashMap};
 
 thread_local! {
@@ -9,8 +8,9 @@ thread_local! {
     static OPTIONS: RefCell<Options> = RefCell::new(Options::default())
 }
 
-pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
+mod rust_to_wit_error;
 
+pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
     APP_TO_BYTES.with(|app_to_bytes| {
         let mut app_to_bytes = app_to_bytes.borrow_mut();
         let all_bytes = RefCell::new(Vec::new());
@@ -26,53 +26,70 @@ pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<Stri
     Result::Ok("setup: success".to_string())
 }
 
-pub fn run(new_script: String, app_name: String) -> Result<Vec<Probe>, ErrorCode> {
-    return APP_TO_BYTES.with(|app_to_bytes|{
+pub fn no_change(
+    new_script: String,
+) -> Result<bool, ErrorCode> {
+    return SCRIPT.with(|script| {
+        let script_cache = &mut *script.borrow_mut();
+        return if !new_script.eq(script_cache) {
+            Result::Ok(true)
+        } else {
+            Result::Err(ErrorCode::NoChange(
+                "No change between old and new whamm script".to_string(),
+            ))
+        };
+    });
+}
+
+pub fn run(
+    new_script: String,
+    app_name: String,
+    script_path: String,
+) -> Result<Vec<Probe>, Vec<WhammApiError>> {
+    return APP_TO_BYTES.with(|app_to_bytes| {
         let app_to_bytes = app_to_bytes.borrow_mut();
         let bytes = app_to_bytes.get(&app_name).unwrap();
-        let bytes = & *bytes.borrow();
-        let wasm = Module::parse(bytes, true).unwrap();
+        let bytes = &*bytes.borrow();
 
-        log(&format!("number of module globals: {:?}", wasm.globals.len()));
-    
         return SCRIPT.with(|script| {
             let script_cache = &mut *script.borrow_mut();
-    
-            return if !new_script.eq(script_cache) {
                 *script_cache = new_script.clone();
-// TODO: CALL THE WHAMM API AND RETURN THAT RESPONSE INSTEAD
-//                 let response = whamm::api::instrument::instrument_as_dry_run_with_contents(
-//                     (*bytes).clone(), new_script, vec![], None, None);
-
-                Result::Ok(vec![
-                    Probe {
-                        app_loc: AppLoc { byte_offset: 1, mode: Mode::Before },
-                        script_loc: ScriptLoc { l: 2, c: 3 },
-                        wat: "i32.const 1234".to_string()
+                let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
+                    (*bytes).clone(),
+                    script_path,
+                    new_script,
+                    Vec::new(),
+                );
+                match response{
+                    Ok(ok_response) => {
+                        // TODO
+                        Result::Err(Vec::new())
+                    },
+                    Err(whamm_errors) =>{
+                        let mut api_response = Vec::new();
+                        for whamm_error in &whamm_errors{
+                            api_response.push(WhammApiError::from(whamm_error));
+                        }
+                        Result::Err(api_response)
                     }
-                ])
-            } else {
-                Result::Err(ErrorCode::NoChange("No change between old and new whamm script".to_string()))
-            }
-            // });
+                }
         });
     });
 }
 
-impl From<wat::Error> for ErrorCode{
+impl From<wat::Error> for ErrorCode {
     fn from(_: wat::Error) -> Self {
         ErrorCode::Unexpected("Error reading file".to_string())
     }
 }
 
-pub fn wat2wat(_content: String) -> Result<String, ErrorCode>{
+pub fn wat2wat(_content: String) -> Result<String, ErrorCode> {
     let binary = wat::parse_str(_content)?;
     wasm2wat(binary)
 }
 
-pub fn wasm2wat(_content: Vec<u8>) -> Result<String, ErrorCode>{
-    let _wat = wasmprinter::print_bytes(_content)
-                    .expect("Problem parsing the wasm module");
+pub fn wasm2wat(_content: Vec<u8>) -> Result<String, ErrorCode> {
+    let _wat = wasmprinter::print_bytes(_content).expect("Problem parsing the wasm module");
     Ok(_wat)
 }
 
@@ -83,7 +100,7 @@ pub fn wasm2wat(_content: Vec<u8>) -> Result<String, ErrorCode>{
 impl Options {
     fn default() -> Self {
         Self {
-            as_monitor_module: false
+            as_monitor_module: false,
         }
     }
 }

@@ -1,4 +1,4 @@
-use whamm_server::{run, setup, wat2wat, wasm2wat};
+use whamm_server::{run, setup, wat2wat, wasm2wat, no_change};
 
 mod whamm_server;
 // Use a procedural macro to generate bindings for the world we specified in `whamm-server.wit`
@@ -18,7 +18,11 @@ impl Guest for WhammServer {
 		result
 	}
 
-	fn run(script: String, app_name: String, script_path: String) -> Result<Vec<Probe>, ErrorCode> {
+	fn no_change(new_script: String) -> Result<bool, ErrorCode>{
+		no_change(new_script)
+	}
+
+	fn run(script: String, app_name: String, script_path: String) -> Result<Vec<Probe>, Vec<WhammApiError>>{
 		log("Starting whamm run");
 		let result = run(script, app_name, script_path);
 		log("Finished whamm run");

@@ -416,7 +416,7 @@ export namespace Types {
 	/**
 	 * whamm error types
 	 */
-	export namespace LineColLocation {
+	export namespace LineColumnLocation {
 		export const pos = 'pos' as const;
 		export type Pos = { readonly tag: typeof pos; readonly value: [u64, u64] } & _common;
 		export function Pos(value: [u64, u64]): Pos {
@@ -432,8 +432,8 @@ export namespace Types {
 		export type _tt = typeof pos | typeof span;
 		export type _vt = [u64, u64] | [[u64, u64], [u64, u64]];
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): LineColLocation {
-			return new VariantImpl(t, v) as LineColLocation;
+		export function _ctor(t: _tt, v: _vt): LineColumnLocation {
+			return new VariantImpl(t, v) as LineColumnLocation;
 		}
 		class VariantImpl {
 			private readonly _tag: _tt;
@@ -449,28 +449,28 @@ export namespace Types {
 				return this._value;
 			}
 			isPos(): this is Pos {
-				return this._tag === LineColLocation.pos;
+				return this._tag === LineColumnLocation.pos;
 			}
 			isSpan(): this is Span {
-				return this._tag === LineColLocation.span;
+				return this._tag === LineColumnLocation.span;
 			}
 		}
 	}
-	export type LineColLocation = LineColLocation.Pos | LineColLocation.Span;
+	export type LineColumnLocation = LineColumnLocation.Pos | LineColumnLocation.Span;
 
-	export type CodeLocation = {
+	export type ErrorCodeLocation = {
 		isErr: boolean;
 		message?: string | undefined;
-		lineCol: LineColLocation;
+		lineCol: LineColumnLocation;
 		lineStr?: string | undefined;
 		line2Str?: string | undefined;
 	};
 
-	export type WhammError = {
+	export type WhammApiError = {
 		matchRule?: string | undefined;
 		fatal: boolean;
-		errLoc?: CodeLocation | undefined;
-		infoLoc?: CodeLocation | undefined;
+		errLoc?: ErrorCodeLocation | undefined;
+		infoLoc?: ErrorCodeLocation | undefined;
 		ty: string;
 	};
 }
@@ -481,6 +481,7 @@ export namespace whammServer {
 	export type Probe = Types.Probe;
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
+	export type WhammApiError = Types.WhammApiError;
 	export type Imports = {
 		log: (msg: string) => void;
 	};
@@ -496,9 +497,13 @@ export namespace whammServer {
 		 */
 		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
 		/**
-		 * @throws ErrorCode.Error_
+		 * @throws $wcm.list.Error
 		 */
 		run: (script: string, appName: string, scriptPath: string) => Probe[];
+		/**
+		 * @throws ErrorCode.Error_
+		 */
+		noChange: (newScript: string) => boolean;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -618,19 +623,19 @@ export namespace Types.$ {
 		['cause', Cause],
 	]);
 	export const Injection = new $wcm.VariantType<Types.Injection, Types.Injection._tt, Types.Injection._vt>([['importType', ImportRecord], ['exportType', ExportRecord], ['typeType', TypeRecord], ['memoryType', MemoryRecord], ['activeDataType', ActiveDataRecord], ['passiveDataType', PassiveDataRecord], ['globalType', GlobalRecord], ['functionType', FunctionRecord], ['localType', LocalRecord], ['tableType', TableRecord], ['elementType', ElementRecord], ['opProbeType', OpProbeRecord], ['funcProbeType', FuncProbeRecord]], Types.Injection._ctor);
-	export const LineColLocation = new $wcm.VariantType<Types.LineColLocation, Types.LineColLocation._tt, Types.LineColLocation._vt>([['pos', new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])], ['span', new $wcm.TupleType<[[u64, u64], [u64, u64]]>([new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64]), new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])])]], Types.LineColLocation._ctor);
-	export const CodeLocation = new $wcm.RecordType<Types.CodeLocation>([
+	export const LineColumnLocation = new $wcm.VariantType<Types.LineColumnLocation, Types.LineColumnLocation._tt, Types.LineColumnLocation._vt>([['pos', new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])], ['span', new $wcm.TupleType<[[u64, u64], [u64, u64]]>([new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64]), new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])])]], Types.LineColumnLocation._ctor);
+	export const ErrorCodeLocation = new $wcm.RecordType<Types.ErrorCodeLocation>([
 		['isErr', $wcm.bool],
 		['message', new $wcm.OptionType<string>($wcm.wstring)],
-		['lineCol', LineColLocation],
+		['lineCol', LineColumnLocation],
 		['lineStr', new $wcm.OptionType<string>($wcm.wstring)],
 		['line2Str', new $wcm.OptionType<string>($wcm.wstring)],
 	]);
-	export const WhammError = new $wcm.RecordType<Types.WhammError>([
+	export const WhammApiError = new $wcm.RecordType<Types.WhammApiError>([
 		['matchRule', new $wcm.OptionType<string>($wcm.wstring)],
 		['fatal', $wcm.bool],
-		['errLoc', new $wcm.OptionType<Types.CodeLocation>(CodeLocation)],
-		['infoLoc', new $wcm.OptionType<Types.CodeLocation>(CodeLocation)],
+		['errLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
+		['infoLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
 		['ty', $wcm.wstring],
 	]);
 }
@@ -662,9 +667,9 @@ export namespace Types._ {
 		['OpProbeRecord', $.OpProbeRecord],
 		['FuncProbeRecord', $.FuncProbeRecord],
 		['Injection', $.Injection],
-		['LineColLocation', $.LineColLocation],
-		['CodeLocation', $.CodeLocation],
-		['WhammError', $.WhammError]
+		['LineColumnLocation', $.LineColumnLocation],
+		['ErrorCodeLocation', $.ErrorCodeLocation],
+		['WhammApiError', $.WhammApiError]
 	]);
 	export type WasmInterface = {
 	};
@@ -673,6 +678,7 @@ export namespace whammServer.$ {
 	export const Options = Types.$.Options;
 	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
+	export const WhammApiError = Types.$.WhammApiError;
 	export namespace imports {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
@@ -688,7 +694,10 @@ export namespace whammServer.$ {
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
 			['scriptPath', $wcm.wstring],
-		], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
+		], new $wcm.ResultType<whammServer.Probe[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.Probe>(Probe), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError), $wcm.list.Error));
+		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
+			['newScript', $wcm.wstring],
+		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
 		export const wat2wat = new $wcm.FunctionType<whammServer.Exports['wat2wat']>('wat2wat',[
 			['content', $wcm.wstring],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
@@ -724,6 +733,7 @@ export namespace whammServer._ {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
 			['setup', $.exports.setup],
 			['run', $.exports.run],
+			['noChange', $.exports.noChange],
 			['wat2wat', $.exports.wat2wat],
 			['wasm2wat', $.exports.wasm2wat]
 		]);
@@ -733,7 +743,8 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
+		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<Probe[], WhammApiError[]>>) => void;
+		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 	};
