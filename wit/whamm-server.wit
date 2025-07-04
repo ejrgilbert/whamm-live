@@ -3,7 +3,7 @@ package vscode:example;
 
 interface types {
 	
-	enum inject-type {
+	enum whamm-inject-type {
 		type-inject,
 		import-inject,
 		export-inject,
@@ -53,6 +53,21 @@ interface types {
 
 	// injected related tyoes
 
+	enum func-body-instrumentation-mode {
+		before,
+		after,
+		alternate,
+		semantic-after,
+		block-entry,
+		block-exit,
+		block-alt,
+	}
+
+	enum func-instrumentation-mode {
+    	entry,
+    	exit
+	}
+
     record line-col {
 		l: u32,
 		c: u32
@@ -63,7 +78,7 @@ interface types {
 		lc1: line-col
 	}
 	
-	variant cause {
+	variant whamm-cause {
 		user-pos(line-col),
 		user-span(span),
 		user-probe(span),
@@ -76,38 +91,38 @@ interface types {
 		module: string,
 		name: string,
 		type-ref: string,
-		cause: cause
+		cause: whamm-cause
 	}
 
 	record export-record{
 		name: string,
 		kind: string,
 		index: u32,
-		cause: cause
+		cause: whamm-cause
 	}
 	
 	record type-record{
 		ty: string,
-		cause: cause
+		cause: whamm-cause
 	}
 
 	record memory-record{
 		id: u32, // ToDo -- may not need (it's ordered in a list)
 		initial: u64,
 		maximum: option<u64>,
-		cause: cause
+		cause: whamm-cause
 	}
 
 	record active-data-record{
 		memory-index: u32,
 		offset-expr: list<string>,
 		data: list<u8>,
-		cause: cause
+		cause: whamm-cause
 	}
 
 	record passive-data-record{
 		data: list<u8>,
-		cause: cause
+		cause: whamm-cause
 	}
 
 	record global-record{
@@ -116,7 +131,7 @@ interface types {
 		shared: bool,
 		mutable: bool,
 		init-expr: list<string>,
-		cause: cause,
+		cause: whamm-cause,
 	}
 
 	record function-record{
@@ -125,34 +140,34 @@ interface types {
 		sig: tuple<list<string>, list<string>>,
 		locals: list<string>,
 		body: list<string>,
-		cause: cause,
+		cause: whamm-cause,
 	}
 
 	record local-record{
 		target-fid: u32,
 		ty: string,
-		cause: cause
+		cause: whamm-cause
 	}
 
-    record table-record{ cause: cause }
-    record element-record{ cause: cause }
+    record table-record{ cause: whamm-cause }
+    record element-record{ cause: whamm-cause }
 
 	record op-probe-record{
 		target-fid: u32,
 		target-opcode-idx: u32,
-		mode: string,
+		mode: func-body-instrumentation-mode,
 		body: list<string>,
-		cause: cause,
+		cause: whamm-cause,
 	}
 
 	record func-probe-record {
 		target-fid: u32,
-		mode: string,
+		mode: func-instrumentation-mode,
 		body: list<string>,
-		cause: cause,
+		cause: whamm-cause,
 	}
 
-	variant injection {
+	variant whamm-injection {
     	import-type(import-record),
 		export-type(export-record),
 		type-type(type-record),
@@ -166,6 +181,11 @@ interface types {
 		element-type(element-record),
 		op-probe-type (op-probe-record),
 		func-probe-type (func-probe-record)
+	}
+
+	record injection-pair{
+		injection-type: string,
+		injection-value: list<whamm-injection>
 	}
 
 	// whamm error types
@@ -193,11 +213,12 @@ interface types {
 }
 
 world whamm-server {
-	use types.{ options, probe, error-code, whamm-api-error};
+	use types.{ options, probe, error-code, whamm-api-error, injection-pair};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
-	export run: func(script: string, app-name: string, script-path: string) -> result<list<probe>, list<whamm-api-error>>;
+	// No hash map support in wit. So, we usea list of key-value pairs
+	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, list<whamm-api-error>>;
 	export no-change: func(new-script: string) -> result<bool, error-code>;
 	export wat2wat: func(content: string) -> result<string, error-code>;
 	export wasm2wat: func(content: list<u8>) -> result<string, error-code>;

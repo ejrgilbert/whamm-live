@@ -1,5 +1,5 @@
 use crate::log;
-use crate::vscode::example::types::{ErrorCode,Options,Probe,WhammApiError};
+use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammApiError, WhammInjectType, WhammInjection};
 use std::{cell::RefCell, collections::HashMap};
 
 thread_local! {
@@ -9,6 +9,7 @@ thread_local! {
 }
 
 mod rust_to_wit_error;
+mod rust_to_wit;
 
 pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
     APP_TO_BYTES.with(|app_to_bytes| {
@@ -45,7 +46,7 @@ pub fn run(
     new_script: String,
     app_name: String,
     script_path: String,
-) -> Result<Vec<Probe>, Vec<WhammApiError>> {
+) -> Result<Vec<InjectionPair>, Vec<WhammApiError>> {
     return APP_TO_BYTES.with(|app_to_bytes| {
         let app_to_bytes = app_to_bytes.borrow_mut();
         let bytes = app_to_bytes.get(&app_name).unwrap();
@@ -54,17 +55,37 @@ pub fn run(
         return SCRIPT.with(|script| {
             let script_cache = &mut *script.borrow_mut();
                 *script_cache = new_script.clone();
+                
+                // Call the WHAMM api
                 let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
                     (*bytes).clone(),
                     script_path,
                     new_script,
                     Vec::new(),
                 );
+
                 match response{
+                    // handle valid response
                     Ok(ok_response) => {
-                        // TODO
-                        Result::Err(Vec::new())
+
+                        let mut api_response = Vec::new();
+                        // Go through all the different inject types
+                        // and convert their vec of injections to the wit supported type
+                        for (key, values) in &ok_response{
+                            let mut injection_pair = InjectionPair{
+                                injection_type: key.to_string(),
+                                injection_value: Vec::new()
+                            };
+                            for value in values{
+                                injection_pair.injection_value.push(WhammInjection::from(value));
+                            }
+                            api_response.push(injection_pair);
+                        }
+                        Result::Ok(api_response)
+
                     },
+
+                    // handle error response
                     Err(whamm_errors) =>{
                         let mut api_response = Vec::new();
                         for whamm_error in &whamm_errors{

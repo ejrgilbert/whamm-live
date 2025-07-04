@@ -22,7 +22,7 @@ impl Guest for WhammServer {
 		no_change(new_script)
 	}
 
-	fn run(script: String, app_name: String, script_path: String) -> Result<Vec<Probe>, Vec<WhammApiError>>{
+	fn run(script: String, app_name: String, script_path: String) -> Result<Vec<InjectionPair>, Vec<WhammApiError>>{
 		log("Starting whamm run");
 		let result = run(script, app_name, script_path);
 		log("Finished whamm run");

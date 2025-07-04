@@ -7,7 +7,7 @@ import * as $wcm from '@vscode/wasm-component-model';
 import type { u32, u64, i32, ptr, result } from '@vscode/wasm-component-model';
 
 export namespace Types {
-	export enum InjectType {
+	export enum WhammInjectType {
 		typeInject = 'typeInject',
 		importInject = 'importInject',
 		exportInject = 'exportInject',
@@ -110,6 +110,21 @@ export namespace Types {
 	/**
 	 * injected related tyoes
 	 */
+	export enum FuncBodyInstrumentationMode {
+		before = 'before',
+		after = 'after',
+		alternate = 'alternate',
+		semanticAfter = 'semanticAfter',
+		blockEntry = 'blockEntry',
+		blockExit = 'blockExit',
+		blockAlt = 'blockAlt'
+	}
+
+	export enum FuncInstrumentationMode {
+		entry = 'entry',
+		exit = 'exit'
+	}
+
 	export type LineCol = {
 		l: u32;
 		c: u32;
@@ -260,19 +275,19 @@ export namespace Types {
 	export type OpProbeRecord = {
 		targetFid: u32;
 		targetOpcodeIdx: u32;
-		mode: string;
+		mode: FuncBodyInstrumentationMode;
 		body: string[];
 		cause: Cause;
 	};
 
 	export type FuncProbeRecord = {
 		targetFid: u32;
-		mode: string;
+		mode: FuncInstrumentationMode;
 		body: string[];
 		cause: Cause;
 	};
 
-	export namespace Injection {
+	export namespace WhammInjection {
 		export const importType = 'importType' as const;
 		export type ImportType = { readonly tag: typeof importType; readonly value: ImportRecord } & _common;
 		export function ImportType(value: ImportRecord): ImportType {
@@ -354,8 +369,8 @@ export namespace Types {
 		export type _tt = typeof importType | typeof exportType | typeof typeType | typeof memoryType | typeof activeDataType | typeof passiveDataType | typeof globalType | typeof functionType | typeof localType | typeof tableType | typeof elementType | typeof opProbeType | typeof funcProbeType;
 		export type _vt = ImportRecord | ExportRecord | TypeRecord | MemoryRecord | ActiveDataRecord | PassiveDataRecord | GlobalRecord | FunctionRecord | LocalRecord | TableRecord | ElementRecord | OpProbeRecord | FuncProbeRecord;
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): Injection {
-			return new VariantImpl(t, v) as Injection;
+		export function _ctor(t: _tt, v: _vt): WhammInjection {
+			return new VariantImpl(t, v) as WhammInjection;
 		}
 		class VariantImpl {
 			private readonly _tag: _tt;
@@ -371,47 +386,52 @@ export namespace Types {
 				return this._value;
 			}
 			isImportType(): this is ImportType {
-				return this._tag === Injection.importType;
+				return this._tag === WhammInjection.importType;
 			}
 			isExportType(): this is ExportType {
-				return this._tag === Injection.exportType;
+				return this._tag === WhammInjection.exportType;
 			}
 			isTypeType(): this is TypeType {
-				return this._tag === Injection.typeType;
+				return this._tag === WhammInjection.typeType;
 			}
 			isMemoryType(): this is MemoryType {
-				return this._tag === Injection.memoryType;
+				return this._tag === WhammInjection.memoryType;
 			}
 			isActiveDataType(): this is ActiveDataType {
-				return this._tag === Injection.activeDataType;
+				return this._tag === WhammInjection.activeDataType;
 			}
 			isPassiveDataType(): this is PassiveDataType {
-				return this._tag === Injection.passiveDataType;
+				return this._tag === WhammInjection.passiveDataType;
 			}
 			isGlobalType(): this is GlobalType {
-				return this._tag === Injection.globalType;
+				return this._tag === WhammInjection.globalType;
 			}
 			isFunctionType(): this is FunctionType {
-				return this._tag === Injection.functionType;
+				return this._tag === WhammInjection.functionType;
 			}
 			isLocalType(): this is LocalType {
-				return this._tag === Injection.localType;
+				return this._tag === WhammInjection.localType;
 			}
 			isTableType(): this is TableType {
-				return this._tag === Injection.tableType;
+				return this._tag === WhammInjection.tableType;
 			}
 			isElementType(): this is ElementType {
-				return this._tag === Injection.elementType;
+				return this._tag === WhammInjection.elementType;
 			}
 			isOpProbeType(): this is OpProbeType {
-				return this._tag === Injection.opProbeType;
+				return this._tag === WhammInjection.opProbeType;
 			}
 			isFuncProbeType(): this is FuncProbeType {
-				return this._tag === Injection.funcProbeType;
+				return this._tag === WhammInjection.funcProbeType;
 			}
 		}
 	}
-	export type Injection = Injection.ImportType | Injection.ExportType | Injection.TypeType | Injection.MemoryType | Injection.ActiveDataType | Injection.PassiveDataType | Injection.GlobalType | Injection.FunctionType | Injection.LocalType | Injection.TableType | Injection.ElementType | Injection.OpProbeType | Injection.FuncProbeType;
+	export type WhammInjection = WhammInjection.ImportType | WhammInjection.ExportType | WhammInjection.TypeType | WhammInjection.MemoryType | WhammInjection.ActiveDataType | WhammInjection.PassiveDataType | WhammInjection.GlobalType | WhammInjection.FunctionType | WhammInjection.LocalType | WhammInjection.TableType | WhammInjection.ElementType | WhammInjection.OpProbeType | WhammInjection.FuncProbeType;
+
+	export type InjectionPair = {
+		injectionType: string;
+		injectionValue: WhammInjection[];
+	};
 
 	/**
 	 * whamm error types
@@ -482,6 +502,7 @@ export namespace whammServer {
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
 	export type WhammApiError = Types.WhammApiError;
+	export type InjectionPair = Types.InjectionPair;
 	export type Imports = {
 		log: (msg: string) => void;
 	};
@@ -497,9 +518,11 @@ export namespace whammServer {
 		 */
 		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
 		/**
+		 * No hash map support in wit. So, we usea list of key-value pairs
+		 *
 		 * @throws $wcm.list.Error
 		 */
-		run: (script: string, appName: string, scriptPath: string) => Probe[];
+		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -522,7 +545,7 @@ export namespace whammServer {
 }
 
 export namespace Types.$ {
-	export const InjectType = new $wcm.EnumType<Types.InjectType>(['typeInject', 'importInject', 'exportInject', 'memoryInject', 'dataInject', 'globalInject', 'funcInject', 'localInject', 'tableInject', 'elementInject', 'probeInject']);
+	export const WhammInjectType = new $wcm.EnumType<Types.WhammInjectType>(['typeInject', 'importInject', 'exportInject', 'memoryInject', 'dataInject', 'globalInject', 'funcInject', 'localInject', 'tableInject', 'elementInject', 'probeInject']);
 	export const Options = new $wcm.RecordType<Types.Options>([
 		['asMonitorModule', $wcm.bool],
 	]);
@@ -541,6 +564,8 @@ export namespace Types.$ {
 		['wat', $wcm.wstring],
 	]);
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
+	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
+	export const FuncInstrumentationMode = new $wcm.EnumType<Types.FuncInstrumentationMode>(['entry', 'exit']);
 	export const LineCol = new $wcm.RecordType<Types.LineCol>([
 		['l', $wcm.u32],
 		['c', $wcm.u32],
@@ -612,17 +637,21 @@ export namespace Types.$ {
 	export const OpProbeRecord = new $wcm.RecordType<Types.OpProbeRecord>([
 		['targetFid', $wcm.u32],
 		['targetOpcodeIdx', $wcm.u32],
-		['mode', $wcm.wstring],
+		['mode', FuncBodyInstrumentationMode],
 		['body', new $wcm.ListType<string>($wcm.wstring)],
 		['cause', Cause],
 	]);
 	export const FuncProbeRecord = new $wcm.RecordType<Types.FuncProbeRecord>([
 		['targetFid', $wcm.u32],
-		['mode', $wcm.wstring],
+		['mode', FuncInstrumentationMode],
 		['body', new $wcm.ListType<string>($wcm.wstring)],
 		['cause', Cause],
 	]);
-	export const Injection = new $wcm.VariantType<Types.Injection, Types.Injection._tt, Types.Injection._vt>([['importType', ImportRecord], ['exportType', ExportRecord], ['typeType', TypeRecord], ['memoryType', MemoryRecord], ['activeDataType', ActiveDataRecord], ['passiveDataType', PassiveDataRecord], ['globalType', GlobalRecord], ['functionType', FunctionRecord], ['localType', LocalRecord], ['tableType', TableRecord], ['elementType', ElementRecord], ['opProbeType', OpProbeRecord], ['funcProbeType', FuncProbeRecord]], Types.Injection._ctor);
+	export const WhammInjection = new $wcm.VariantType<Types.WhammInjection, Types.WhammInjection._tt, Types.WhammInjection._vt>([['importType', ImportRecord], ['exportType', ExportRecord], ['typeType', TypeRecord], ['memoryType', MemoryRecord], ['activeDataType', ActiveDataRecord], ['passiveDataType', PassiveDataRecord], ['globalType', GlobalRecord], ['functionType', FunctionRecord], ['localType', LocalRecord], ['tableType', TableRecord], ['elementType', ElementRecord], ['opProbeType', OpProbeRecord], ['funcProbeType', FuncProbeRecord]], Types.WhammInjection._ctor);
+	export const InjectionPair = new $wcm.RecordType<Types.InjectionPair>([
+		['injectionType', $wcm.wstring],
+		['injectionValue', new $wcm.ListType<Types.WhammInjection>(WhammInjection)],
+	]);
 	export const LineColumnLocation = new $wcm.VariantType<Types.LineColumnLocation, Types.LineColumnLocation._tt, Types.LineColumnLocation._vt>([['pos', new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])], ['span', new $wcm.TupleType<[[u64, u64], [u64, u64]]>([new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64]), new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])])]], Types.LineColumnLocation._ctor);
 	export const ErrorCodeLocation = new $wcm.RecordType<Types.ErrorCodeLocation>([
 		['isErr', $wcm.bool],
@@ -643,13 +672,15 @@ export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
 	export const witName = 'types' as const;
 	export const types: Map<string, $wcm.AnyComponentModelType> = new Map<string, $wcm.AnyComponentModelType>([
-		['InjectType', $.InjectType],
+		['WhammInjectType', $.WhammInjectType],
 		['Options', $.Options],
 		['Mode', $.Mode],
 		['ScriptLoc', $.ScriptLoc],
 		['AppLoc', $.AppLoc],
 		['Probe', $.Probe],
 		['ErrorCode', $.ErrorCode],
+		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
+		['FuncInstrumentationMode', $.FuncInstrumentationMode],
 		['LineCol', $.LineCol],
 		['Span', $.Span],
 		['Cause', $.Cause],
@@ -666,7 +697,8 @@ export namespace Types._ {
 		['ElementRecord', $.ElementRecord],
 		['OpProbeRecord', $.OpProbeRecord],
 		['FuncProbeRecord', $.FuncProbeRecord],
-		['Injection', $.Injection],
+		['WhammInjection', $.WhammInjection],
+		['InjectionPair', $.InjectionPair],
 		['LineColumnLocation', $.LineColumnLocation],
 		['ErrorCodeLocation', $.ErrorCodeLocation],
 		['WhammApiError', $.WhammApiError]
@@ -679,6 +711,7 @@ export namespace whammServer.$ {
 	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
 	export const WhammApiError = Types.$.WhammApiError;
+	export const InjectionPair = Types.$.InjectionPair;
 	export namespace imports {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
@@ -694,7 +727,7 @@ export namespace whammServer.$ {
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
 			['scriptPath', $wcm.wstring],
-		], new $wcm.ResultType<whammServer.Probe[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.Probe>(Probe), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError), $wcm.list.Error));
+		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError), $wcm.list.Error));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
 		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
@@ -743,7 +776,7 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<Probe[], WhammApiError[]>>) => void;
+		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], WhammApiError[]>>) => void;
 		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
