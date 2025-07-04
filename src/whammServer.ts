@@ -125,32 +125,32 @@ export namespace Types {
 		exit = 'exit'
 	}
 
-	export type LineCol = {
+	export type LineColData = {
 		l: u32;
 		c: u32;
 	};
 
-	export type Span = {
-		lc0: LineCol;
-		lc1: LineCol;
+	export type SpanData = {
+		lc0: LineColData;
+		lc1: LineColData;
 	};
 
-	export namespace Cause {
+	export namespace WhammCause {
 		export const userPos = 'userPos' as const;
-		export type UserPos = { readonly tag: typeof userPos; readonly value: LineCol } & _common;
-		export function UserPos(value: LineCol): UserPos {
+		export type UserPos = { readonly tag: typeof userPos; readonly value: LineColData } & _common;
+		export function UserPos(value: LineColData): UserPos {
 			return new VariantImpl(userPos, value) as UserPos;
 		}
 
 		export const userSpan = 'userSpan' as const;
-		export type UserSpan = { readonly tag: typeof userSpan; readonly value: Span } & _common;
-		export function UserSpan(value: Span): UserSpan {
+		export type UserSpan = { readonly tag: typeof userSpan; readonly value: SpanData } & _common;
+		export function UserSpan(value: SpanData): UserSpan {
 			return new VariantImpl(userSpan, value) as UserSpan;
 		}
 
 		export const userProbe = 'userProbe' as const;
-		export type UserProbe = { readonly tag: typeof userProbe; readonly value: Span } & _common;
-		export function UserProbe(value: Span): UserProbe {
+		export type UserProbe = { readonly tag: typeof userProbe; readonly value: SpanData } & _common;
+		export function UserProbe(value: SpanData): UserProbe {
 			return new VariantImpl(userProbe, value) as UserProbe;
 		}
 
@@ -161,10 +161,10 @@ export namespace Types {
 		}
 
 		export type _tt = typeof userPos | typeof userSpan | typeof userProbe | typeof whamm;
-		export type _vt = LineCol | Span | Span | undefined;
+		export type _vt = LineColData | SpanData | SpanData | undefined;
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): Cause {
-			return new VariantImpl(t, v) as Cause;
+		export function _ctor(t: _tt, v: _vt): WhammCause {
+			return new VariantImpl(t, v) as WhammCause;
 		}
 		class VariantImpl {
 			private readonly _tag: _tt;
@@ -180,20 +180,20 @@ export namespace Types {
 				return this._value;
 			}
 			isUserPos(): this is UserPos {
-				return this._tag === Cause.userPos;
+				return this._tag === WhammCause.userPos;
 			}
 			isUserSpan(): this is UserSpan {
-				return this._tag === Cause.userSpan;
+				return this._tag === WhammCause.userSpan;
 			}
 			isUserProbe(): this is UserProbe {
-				return this._tag === Cause.userProbe;
+				return this._tag === WhammCause.userProbe;
 			}
 			isWhamm(): this is Whamm {
-				return this._tag === Cause.whamm;
+				return this._tag === WhammCause.whamm;
 			}
 		}
 	}
-	export type Cause = Cause.UserPos | Cause.UserSpan | Cause.UserProbe | Cause.Whamm;
+	export type WhammCause = WhammCause.UserPos | WhammCause.UserSpan | WhammCause.UserProbe | WhammCause.Whamm;
 
 	/**
 	 * injection record types
@@ -202,19 +202,19 @@ export namespace Types {
 		module: string;
 		name: string;
 		typeRef: string;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type ExportRecord = {
 		name: string;
 		kind: string;
 		index: u32;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type TypeRecord = {
 		ty: string;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type MemoryRecord = {
@@ -225,19 +225,19 @@ export namespace Types {
 		 */
 		initial: u64;
 		maximum?: u64 | undefined;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type ActiveDataRecord = {
 		memoryIndex: u32;
 		offsetExpr: string[];
 		data: Uint8Array;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type PassiveDataRecord = {
 		data: Uint8Array;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type GlobalRecord = {
@@ -246,7 +246,7 @@ export namespace Types {
 		shared: boolean;
 		mutable: boolean;
 		initExpr: string[];
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type FunctionRecord = {
@@ -255,21 +255,21 @@ export namespace Types {
 		sig: [string[], string[]];
 		locals: string[];
 		body: string[];
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type LocalRecord = {
 		targetFid: u32;
 		ty: string;
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type TableRecord = {
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type ElementRecord = {
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type OpProbeRecord = {
@@ -277,14 +277,14 @@ export namespace Types {
 		targetOpcodeIdx: u32;
 		mode: FuncBodyInstrumentationMode;
 		body: string[];
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export type FuncProbeRecord = {
 		targetFid: u32;
 		mode: FuncInstrumentationMode;
 		body: string[];
-		cause: Cause;
+		cause: WhammCause;
 	};
 
 	export namespace WhammInjection {
@@ -566,46 +566,46 @@ export namespace Types.$ {
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
 	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
 	export const FuncInstrumentationMode = new $wcm.EnumType<Types.FuncInstrumentationMode>(['entry', 'exit']);
-	export const LineCol = new $wcm.RecordType<Types.LineCol>([
+	export const LineColData = new $wcm.RecordType<Types.LineColData>([
 		['l', $wcm.u32],
 		['c', $wcm.u32],
 	]);
-	export const Span = new $wcm.RecordType<Types.Span>([
-		['lc0', LineCol],
-		['lc1', LineCol],
+	export const SpanData = new $wcm.RecordType<Types.SpanData>([
+		['lc0', LineColData],
+		['lc1', LineColData],
 	]);
-	export const Cause = new $wcm.VariantType<Types.Cause, Types.Cause._tt, Types.Cause._vt>([['userPos', LineCol], ['userSpan', Span], ['userProbe', Span], ['whamm', undefined]], Types.Cause._ctor);
+	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', LineColData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
 	export const ImportRecord = new $wcm.RecordType<Types.ImportRecord>([
 		['module', $wcm.wstring],
 		['name', $wcm.wstring],
 		['typeRef', $wcm.wstring],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const ExportRecord = new $wcm.RecordType<Types.ExportRecord>([
 		['name', $wcm.wstring],
 		['kind', $wcm.wstring],
 		['index', $wcm.u32],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const TypeRecord = new $wcm.RecordType<Types.TypeRecord>([
 		['ty', $wcm.wstring],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const MemoryRecord = new $wcm.RecordType<Types.MemoryRecord>([
 		['id', $wcm.u32],
 		['initial', $wcm.u64],
 		['maximum', new $wcm.OptionType<u64>($wcm.u64)],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const ActiveDataRecord = new $wcm.RecordType<Types.ActiveDataRecord>([
 		['memoryIndex', $wcm.u32],
 		['offsetExpr', new $wcm.ListType<string>($wcm.wstring)],
 		['data', new $wcm.Uint8ArrayType()],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const PassiveDataRecord = new $wcm.RecordType<Types.PassiveDataRecord>([
 		['data', new $wcm.Uint8ArrayType()],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const GlobalRecord = new $wcm.RecordType<Types.GlobalRecord>([
 		['id', $wcm.u32],
@@ -613,7 +613,7 @@ export namespace Types.$ {
 		['shared', $wcm.bool],
 		['mutable', $wcm.bool],
 		['initExpr', new $wcm.ListType<string>($wcm.wstring)],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const FunctionRecord = new $wcm.RecordType<Types.FunctionRecord>([
 		['id', $wcm.u32],
@@ -621,31 +621,31 @@ export namespace Types.$ {
 		['sig', new $wcm.TupleType<[string[], string[]]>([new $wcm.ListType<string>($wcm.wstring), new $wcm.ListType<string>($wcm.wstring)])],
 		['locals', new $wcm.ListType<string>($wcm.wstring)],
 		['body', new $wcm.ListType<string>($wcm.wstring)],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const LocalRecord = new $wcm.RecordType<Types.LocalRecord>([
 		['targetFid', $wcm.u32],
 		['ty', $wcm.wstring],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const TableRecord = new $wcm.RecordType<Types.TableRecord>([
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const ElementRecord = new $wcm.RecordType<Types.ElementRecord>([
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const OpProbeRecord = new $wcm.RecordType<Types.OpProbeRecord>([
 		['targetFid', $wcm.u32],
 		['targetOpcodeIdx', $wcm.u32],
 		['mode', FuncBodyInstrumentationMode],
 		['body', new $wcm.ListType<string>($wcm.wstring)],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const FuncProbeRecord = new $wcm.RecordType<Types.FuncProbeRecord>([
 		['targetFid', $wcm.u32],
 		['mode', FuncInstrumentationMode],
 		['body', new $wcm.ListType<string>($wcm.wstring)],
-		['cause', Cause],
+		['cause', WhammCause],
 	]);
 	export const WhammInjection = new $wcm.VariantType<Types.WhammInjection, Types.WhammInjection._tt, Types.WhammInjection._vt>([['importType', ImportRecord], ['exportType', ExportRecord], ['typeType', TypeRecord], ['memoryType', MemoryRecord], ['activeDataType', ActiveDataRecord], ['passiveDataType', PassiveDataRecord], ['globalType', GlobalRecord], ['functionType', FunctionRecord], ['localType', LocalRecord], ['tableType', TableRecord], ['elementType', ElementRecord], ['opProbeType', OpProbeRecord], ['funcProbeType', FuncProbeRecord]], Types.WhammInjection._ctor);
 	export const InjectionPair = new $wcm.RecordType<Types.InjectionPair>([
@@ -681,9 +681,9 @@ export namespace Types._ {
 		['ErrorCode', $.ErrorCode],
 		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
 		['FuncInstrumentationMode', $.FuncInstrumentationMode],
-		['LineCol', $.LineCol],
-		['Span', $.Span],
-		['Cause', $.Cause],
+		['LineColData', $.LineColData],
+		['SpanData', $.SpanData],
+		['WhammCause', $.WhammCause],
 		['ImportRecord', $.ImportRecord],
 		['ExportRecord', $.ExportRecord],
 		['TypeRecord', $.TypeRecord],

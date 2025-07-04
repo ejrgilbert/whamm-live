@@ -1,4 +1,4 @@
-use crate::vscode::example::types::{ActiveDataRecord, ElementRecord, ExportRecord, FuncBodyInstrumentationMode, FuncInstrumentationMode, FuncProbeRecord, FunctionRecord, GlobalRecord, ImportRecord, LocalRecord, MemoryRecord, OpProbeRecord, PassiveDataRecord, TableRecord, TypeRecord, WhammCause, WhammInjectType, WhammInjection};
+use crate::vscode::example::types::*;
 use whamm::api::instrument::{Injection, Cause};
 use wirm::ir::types::{FuncInstrMode, InstrumentationMode};
 
@@ -122,13 +122,19 @@ impl From<&Cause> for WhammCause{
     fn from(value: &Cause) -> Self {
        match value{
         Cause::UserPos { lc }=>{
-            todo!()
+            WhammCause::UserPos(LineColData { l: lc.l, c: lc.c })
         },
         Cause::UserProbe { lc0, lc1 }=>{
-            todo!()
+            WhammCause::UserProbe(
+                SpanData { lc0: LineColData { l: lc0.l, c: lc0.c },
+                        lc1: LineColData { l: lc1.l, c: lc1.c } }
+                    )
         },
         Cause::UserSpan { lc0, lc1 }=>{
-            todo!()
+            WhammCause::UserSpan(
+                SpanData { lc0: LineColData { l: lc0.l, c: lc0.c },
+                        lc1: LineColData { l: lc1.l, c: lc1.c } }
+                    )
         },
         Cause::Whamm => WhammCause::Whamm
        }

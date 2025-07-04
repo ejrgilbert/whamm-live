@@ -1,5 +1,5 @@
 use crate::log;
-use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammApiError, WhammInjectType, WhammInjection};
+use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammApiError, WhammInjection};
 use std::{cell::RefCell, collections::HashMap};
 
 thread_local! {

@@ -68,20 +68,20 @@ interface types {
     	exit
 	}
 
-    record line-col {
+    record line-col-data {
 		l: u32,
 		c: u32
 	}
 	
-	record span{
-		lc0: line-col,
-		lc1: line-col
+	record span-data{
+		lc0: line-col-data,
+		lc1: line-col-data
 	}
 	
 	variant whamm-cause {
-		user-pos(line-col),
-		user-span(span),
-		user-probe(span),
+		user-pos(line-col-data),
+		user-span(span-data),
+		user-probe(span-data),
 		whamm
 	}
 	
