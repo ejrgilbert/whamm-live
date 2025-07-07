@@ -100,7 +100,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// TODO: this should be split out to a different async func callback! (should update script content each time)
 		try {
-			printProbe(api.run(script_content, app_path, script_path), channel);
+			let data = api.run(script_content, app_path, script_path);
+			// TODO (handle the recieved data)
 		} catch (error) {
 			channel.appendLine(`whamm run failed`)
 			handleError(error, channel);

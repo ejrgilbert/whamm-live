@@ -287,146 +287,38 @@ export namespace Types {
 		cause: WhammCause;
 	};
 
-	export namespace WhammInjection {
-		export const importType = 'importType' as const;
-		export type ImportType = { readonly tag: typeof importType; readonly value: ImportRecord } & _common;
-		export function ImportType(value: ImportRecord): ImportType {
-			return new VariantImpl(importType, value) as ImportType;
-		}
-
-		export const exportType = 'exportType' as const;
-		export type ExportType = { readonly tag: typeof exportType; readonly value: ExportRecord } & _common;
-		export function ExportType(value: ExportRecord): ExportType {
-			return new VariantImpl(exportType, value) as ExportType;
-		}
-
-		export const typeType = 'typeType' as const;
-		export type TypeType = { readonly tag: typeof typeType; readonly value: TypeRecord } & _common;
-		export function TypeType(value: TypeRecord): TypeType {
-			return new VariantImpl(typeType, value) as TypeType;
-		}
-
-		export const memoryType = 'memoryType' as const;
-		export type MemoryType = { readonly tag: typeof memoryType; readonly value: MemoryRecord } & _common;
-		export function MemoryType(value: MemoryRecord): MemoryType {
-			return new VariantImpl(memoryType, value) as MemoryType;
-		}
-
-		export const activeDataType = 'activeDataType' as const;
-		export type ActiveDataType = { readonly tag: typeof activeDataType; readonly value: ActiveDataRecord } & _common;
-		export function ActiveDataType(value: ActiveDataRecord): ActiveDataType {
-			return new VariantImpl(activeDataType, value) as ActiveDataType;
-		}
-
-		export const passiveDataType = 'passiveDataType' as const;
-		export type PassiveDataType = { readonly tag: typeof passiveDataType; readonly value: PassiveDataRecord } & _common;
-		export function PassiveDataType(value: PassiveDataRecord): PassiveDataType {
-			return new VariantImpl(passiveDataType, value) as PassiveDataType;
-		}
-
-		export const globalType = 'globalType' as const;
-		export type GlobalType = { readonly tag: typeof globalType; readonly value: GlobalRecord } & _common;
-		export function GlobalType(value: GlobalRecord): GlobalType {
-			return new VariantImpl(globalType, value) as GlobalType;
-		}
-
-		export const functionType = 'functionType' as const;
-		export type FunctionType = { readonly tag: typeof functionType; readonly value: FunctionRecord } & _common;
-		export function FunctionType(value: FunctionRecord): FunctionType {
-			return new VariantImpl(functionType, value) as FunctionType;
-		}
-
-		export const localType = 'localType' as const;
-		export type LocalType = { readonly tag: typeof localType; readonly value: LocalRecord } & _common;
-		export function LocalType(value: LocalRecord): LocalType {
-			return new VariantImpl(localType, value) as LocalType;
-		}
-
-		export const tableType = 'tableType' as const;
-		export type TableType = { readonly tag: typeof tableType; readonly value: TableRecord } & _common;
-		export function TableType(value: TableRecord): TableType {
-			return new VariantImpl(tableType, value) as TableType;
-		}
-
-		export const elementType = 'elementType' as const;
-		export type ElementType = { readonly tag: typeof elementType; readonly value: ElementRecord } & _common;
-		export function ElementType(value: ElementRecord): ElementType {
-			return new VariantImpl(elementType, value) as ElementType;
-		}
-
-		export const opProbeType = 'opProbeType' as const;
-		export type OpProbeType = { readonly tag: typeof opProbeType; readonly value: OpProbeRecord } & _common;
-		export function OpProbeType(value: OpProbeRecord): OpProbeType {
-			return new VariantImpl(opProbeType, value) as OpProbeType;
-		}
-
-		export const funcProbeType = 'funcProbeType' as const;
-		export type FuncProbeType = { readonly tag: typeof funcProbeType; readonly value: FuncProbeRecord } & _common;
-		export function FuncProbeType(value: FuncProbeRecord): FuncProbeType {
-			return new VariantImpl(funcProbeType, value) as FuncProbeType;
-		}
-
-		export type _tt = typeof importType | typeof exportType | typeof typeType | typeof memoryType | typeof activeDataType | typeof passiveDataType | typeof globalType | typeof functionType | typeof localType | typeof tableType | typeof elementType | typeof opProbeType | typeof funcProbeType;
-		export type _vt = ImportRecord | ExportRecord | TypeRecord | MemoryRecord | ActiveDataRecord | PassiveDataRecord | GlobalRecord | FunctionRecord | LocalRecord | TableRecord | ElementRecord | OpProbeRecord | FuncProbeRecord;
-		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): WhammInjection {
-			return new VariantImpl(t, v) as WhammInjection;
-		}
-		class VariantImpl {
-			private readonly _tag: _tt;
-			private readonly _value: _vt;
-			constructor(t: _tt, value: _vt) {
-				this._tag = t;
-				this._value = value;
-			}
-			get tag(): _tt {
-				return this._tag;
-			}
-			get value(): _vt {
-				return this._value;
-			}
-			isImportType(): this is ImportType {
-				return this._tag === WhammInjection.importType;
-			}
-			isExportType(): this is ExportType {
-				return this._tag === WhammInjection.exportType;
-			}
-			isTypeType(): this is TypeType {
-				return this._tag === WhammInjection.typeType;
-			}
-			isMemoryType(): this is MemoryType {
-				return this._tag === WhammInjection.memoryType;
-			}
-			isActiveDataType(): this is ActiveDataType {
-				return this._tag === WhammInjection.activeDataType;
-			}
-			isPassiveDataType(): this is PassiveDataType {
-				return this._tag === WhammInjection.passiveDataType;
-			}
-			isGlobalType(): this is GlobalType {
-				return this._tag === WhammInjection.globalType;
-			}
-			isFunctionType(): this is FunctionType {
-				return this._tag === WhammInjection.functionType;
-			}
-			isLocalType(): this is LocalType {
-				return this._tag === WhammInjection.localType;
-			}
-			isTableType(): this is TableType {
-				return this._tag === WhammInjection.tableType;
-			}
-			isElementType(): this is ElementType {
-				return this._tag === WhammInjection.elementType;
-			}
-			isOpProbeType(): this is OpProbeType {
-				return this._tag === WhammInjection.opProbeType;
-			}
-			isFuncProbeType(): this is FuncProbeType {
-				return this._tag === WhammInjection.funcProbeType;
-			}
-		}
+	export enum WhammDataType {
+		importType = 'importType',
+		exportType = 'exportType',
+		typeType = 'typeType',
+		memoryType = 'memoryType',
+		activeDataType = 'activeDataType',
+		passiveDataType = 'passiveDataType',
+		globalType = 'globalType',
+		functionType = 'functionType',
+		localType = 'localType',
+		tableType = 'tableType',
+		elementType = 'elementType',
+		opProbeType = 'opProbeType',
+		funcProbeType = 'funcProbeType'
 	}
-	export type WhammInjection = WhammInjection.ImportType | WhammInjection.ExportType | WhammInjection.TypeType | WhammInjection.MemoryType | WhammInjection.ActiveDataType | WhammInjection.PassiveDataType | WhammInjection.GlobalType | WhammInjection.FunctionType | WhammInjection.LocalType | WhammInjection.TableType | WhammInjection.ElementType | WhammInjection.OpProbeType | WhammInjection.FuncProbeType;
+
+	export type WhammInjection = {
+		dataType: WhammDataType;
+		importData?: ImportRecord | undefined;
+		exportData?: ExportRecord | undefined;
+		typeData?: TypeRecord | undefined;
+		memoryData?: MemoryRecord | undefined;
+		activeData?: ActiveDataRecord | undefined;
+		passiveData?: PassiveDataRecord | undefined;
+		globalData?: GlobalRecord | undefined;
+		functionData?: FunctionRecord | undefined;
+		localData?: LocalRecord | undefined;
+		tableData?: TableRecord | undefined;
+		elementData?: ElementRecord | undefined;
+		opProbeData?: OpProbeRecord | undefined;
+		funcProbeData?: FuncProbeRecord | undefined;
+	};
 
 	export type InjectionPair = {
 		injectionType: string;
@@ -647,7 +539,23 @@ export namespace Types.$ {
 		['body', new $wcm.ListType<string>($wcm.wstring)],
 		['cause', WhammCause],
 	]);
-	export const WhammInjection = new $wcm.VariantType<Types.WhammInjection, Types.WhammInjection._tt, Types.WhammInjection._vt>([['importType', ImportRecord], ['exportType', ExportRecord], ['typeType', TypeRecord], ['memoryType', MemoryRecord], ['activeDataType', ActiveDataRecord], ['passiveDataType', PassiveDataRecord], ['globalType', GlobalRecord], ['functionType', FunctionRecord], ['localType', LocalRecord], ['tableType', TableRecord], ['elementType', ElementRecord], ['opProbeType', OpProbeRecord], ['funcProbeType', FuncProbeRecord]], Types.WhammInjection._ctor);
+	export const WhammDataType = new $wcm.EnumType<Types.WhammDataType>(['importType', 'exportType', 'typeType', 'memoryType', 'activeDataType', 'passiveDataType', 'globalType', 'functionType', 'localType', 'tableType', 'elementType', 'opProbeType', 'funcProbeType']);
+	export const WhammInjection = new $wcm.RecordType<Types.WhammInjection>([
+		['dataType', WhammDataType],
+		['importData', new $wcm.OptionType<Types.ImportRecord>(ImportRecord)],
+		['exportData', new $wcm.OptionType<Types.ExportRecord>(ExportRecord)],
+		['typeData', new $wcm.OptionType<Types.TypeRecord>(TypeRecord)],
+		['memoryData', new $wcm.OptionType<Types.MemoryRecord>(MemoryRecord)],
+		['activeData', new $wcm.OptionType<Types.ActiveDataRecord>(ActiveDataRecord)],
+		['passiveData', new $wcm.OptionType<Types.PassiveDataRecord>(PassiveDataRecord)],
+		['globalData', new $wcm.OptionType<Types.GlobalRecord>(GlobalRecord)],
+		['functionData', new $wcm.OptionType<Types.FunctionRecord>(FunctionRecord)],
+		['localData', new $wcm.OptionType<Types.LocalRecord>(LocalRecord)],
+		['tableData', new $wcm.OptionType<Types.TableRecord>(TableRecord)],
+		['elementData', new $wcm.OptionType<Types.ElementRecord>(ElementRecord)],
+		['opProbeData', new $wcm.OptionType<Types.OpProbeRecord>(OpProbeRecord)],
+		['funcProbeData', new $wcm.OptionType<Types.FuncProbeRecord>(FuncProbeRecord)],
+	]);
 	export const InjectionPair = new $wcm.RecordType<Types.InjectionPair>([
 		['injectionType', $wcm.wstring],
 		['injectionValue', new $wcm.ListType<Types.WhammInjection>(WhammInjection)],
@@ -697,6 +605,7 @@ export namespace Types._ {
 		['ElementRecord', $.ElementRecord],
 		['OpProbeRecord', $.OpProbeRecord],
 		['FuncProbeRecord', $.FuncProbeRecord],
+		['WhammDataType', $.WhammDataType],
 		['WhammInjection', $.WhammInjection],
 		['InjectionPair', $.InjectionPair],
 		['LineColumnLocation', $.LineColumnLocation],
@@ -727,7 +636,7 @@ export namespace whammServer.$ {
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
 			['scriptPath', $wcm.wstring],
-		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError), $wcm.list.Error));
+		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError)));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
 		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));

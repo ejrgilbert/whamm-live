@@ -81,6 +81,7 @@ pub fn run(
                             }
                             api_response.push(injection_pair);
                         }
+                        log(format!("{api_response:#?}").as_str());
                         Result::Ok(api_response)
 
                     },
