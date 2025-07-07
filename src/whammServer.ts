@@ -385,6 +385,46 @@ export namespace Types {
 		infoLoc?: ErrorCodeLocation | undefined;
 		ty: string;
 	};
+
+	export namespace ErrorWrapper {
+		export const errors = 'errors' as const;
+		export type Errors = { readonly tag: typeof errors; readonly value: WhammApiError[] } & _common;
+		export function Errors(value: WhammApiError[]): Errors {
+			return new VariantImpl(errors, value) as Errors;
+		}
+
+		export type _tt = typeof errors;
+		export type _vt = WhammApiError[];
+		type _common = Omit<VariantImpl, 'tag' | 'value'>;
+		export function _ctor(t: _tt, v: _vt): ErrorWrapper {
+			return new VariantImpl(t, v) as ErrorWrapper;
+		}
+		class VariantImpl {
+			private readonly _tag: _tt;
+			private readonly _value: _vt;
+			constructor(t: _tt, value: _vt) {
+				this._tag = t;
+				this._value = value;
+			}
+			get tag(): _tt {
+				return this._tag;
+			}
+			get value(): _vt {
+				return this._value;
+			}
+			isErrors(): this is Errors {
+				return this._tag === ErrorWrapper.errors;
+			}
+		}
+	}
+	export type ErrorWrapper = ErrorWrapper.Errors;
+	export namespace ErrorWrapper {
+		export class Error_ extends $wcm.ResultError<ErrorWrapper> {
+			constructor(cause: ErrorWrapper) {
+				super(`ErrorWrapper: ${cause}`, cause);
+			}
+		}
+	}
 }
 export type Types = {
 };
@@ -393,8 +433,9 @@ export namespace whammServer {
 	export type Probe = Types.Probe;
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
-	export type WhammApiError = Types.WhammApiError;
 	export type InjectionPair = Types.InjectionPair;
+	export type ErrorWrapper = Types.ErrorWrapper;
+	export const ErrorWrapper = Types.ErrorWrapper;
 	export type Imports = {
 		log: (msg: string) => void;
 	};
@@ -412,7 +453,7 @@ export namespace whammServer {
 		/**
 		 * No hash map support in wit. So, we usea list of key-value pairs
 		 *
-		 * @throws $wcm.list.Error
+		 * @throws ErrorWrapper.Error_
 		 */
 		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
 		/**
@@ -575,6 +616,7 @@ export namespace Types.$ {
 		['infoLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
 		['ty', $wcm.wstring],
 	]);
+	export const ErrorWrapper = new $wcm.VariantType<Types.ErrorWrapper, Types.ErrorWrapper._tt, Types.ErrorWrapper._vt>([['errors', new $wcm.ListType<Types.WhammApiError>(WhammApiError)]], Types.ErrorWrapper._ctor);
 }
 export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
@@ -610,7 +652,8 @@ export namespace Types._ {
 		['InjectionPair', $.InjectionPair],
 		['LineColumnLocation', $.LineColumnLocation],
 		['ErrorCodeLocation', $.ErrorCodeLocation],
-		['WhammApiError', $.WhammApiError]
+		['WhammApiError', $.WhammApiError],
+		['ErrorWrapper', $.ErrorWrapper]
 	]);
 	export type WasmInterface = {
 	};
@@ -619,8 +662,8 @@ export namespace whammServer.$ {
 	export const Options = Types.$.Options;
 	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
-	export const WhammApiError = Types.$.WhammApiError;
 	export const InjectionPair = Types.$.InjectionPair;
+	export const ErrorWrapper = Types.$.ErrorWrapper;
 	export namespace imports {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
@@ -636,7 +679,7 @@ export namespace whammServer.$ {
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
 			['scriptPath', $wcm.wstring],
-		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.WhammApiError[]>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), new $wcm.ListType<whammServer.WhammApiError>(WhammApiError)));
+		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.ErrorWrapper>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), ErrorWrapper, Types.ErrorWrapper.Error_));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
 		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
@@ -685,7 +728,7 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], WhammApiError[]>>) => void;
+		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
 		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;

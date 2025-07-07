@@ -1,5 +1,5 @@
 use crate::log;
-use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammApiError, WhammInjection};
+use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammInjection, WhammApiError, ErrorWrapper};
 use std::{cell::RefCell, collections::HashMap};
 
 thread_local! {
@@ -46,7 +46,7 @@ pub fn run(
     new_script: String,
     app_name: String,
     script_path: String,
-) -> Result<Vec<InjectionPair>, Vec<WhammApiError>> {
+) -> Result<Vec<InjectionPair>, ErrorWrapper> {
     return APP_TO_BYTES.with(|app_to_bytes| {
         let app_to_bytes = app_to_bytes.borrow_mut();
         let bytes = app_to_bytes.get(&app_name).unwrap();
@@ -92,7 +92,7 @@ pub fn run(
                         for whamm_error in &whamm_errors{
                             api_response.push(WhammApiError::from(whamm_error));
                         }
-                        Result::Err(api_response)
+                        Result::Err(ErrorWrapper::Errors(api_response))
                     }
                 }
         });
