@@ -2,6 +2,21 @@
 package vscode:example;
 
 interface types {
+	
+	enum whamm-inject-type {
+		type-inject,
+		import-inject,
+		export-inject,
+		memory-inject,
+		data-inject,
+		global-inject,
+		func-inject,
+		local-inject,
+		table-inject,
+		element-inject,
+		probe-inject
+	}
+	
 	record options {
 		as-monitor-module: bool
 	}
@@ -23,32 +38,209 @@ interface types {
 		byte-offset: u64,
 		mode: mode
 	}
-
+	
 	record probe {
     	app-loc: app-loc,
 		script-loc: script-loc,
 		wat: string
 	}
 
-	// variant operation {
-	// 	add(operands),
-	// 	sub(operands),
-	// 	mul(operands),
-	// 	div(operands)
-	// }
-
 	variant error-code {
 		invalid(string),
 		unexpected(string),
 		no-change(string)
 	}
+
+	// injected related tyoes
+
+	enum func-body-instrumentation-mode {
+		before,
+		after,
+		alternate,
+		semantic-after,
+		block-entry,
+		block-exit,
+		block-alt,
+	}
+
+	enum func-instrumentation-mode {
+    	entry,
+    	exit
+	}
+
+    record line-col-data {
+		l: u32,
+		c: u32
+	}
+	
+	record span-data{
+		lc0: line-col-data,
+		lc1: line-col-data
+	}
+	
+	variant whamm-cause {
+		user-pos(line-col-data),
+		user-span(span-data),
+		user-probe(span-data),
+		whamm
+	}
+	
+	// injection record types
+
+    record import-record {
+		module: string,
+		name: string,
+		type-ref: string,
+		cause: whamm-cause
+	}
+
+	record export-record{
+		name: string,
+		kind: string,
+		index: u32,
+		cause: whamm-cause
+	}
+	
+	record type-record{
+		ty: string,
+		cause: whamm-cause
+	}
+
+	record memory-record{
+		id: u32, // ToDo -- may not need (it's ordered in a list)
+		initial: u64,
+		maximum: option<u64>,
+		cause: whamm-cause
+	}
+
+	record active-data-record{
+		memory-index: u32,
+		offset-expr: list<string>,
+		data: list<u8>,
+		cause: whamm-cause
+	}
+
+	record passive-data-record{
+		data: list<u8>,
+		cause: whamm-cause
+	}
+
+	record global-record{
+		id: u32, 
+		ty: string,
+		shared: bool,
+		mutable: bool,
+		init-expr: list<string>,
+		cause: whamm-cause,
+	}
+
+	record function-record{
+		id: u32,
+		fname: option<string>,
+		sig: tuple<list<string>, list<string>>,
+		locals: list<string>,
+		body: list<string>,
+		cause: whamm-cause,
+	}
+
+	record local-record{
+		target-fid: u32,
+		ty: string,
+		cause: whamm-cause
+	}
+
+    record table-record{ cause: whamm-cause }
+    record element-record{ cause: whamm-cause }
+
+	record op-probe-record{
+		target-fid: u32,
+		target-opcode-idx: u32,
+		mode: func-body-instrumentation-mode,
+		body: list<string>,
+		cause: whamm-cause,
+	}
+
+	record func-probe-record {
+		target-fid: u32,
+		mode: func-instrumentation-mode,
+		body: list<string>,
+		cause: whamm-cause,
+	}
+
+	enum whamm-data-type {
+		import-type,
+		export-type,
+		type-type,
+		memory-type,
+		active-data-type,
+		passive-data-type,
+		global-type ,
+		function-type ,
+		local-type ,
+		table-type,
+		element-type,
+		op-probe-type ,
+		func-probe-type 
+	}
+
+	record whamm-injection {
+		data-type: whamm-data-type,
+		import-data: option<import-record>,
+		export-data: option<export-record>,
+		type-data: option<type-record>,
+		memory-data: option<memory-record>,
+		active-data: option<active-data-record>,
+		passive-data: option<passive-data-record>,
+		global-data: option<global-record>,
+		function-data: option<function-record>,
+		local-data: option<local-record>,
+		table-data: option<table-record>,
+		element-data: option<element-record>,
+		op-probe-data : option<op-probe-record>,
+		func-probe-data : option<func-probe-record>,
+	}
+
+	record injection-pair{
+		injection-type: string,
+		injection-value: list<whamm-injection>
+	}
+
+	// whamm error types
+
+	variant line-column-location{
+		pos(tuple<u64, u64>),
+		span(tuple<tuple<u64, u64>, tuple<u64, u64>>)
+	}
+
+	record error-code-location{
+		is-err: bool,
+		message: option<string>,
+		line-col: line-column-location,
+		line-str: option<string>,
+		line2-str: option<string>,
+	}
+
+	record whamm-api-error {
+    	match-rule: option<string>,
+    	fatal: bool,
+    	err-loc: option<error-code-location>,
+    	info-loc: option<error-code-location>,
+    	ty: string,
+	}
+
+	variant error-wrapper{
+		errors(list<whamm-api-error>)
+	}
 }
+
 world whamm-server {
-	use types.{ options, probe, error-code };
+	use types.{ options, probe, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
-	export run: func(script: string, app-name: string) -> result<list<probe>, error-code>;
+	// No hash map support in wit. So, we usea list of key-value pairs
+	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
+	export no-change: func(new-script: string) -> result<bool, error-code>;
 	export wat2wat: func(content: string) -> result<string, error-code>;
 	export wasm2wat: func(content: list<u8>) -> result<string, error-code>;
 }

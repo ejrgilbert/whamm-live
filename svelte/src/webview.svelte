@@ -3,11 +3,12 @@
     import WasmWebview from './lib/WasmWebview.svelte';
     import {wast} from "@codemirror/lang-wast";
     import {EditorView, basicSetup} from "codemirror"
-    import { foldKeymap, HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+    import { HighlightStyle, syntaxHighlighting} from "@codemirror/language";
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
-    import { keymap } from "@codemirror/view";
+    import { keymap} from "@codemirror/view";
     import {probe_data} from './lib/probe_data.svelte';
+    import { EditorState} from "@codemirror/state";
 
     let wizard_tab = $state(false);
     let wat_content : undefined | string = $state(undefined);
@@ -52,6 +53,7 @@
                                                 highlight_style,
                                                 EditorView.editable.of(false),
                                                 EditorView.contentAttributes.of({tabindex: "0"}),
+                                                EditorState.readOnly.of(true),
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
                                         ],

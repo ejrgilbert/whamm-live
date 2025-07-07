@@ -7,6 +7,20 @@ import * as $wcm from '@vscode/wasm-component-model';
 import type { u32, u64, i32, ptr, result } from '@vscode/wasm-component-model';
 
 export namespace Types {
+	export enum WhammInjectType {
+		typeInject = 'typeInject',
+		importInject = 'importInject',
+		exportInject = 'exportInject',
+		memoryInject = 'memoryInject',
+		dataInject = 'dataInject',
+		globalInject = 'globalInject',
+		funcInject = 'funcInject',
+		localInject = 'localInject',
+		tableInject = 'tableInject',
+		elementInject = 'elementInject',
+		probeInject = 'probeInject'
+	}
+
 	export type Options = {
 		asMonitorModule: boolean;
 	};
@@ -35,14 +49,6 @@ export namespace Types {
 		wat: string;
 	};
 
-	/**
-	 * variant operation {
-	 * 	add(operands),
-	 * 	sub(operands),
-	 * 	mul(operands),
-	 * 	div(operands)
-	 * }
-	 */
 	export namespace ErrorCode {
 		export const invalid = 'invalid' as const;
 		export type Invalid = { readonly tag: typeof invalid; readonly value: string } & _common;
@@ -100,6 +106,325 @@ export namespace Types {
 			}
 		}
 	}
+
+	/**
+	 * injected related tyoes
+	 */
+	export enum FuncBodyInstrumentationMode {
+		before = 'before',
+		after = 'after',
+		alternate = 'alternate',
+		semanticAfter = 'semanticAfter',
+		blockEntry = 'blockEntry',
+		blockExit = 'blockExit',
+		blockAlt = 'blockAlt'
+	}
+
+	export enum FuncInstrumentationMode {
+		entry = 'entry',
+		exit = 'exit'
+	}
+
+	export type LineColData = {
+		l: u32;
+		c: u32;
+	};
+
+	export type SpanData = {
+		lc0: LineColData;
+		lc1: LineColData;
+	};
+
+	export namespace WhammCause {
+		export const userPos = 'userPos' as const;
+		export type UserPos = { readonly tag: typeof userPos; readonly value: LineColData } & _common;
+		export function UserPos(value: LineColData): UserPos {
+			return new VariantImpl(userPos, value) as UserPos;
+		}
+
+		export const userSpan = 'userSpan' as const;
+		export type UserSpan = { readonly tag: typeof userSpan; readonly value: SpanData } & _common;
+		export function UserSpan(value: SpanData): UserSpan {
+			return new VariantImpl(userSpan, value) as UserSpan;
+		}
+
+		export const userProbe = 'userProbe' as const;
+		export type UserProbe = { readonly tag: typeof userProbe; readonly value: SpanData } & _common;
+		export function UserProbe(value: SpanData): UserProbe {
+			return new VariantImpl(userProbe, value) as UserProbe;
+		}
+
+		export const whamm = 'whamm' as const;
+		export type Whamm = { readonly tag: typeof whamm } & _common;
+		export function Whamm(): Whamm {
+			return new VariantImpl(whamm, undefined) as Whamm;
+		}
+
+		export type _tt = typeof userPos | typeof userSpan | typeof userProbe | typeof whamm;
+		export type _vt = LineColData | SpanData | SpanData | undefined;
+		type _common = Omit<VariantImpl, 'tag' | 'value'>;
+		export function _ctor(t: _tt, v: _vt): WhammCause {
+			return new VariantImpl(t, v) as WhammCause;
+		}
+		class VariantImpl {
+			private readonly _tag: _tt;
+			private readonly _value?: _vt;
+			constructor(t: _tt, value: _vt) {
+				this._tag = t;
+				this._value = value;
+			}
+			get tag(): _tt {
+				return this._tag;
+			}
+			get value(): _vt {
+				return this._value;
+			}
+			isUserPos(): this is UserPos {
+				return this._tag === WhammCause.userPos;
+			}
+			isUserSpan(): this is UserSpan {
+				return this._tag === WhammCause.userSpan;
+			}
+			isUserProbe(): this is UserProbe {
+				return this._tag === WhammCause.userProbe;
+			}
+			isWhamm(): this is Whamm {
+				return this._tag === WhammCause.whamm;
+			}
+		}
+	}
+	export type WhammCause = WhammCause.UserPos | WhammCause.UserSpan | WhammCause.UserProbe | WhammCause.Whamm;
+
+	/**
+	 * injection record types
+	 */
+	export type ImportRecord = {
+		module: string;
+		name: string;
+		typeRef: string;
+		cause: WhammCause;
+	};
+
+	export type ExportRecord = {
+		name: string;
+		kind: string;
+		index: u32;
+		cause: WhammCause;
+	};
+
+	export type TypeRecord = {
+		ty: string;
+		cause: WhammCause;
+	};
+
+	export type MemoryRecord = {
+		id: u32;
+
+		/**
+		 * ToDo -- may not need (it's ordered in a list)
+		 */
+		initial: u64;
+		maximum?: u64 | undefined;
+		cause: WhammCause;
+	};
+
+	export type ActiveDataRecord = {
+		memoryIndex: u32;
+		offsetExpr: string[];
+		data: Uint8Array;
+		cause: WhammCause;
+	};
+
+	export type PassiveDataRecord = {
+		data: Uint8Array;
+		cause: WhammCause;
+	};
+
+	export type GlobalRecord = {
+		id: u32;
+		ty: string;
+		shared: boolean;
+		mutable: boolean;
+		initExpr: string[];
+		cause: WhammCause;
+	};
+
+	export type FunctionRecord = {
+		id: u32;
+		fname?: string | undefined;
+		sig: [string[], string[]];
+		locals: string[];
+		body: string[];
+		cause: WhammCause;
+	};
+
+	export type LocalRecord = {
+		targetFid: u32;
+		ty: string;
+		cause: WhammCause;
+	};
+
+	export type TableRecord = {
+		cause: WhammCause;
+	};
+
+	export type ElementRecord = {
+		cause: WhammCause;
+	};
+
+	export type OpProbeRecord = {
+		targetFid: u32;
+		targetOpcodeIdx: u32;
+		mode: FuncBodyInstrumentationMode;
+		body: string[];
+		cause: WhammCause;
+	};
+
+	export type FuncProbeRecord = {
+		targetFid: u32;
+		mode: FuncInstrumentationMode;
+		body: string[];
+		cause: WhammCause;
+	};
+
+	export enum WhammDataType {
+		importType = 'importType',
+		exportType = 'exportType',
+		typeType = 'typeType',
+		memoryType = 'memoryType',
+		activeDataType = 'activeDataType',
+		passiveDataType = 'passiveDataType',
+		globalType = 'globalType',
+		functionType = 'functionType',
+		localType = 'localType',
+		tableType = 'tableType',
+		elementType = 'elementType',
+		opProbeType = 'opProbeType',
+		funcProbeType = 'funcProbeType'
+	}
+
+	export type WhammInjection = {
+		dataType: WhammDataType;
+		importData?: ImportRecord | undefined;
+		exportData?: ExportRecord | undefined;
+		typeData?: TypeRecord | undefined;
+		memoryData?: MemoryRecord | undefined;
+		activeData?: ActiveDataRecord | undefined;
+		passiveData?: PassiveDataRecord | undefined;
+		globalData?: GlobalRecord | undefined;
+		functionData?: FunctionRecord | undefined;
+		localData?: LocalRecord | undefined;
+		tableData?: TableRecord | undefined;
+		elementData?: ElementRecord | undefined;
+		opProbeData?: OpProbeRecord | undefined;
+		funcProbeData?: FuncProbeRecord | undefined;
+	};
+
+	export type InjectionPair = {
+		injectionType: string;
+		injectionValue: WhammInjection[];
+	};
+
+	/**
+	 * whamm error types
+	 */
+	export namespace LineColumnLocation {
+		export const pos = 'pos' as const;
+		export type Pos = { readonly tag: typeof pos; readonly value: [u64, u64] } & _common;
+		export function Pos(value: [u64, u64]): Pos {
+			return new VariantImpl(pos, value) as Pos;
+		}
+
+		export const span = 'span' as const;
+		export type Span = { readonly tag: typeof span; readonly value: [[u64, u64], [u64, u64]] } & _common;
+		export function Span(value: [[u64, u64], [u64, u64]]): Span {
+			return new VariantImpl(span, value) as Span;
+		}
+
+		export type _tt = typeof pos | typeof span;
+		export type _vt = [u64, u64] | [[u64, u64], [u64, u64]];
+		type _common = Omit<VariantImpl, 'tag' | 'value'>;
+		export function _ctor(t: _tt, v: _vt): LineColumnLocation {
+			return new VariantImpl(t, v) as LineColumnLocation;
+		}
+		class VariantImpl {
+			private readonly _tag: _tt;
+			private readonly _value: _vt;
+			constructor(t: _tt, value: _vt) {
+				this._tag = t;
+				this._value = value;
+			}
+			get tag(): _tt {
+				return this._tag;
+			}
+			get value(): _vt {
+				return this._value;
+			}
+			isPos(): this is Pos {
+				return this._tag === LineColumnLocation.pos;
+			}
+			isSpan(): this is Span {
+				return this._tag === LineColumnLocation.span;
+			}
+		}
+	}
+	export type LineColumnLocation = LineColumnLocation.Pos | LineColumnLocation.Span;
+
+	export type ErrorCodeLocation = {
+		isErr: boolean;
+		message?: string | undefined;
+		lineCol: LineColumnLocation;
+		lineStr?: string | undefined;
+		line2Str?: string | undefined;
+	};
+
+	export type WhammApiError = {
+		matchRule?: string | undefined;
+		fatal: boolean;
+		errLoc?: ErrorCodeLocation | undefined;
+		infoLoc?: ErrorCodeLocation | undefined;
+		ty: string;
+	};
+
+	export namespace ErrorWrapper {
+		export const errors = 'errors' as const;
+		export type Errors = { readonly tag: typeof errors; readonly value: WhammApiError[] } & _common;
+		export function Errors(value: WhammApiError[]): Errors {
+			return new VariantImpl(errors, value) as Errors;
+		}
+
+		export type _tt = typeof errors;
+		export type _vt = WhammApiError[];
+		type _common = Omit<VariantImpl, 'tag' | 'value'>;
+		export function _ctor(t: _tt, v: _vt): ErrorWrapper {
+			return new VariantImpl(t, v) as ErrorWrapper;
+		}
+		class VariantImpl {
+			private readonly _tag: _tt;
+			private readonly _value: _vt;
+			constructor(t: _tt, value: _vt) {
+				this._tag = t;
+				this._value = value;
+			}
+			get tag(): _tt {
+				return this._tag;
+			}
+			get value(): _vt {
+				return this._value;
+			}
+			isErrors(): this is Errors {
+				return this._tag === ErrorWrapper.errors;
+			}
+		}
+	}
+	export type ErrorWrapper = ErrorWrapper.Errors;
+	export namespace ErrorWrapper {
+		export class Error_ extends $wcm.ResultError<ErrorWrapper> {
+			constructor(cause: ErrorWrapper) {
+				super(`ErrorWrapper: ${cause}`, cause);
+			}
+		}
+	}
 }
 export type Types = {
 };
@@ -108,6 +433,9 @@ export namespace whammServer {
 	export type Probe = Types.Probe;
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
+	export type InjectionPair = Types.InjectionPair;
+	export type ErrorWrapper = Types.ErrorWrapper;
+	export const ErrorWrapper = Types.ErrorWrapper;
 	export type Imports = {
 		log: (msg: string) => void;
 	};
@@ -123,9 +451,15 @@ export namespace whammServer {
 		 */
 		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
 		/**
+		 * No hash map support in wit. So, we usea list of key-value pairs
+		 *
+		 * @throws ErrorWrapper.Error_
+		 */
+		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
+		/**
 		 * @throws ErrorCode.Error_
 		 */
-		run: (script: string, appName: string) => Probe[];
+		noChange: (newScript: string) => boolean;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -144,6 +478,7 @@ export namespace whammServer {
 }
 
 export namespace Types.$ {
+	export const WhammInjectType = new $wcm.EnumType<Types.WhammInjectType>(['typeInject', 'importInject', 'exportInject', 'memoryInject', 'dataInject', 'globalInject', 'funcInject', 'localInject', 'tableInject', 'elementInject', 'probeInject']);
 	export const Options = new $wcm.RecordType<Types.Options>([
 		['asMonitorModule', $wcm.bool],
 	]);
@@ -162,17 +497,163 @@ export namespace Types.$ {
 		['wat', $wcm.wstring],
 	]);
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
+	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
+	export const FuncInstrumentationMode = new $wcm.EnumType<Types.FuncInstrumentationMode>(['entry', 'exit']);
+	export const LineColData = new $wcm.RecordType<Types.LineColData>([
+		['l', $wcm.u32],
+		['c', $wcm.u32],
+	]);
+	export const SpanData = new $wcm.RecordType<Types.SpanData>([
+		['lc0', LineColData],
+		['lc1', LineColData],
+	]);
+	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', LineColData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
+	export const ImportRecord = new $wcm.RecordType<Types.ImportRecord>([
+		['module', $wcm.wstring],
+		['name', $wcm.wstring],
+		['typeRef', $wcm.wstring],
+		['cause', WhammCause],
+	]);
+	export const ExportRecord = new $wcm.RecordType<Types.ExportRecord>([
+		['name', $wcm.wstring],
+		['kind', $wcm.wstring],
+		['index', $wcm.u32],
+		['cause', WhammCause],
+	]);
+	export const TypeRecord = new $wcm.RecordType<Types.TypeRecord>([
+		['ty', $wcm.wstring],
+		['cause', WhammCause],
+	]);
+	export const MemoryRecord = new $wcm.RecordType<Types.MemoryRecord>([
+		['id', $wcm.u32],
+		['initial', $wcm.u64],
+		['maximum', new $wcm.OptionType<u64>($wcm.u64)],
+		['cause', WhammCause],
+	]);
+	export const ActiveDataRecord = new $wcm.RecordType<Types.ActiveDataRecord>([
+		['memoryIndex', $wcm.u32],
+		['offsetExpr', new $wcm.ListType<string>($wcm.wstring)],
+		['data', new $wcm.Uint8ArrayType()],
+		['cause', WhammCause],
+	]);
+	export const PassiveDataRecord = new $wcm.RecordType<Types.PassiveDataRecord>([
+		['data', new $wcm.Uint8ArrayType()],
+		['cause', WhammCause],
+	]);
+	export const GlobalRecord = new $wcm.RecordType<Types.GlobalRecord>([
+		['id', $wcm.u32],
+		['ty', $wcm.wstring],
+		['shared', $wcm.bool],
+		['mutable', $wcm.bool],
+		['initExpr', new $wcm.ListType<string>($wcm.wstring)],
+		['cause', WhammCause],
+	]);
+	export const FunctionRecord = new $wcm.RecordType<Types.FunctionRecord>([
+		['id', $wcm.u32],
+		['fname', new $wcm.OptionType<string>($wcm.wstring)],
+		['sig', new $wcm.TupleType<[string[], string[]]>([new $wcm.ListType<string>($wcm.wstring), new $wcm.ListType<string>($wcm.wstring)])],
+		['locals', new $wcm.ListType<string>($wcm.wstring)],
+		['body', new $wcm.ListType<string>($wcm.wstring)],
+		['cause', WhammCause],
+	]);
+	export const LocalRecord = new $wcm.RecordType<Types.LocalRecord>([
+		['targetFid', $wcm.u32],
+		['ty', $wcm.wstring],
+		['cause', WhammCause],
+	]);
+	export const TableRecord = new $wcm.RecordType<Types.TableRecord>([
+		['cause', WhammCause],
+	]);
+	export const ElementRecord = new $wcm.RecordType<Types.ElementRecord>([
+		['cause', WhammCause],
+	]);
+	export const OpProbeRecord = new $wcm.RecordType<Types.OpProbeRecord>([
+		['targetFid', $wcm.u32],
+		['targetOpcodeIdx', $wcm.u32],
+		['mode', FuncBodyInstrumentationMode],
+		['body', new $wcm.ListType<string>($wcm.wstring)],
+		['cause', WhammCause],
+	]);
+	export const FuncProbeRecord = new $wcm.RecordType<Types.FuncProbeRecord>([
+		['targetFid', $wcm.u32],
+		['mode', FuncInstrumentationMode],
+		['body', new $wcm.ListType<string>($wcm.wstring)],
+		['cause', WhammCause],
+	]);
+	export const WhammDataType = new $wcm.EnumType<Types.WhammDataType>(['importType', 'exportType', 'typeType', 'memoryType', 'activeDataType', 'passiveDataType', 'globalType', 'functionType', 'localType', 'tableType', 'elementType', 'opProbeType', 'funcProbeType']);
+	export const WhammInjection = new $wcm.RecordType<Types.WhammInjection>([
+		['dataType', WhammDataType],
+		['importData', new $wcm.OptionType<Types.ImportRecord>(ImportRecord)],
+		['exportData', new $wcm.OptionType<Types.ExportRecord>(ExportRecord)],
+		['typeData', new $wcm.OptionType<Types.TypeRecord>(TypeRecord)],
+		['memoryData', new $wcm.OptionType<Types.MemoryRecord>(MemoryRecord)],
+		['activeData', new $wcm.OptionType<Types.ActiveDataRecord>(ActiveDataRecord)],
+		['passiveData', new $wcm.OptionType<Types.PassiveDataRecord>(PassiveDataRecord)],
+		['globalData', new $wcm.OptionType<Types.GlobalRecord>(GlobalRecord)],
+		['functionData', new $wcm.OptionType<Types.FunctionRecord>(FunctionRecord)],
+		['localData', new $wcm.OptionType<Types.LocalRecord>(LocalRecord)],
+		['tableData', new $wcm.OptionType<Types.TableRecord>(TableRecord)],
+		['elementData', new $wcm.OptionType<Types.ElementRecord>(ElementRecord)],
+		['opProbeData', new $wcm.OptionType<Types.OpProbeRecord>(OpProbeRecord)],
+		['funcProbeData', new $wcm.OptionType<Types.FuncProbeRecord>(FuncProbeRecord)],
+	]);
+	export const InjectionPair = new $wcm.RecordType<Types.InjectionPair>([
+		['injectionType', $wcm.wstring],
+		['injectionValue', new $wcm.ListType<Types.WhammInjection>(WhammInjection)],
+	]);
+	export const LineColumnLocation = new $wcm.VariantType<Types.LineColumnLocation, Types.LineColumnLocation._tt, Types.LineColumnLocation._vt>([['pos', new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])], ['span', new $wcm.TupleType<[[u64, u64], [u64, u64]]>([new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64]), new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])])]], Types.LineColumnLocation._ctor);
+	export const ErrorCodeLocation = new $wcm.RecordType<Types.ErrorCodeLocation>([
+		['isErr', $wcm.bool],
+		['message', new $wcm.OptionType<string>($wcm.wstring)],
+		['lineCol', LineColumnLocation],
+		['lineStr', new $wcm.OptionType<string>($wcm.wstring)],
+		['line2Str', new $wcm.OptionType<string>($wcm.wstring)],
+	]);
+	export const WhammApiError = new $wcm.RecordType<Types.WhammApiError>([
+		['matchRule', new $wcm.OptionType<string>($wcm.wstring)],
+		['fatal', $wcm.bool],
+		['errLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
+		['infoLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
+		['ty', $wcm.wstring],
+	]);
+	export const ErrorWrapper = new $wcm.VariantType<Types.ErrorWrapper, Types.ErrorWrapper._tt, Types.ErrorWrapper._vt>([['errors', new $wcm.ListType<Types.WhammApiError>(WhammApiError)]], Types.ErrorWrapper._ctor);
 }
 export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
 	export const witName = 'types' as const;
 	export const types: Map<string, $wcm.AnyComponentModelType> = new Map<string, $wcm.AnyComponentModelType>([
+		['WhammInjectType', $.WhammInjectType],
 		['Options', $.Options],
 		['Mode', $.Mode],
 		['ScriptLoc', $.ScriptLoc],
 		['AppLoc', $.AppLoc],
 		['Probe', $.Probe],
-		['ErrorCode', $.ErrorCode]
+		['ErrorCode', $.ErrorCode],
+		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
+		['FuncInstrumentationMode', $.FuncInstrumentationMode],
+		['LineColData', $.LineColData],
+		['SpanData', $.SpanData],
+		['WhammCause', $.WhammCause],
+		['ImportRecord', $.ImportRecord],
+		['ExportRecord', $.ExportRecord],
+		['TypeRecord', $.TypeRecord],
+		['MemoryRecord', $.MemoryRecord],
+		['ActiveDataRecord', $.ActiveDataRecord],
+		['PassiveDataRecord', $.PassiveDataRecord],
+		['GlobalRecord', $.GlobalRecord],
+		['FunctionRecord', $.FunctionRecord],
+		['LocalRecord', $.LocalRecord],
+		['TableRecord', $.TableRecord],
+		['ElementRecord', $.ElementRecord],
+		['OpProbeRecord', $.OpProbeRecord],
+		['FuncProbeRecord', $.FuncProbeRecord],
+		['WhammDataType', $.WhammDataType],
+		['WhammInjection', $.WhammInjection],
+		['InjectionPair', $.InjectionPair],
+		['LineColumnLocation', $.LineColumnLocation],
+		['ErrorCodeLocation', $.ErrorCodeLocation],
+		['WhammApiError', $.WhammApiError],
+		['ErrorWrapper', $.ErrorWrapper]
 	]);
 	export type WasmInterface = {
 	};
@@ -181,6 +662,8 @@ export namespace whammServer.$ {
 	export const Options = Types.$.Options;
 	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
+	export const InjectionPair = Types.$.InjectionPair;
+	export const ErrorWrapper = Types.$.ErrorWrapper;
 	export namespace imports {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
@@ -195,7 +678,11 @@ export namespace whammServer.$ {
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
-		], new $wcm.ResultType<whammServer.Probe[], whammServer.ErrorCode>(new $wcm.ListType<whammServer.Probe>(Probe), ErrorCode, Types.ErrorCode.Error_));
+			['scriptPath', $wcm.wstring],
+		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.ErrorWrapper>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), ErrorWrapper, Types.ErrorWrapper.Error_));
+		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
+			['newScript', $wcm.wstring],
+		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
 		export const wat2wat = new $wcm.FunctionType<whammServer.Exports['wat2wat']>('wat2wat',[
 			['content', $wcm.wstring],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
@@ -231,6 +718,7 @@ export namespace whammServer._ {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
 			['setup', $.exports.setup],
 			['run', $.exports.run],
+			['noChange', $.exports.noChange],
 			['wat2wat', $.exports.wat2wat],
 			['wasm2wat', $.exports.wasm2wat]
 		]);
@@ -240,7 +728,8 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, result: ptr<result<Probe[], ErrorCode>>) => void;
+		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
+		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 	};
