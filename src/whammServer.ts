@@ -303,6 +303,11 @@ export namespace Types {
 		funcProbeType = 'funcProbeType'
 	}
 
+	/**
+	 * TODO
+	 * Need to configure how variant can be used instead of this gross struct
+	 * Note: Using a variant gives an error
+	 */
 	export type WhammInjection = {
 		dataType: WhammDataType;
 		importData?: ImportRecord | undefined;
@@ -450,6 +455,7 @@ export namespace whammServer {
 		 * @throws ErrorCode.Error_
 		 */
 		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
+		end: (appName: string) => void;
 		/**
 		 * No hash map support in wit. So, we usea list of key-value pairs
 		 *
@@ -675,6 +681,9 @@ export namespace whammServer.$ {
 			['appBytes', new $wcm.Uint8ArrayType()],
 			['opts', Options],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
+		export const end = new $wcm.FunctionType<whammServer.Exports['end']>('end',[
+			['appName', $wcm.wstring],
+		], undefined);
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
@@ -717,6 +726,7 @@ export namespace whammServer._ {
 	export namespace exports {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
 			['setup', $.exports.setup],
+			['end', $.exports.end],
 			['run', $.exports.run],
 			['noChange', $.exports.noChange],
 			['wat2wat', $.exports.wat2wat],
@@ -728,6 +738,7 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'end': (appName_ptr: i32, appName_len: i32) => void;
 		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
 		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
 		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;

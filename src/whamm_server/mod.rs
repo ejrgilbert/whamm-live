@@ -23,8 +23,15 @@ pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<Stri
     // cache app bytes and options
     OPTIONS.with(|options| *options.borrow_mut() = opts);
 
-    log("setup::success");
+    log(format!("setup::success for {app_name}").as_str());
     Result::Ok("setup: success".to_string())
+}
+
+pub fn end(app_name: String){
+    APP_TO_BYTES.with(|app_to_bytes| {
+        let mut app_to_bytes = app_to_bytes.borrow_mut();
+        app_to_bytes.remove(&app_name);
+    });
 }
 
 pub fn no_change(
@@ -63,7 +70,6 @@ pub fn run(
                     new_script,
                     Vec::new(),
                 );
-                // let response :Result<Injection, Vec<WhammError>>= Err(Vec::new());
 
                 match response{
                     // handle valid response
