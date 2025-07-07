@@ -167,20 +167,37 @@ interface types {
 		cause: whamm-cause,
 	}
 
-	variant whamm-injection {
-    	import-type(import-record),
-		export-type(export-record),
-		type-type(type-record),
-		memory-type(memory-record),
-		active-data-type(active-data-record),
-		passive-data-type(passive-data-record),
-		global-type(global-record), 
-		function-type(function-record), 
-		local-type(local-record), 
-		table-type(table-record),
-		element-type(element-record),
-		op-probe-type (op-probe-record),
-		func-probe-type (func-probe-record)
+	enum whamm-data-type {
+		import-type,
+		export-type,
+		type-type,
+		memory-type,
+		active-data-type,
+		passive-data-type,
+		global-type ,
+		function-type ,
+		local-type ,
+		table-type,
+		element-type,
+		op-probe-type ,
+		func-probe-type 
+	}
+
+	record whamm-injection {
+		data-type: whamm-data-type,
+		import-data: option<import-record>,
+		export-data: option<export-record>,
+		type-data: option<type-record>,
+		memory-data: option<memory-record>,
+		active-data: option<active-data-record>,
+		passive-data: option<passive-data-record>,
+		global-data: option<global-record>,
+		function-data: option<function-record>,
+		local-data: option<local-record>,
+		table-data: option<table-record>,
+		element-data: option<element-record>,
+		op-probe-data : option<op-probe-record>,
+		func-probe-data : option<func-probe-record>,
 	}
 
 	record injection-pair{
