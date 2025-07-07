@@ -2,158 +2,175 @@ use crate::vscode::example::types::*;
 use whamm::api::instrument::{Injection, Cause};
 use wirm::ir::types::{FuncInstrMode, InstrumentationMode};
 
-impl WhammInjection{
-    fn new(data_type: WhammDataType)-> Self{
-        // op probe by default
-        WhammInjection { data_type: data_type, type_data: None, import_data: None, export_data: None, memory_data: None, active_data: None, passive_data: None, global_data: None, function_data: None, local_data: None, table_data: None, element_data: None, op_probe_data: None, func_probe_data: None }
+impl Default for WhammInjection {
+    fn default() -> Self {
+        Self { data_type: WhammDataType::OpProbeType, import_data: None, export_data: None, type_data: None, memory_data: None, active_data: None, passive_data: None, global_data: None, function_data: None, local_data: None, table_data: None, element_data: None, op_probe_data: None, func_probe_data: None }
     }
 }
 
-impl From<&Injection> for WhammInjection{
-    fn from(injection: &Injection) -> Self {
-
+impl From<Injection> for WhammInjection{
+    fn from(injection: Injection) -> Self {
         match injection {
             Injection::Import{ module, name, type_ref, cause} =>{
                 let import_record = ImportRecord {
-                    module: module.to_string(),
-                    name: name.to_string(),
-                    type_ref: type_ref.to_string(),
+                    module,
+                    name,
+                    type_ref,
                     cause:  WhammCause::from(cause) };
-                let mut import_value = WhammInjection::new(WhammDataType::ImportType);
-                import_value.import_data = Some(import_record);
-                import_value
+                
+                WhammInjection {
+                    data_type: WhammDataType::ImportType,
+                    import_data: Some(import_record),
+                    ..Default::default() 
+                }
             },
 
             Injection::Export { name, kind, index, cause } =>{
                 let export_record = ExportRecord{
-                    name: name.to_string(),
-                    kind: kind.to_string(),
-                    index: *index,
+                    name,
+                    kind,
+                    index,
                     cause: WhammCause::from(cause) };
-                let mut export_value = WhammInjection::new(WhammDataType::ExportType);
-                export_value.export_data = Some(export_record);
-                export_value
+                WhammInjection {
+                    data_type: WhammDataType::ExportType,
+                    export_data: Some(export_record),
+                    ..Default::default() 
+                }
             },
 
             Injection::Type { ty, cause } =>{
                 let type_record = TypeRecord{
-                    ty: ty.to_string(),
+                    ty,
                     cause: WhammCause::from(cause) };
-                let mut type_value = WhammInjection::new(WhammDataType::TypeType);
-                type_value.type_data = Some(type_record);
-                type_value
+                WhammInjection {
+                    data_type: WhammDataType::TypeType,
+                    type_data: Some(type_record),
+                    ..Default::default() 
+                }
             },
 
             Injection::Memory { id, initial, maximum, cause } =>{
                 let memory_record = MemoryRecord{
-                    id: *id, initial: *initial, maximum: *maximum,
+                    id, initial, maximum,
                     cause: WhammCause::from(cause) };
-                let mut memory_value = WhammInjection::new(WhammDataType::MemoryType);
-                memory_value.memory_data = Some(memory_record);
-                memory_value
+                WhammInjection {
+                    data_type: WhammDataType::MemoryType,
+                    memory_data: Some(memory_record),
+                    ..Default::default() 
+                }
             },
 
             Injection::ActiveData { memory_index, offset_expr, data, cause } =>{
                 let active_data = ActiveDataRecord{
-                    memory_index: *memory_index,
-                    offset_expr: offset_expr.clone(),
-                    data: data.clone(),
+                    memory_index,
+                    offset_expr,
+                    data,
                     cause: WhammCause::from(cause) };
-                let mut active_data_value = WhammInjection::new(WhammDataType::ActiveDataType);
-                active_data_value.active_data = Some(active_data);
-                active_data_value
+                WhammInjection {
+                    active_data: Some(active_data),
+                    data_type: WhammDataType::ActiveDataType,
+                    ..Default::default() 
+                }
             },
 
             Injection::PassiveData { data, cause } =>{
                 let passive_data = PassiveDataRecord{
-                    data: data.clone(),
+                    data,
                     cause: WhammCause::from(cause)};
-                let mut passive_data_value = WhammInjection::new(WhammDataType::PassiveDataType);
-                passive_data_value.passive_data = Some(passive_data);
-                passive_data_value
+                WhammInjection {
+                    passive_data: Some(passive_data),
+                    data_type: WhammDataType::PassiveDataType,
+                    ..Default::default()}
             },
 
             Injection::Global { id, ty, shared, mutable, init_expr, cause } =>{
                 let global_record = GlobalRecord{
-                    id: *id, 
-                    ty: ty.to_string(),
-                    shared: *shared,
-                    mutable: *mutable,
-                    init_expr: init_expr.clone(),
+                    id,
+                    ty,
+                    shared,
+                    mutable,
+                    init_expr,
                     cause: WhammCause::from(cause),
                 };
-                let mut global_value = WhammInjection::new(WhammDataType::GlobalType);
-                global_value.global_data = Some(global_record);
-                global_value
+                WhammInjection {
+                    global_data: Some(global_record),
+                    data_type: WhammDataType::GlobalType,
+                    ..Default::default()}
             },
 
             Injection::Func { id, fname, sig, locals, body, cause } =>{
                 let function_record = FunctionRecord{
-                    id: *id,
-                    fname: fname.clone(),
-                    sig: sig.clone(),
-                    locals: locals.clone(),
-                    body: body.clone(),
+                    id,
+                    fname,
+                    sig,
+                    locals,
+                    body,
                     cause: WhammCause::from(cause),
                 };
-                let mut function_value = WhammInjection::new(WhammDataType::FunctionType);
-                function_value.function_data = Some(function_record);
-                function_value
+                WhammInjection {
+                    function_data: Some(function_record),
+                    data_type: WhammDataType::FunctionType,
+                    ..Default::default()}
             },
 
             Injection::Local { target_fid, ty, cause } =>{
                 let local_record = LocalRecord{
-                    target_fid: *target_fid,
-                    ty: ty.to_string(),
+                    target_fid: target_fid,
+                    ty: ty,
                     cause: WhammCause::from(cause),
                 };
-                let mut local_value = WhammInjection::new(WhammDataType::LocalType);
-                local_value.local_data = Some(local_record);
-                local_value
+                WhammInjection {
+                    local_data: Some(local_record),
+                    data_type: WhammDataType::LocalType,
+                    ..Default::default()}
             }
 
             Injection::Table {cause } =>{
-                let mut table_value = WhammInjection::new(WhammDataType::TableType);
-                table_value.table_data = Some(TableRecord { cause: WhammCause::from(cause) });
-                table_value
+                WhammInjection {
+                    table_data: Some(TableRecord { cause: WhammCause::from(cause) }),
+                    data_type: WhammDataType::TableType,
+                    ..Default::default()}
             },
 
             Injection::Element { cause } =>{
-                let mut element_value = WhammInjection::new(WhammDataType::ElementType);
-                element_value.element_data = Some(ElementRecord { cause: WhammCause::from(cause) });
-                element_value
+                WhammInjection {
+                    element_data: Some(ElementRecord { cause: WhammCause::from(cause) }),
+                    data_type: WhammDataType::ElementType,
+                    ..Default::default()}
             }
 
             Injection::OpProbe { target_fid, target_opcode_idx, mode, body, cause } =>{
                 let op_probe_record = OpProbeRecord{
-                    target_fid: *target_fid,
-                    target_opcode_idx: *target_opcode_idx,
+                    target_fid,
+                    target_opcode_idx,
+                    body,
                     mode: FuncBodyInstrumentationMode::from(mode),
-                    body: body.clone(),
                     cause: WhammCause::from(cause),
                 };
-                let mut op_probe_value = WhammInjection::new(WhammDataType::OpProbeType);
-                op_probe_value.op_probe_data = Some(op_probe_record);
-                op_probe_value
+                WhammInjection {
+                    op_probe_data: Some(op_probe_record),
+                    data_type: WhammDataType::OpProbeType,
+                    ..Default::default()}
             }
 
             Injection::FuncProbe { target_fid, mode, body, cause }=>{
                 let func_probe_record = FuncProbeRecord{
-                    target_fid: *target_fid,
+                    target_fid,
+                    body,
                     mode: FuncInstrumentationMode::from(mode),
-                    body: body.clone(),
                     cause: WhammCause::from(cause),
                 };
-                let mut func_probe_value = WhammInjection::new(WhammDataType::FuncProbeType);
-                func_probe_value.func_probe_data = Some(func_probe_record);
-                func_probe_value
+                WhammInjection {
+                    func_probe_data: Some(func_probe_record),
+                    data_type: WhammDataType::FuncProbeType,
+                    ..Default::default()}
             }
         }
     }
 }
 
-impl From<&Cause> for WhammCause{
-    fn from(value: &Cause) -> Self {
+impl From<Cause> for WhammCause{
+    fn from(value: Cause) -> Self {
        match value{
         Cause::UserPos { lc }=>{
             WhammCause::UserPos(LineColData { l: lc.l, c: lc.c })
@@ -175,8 +192,8 @@ impl From<&Cause> for WhammCause{
     }
 }
 
-impl From<&InstrumentationMode> for FuncBodyInstrumentationMode{
-    fn from(value: &InstrumentationMode) -> Self {
+impl From<InstrumentationMode> for FuncBodyInstrumentationMode{
+    fn from(value: InstrumentationMode) -> Self {
        match value {
           InstrumentationMode::After => FuncBodyInstrumentationMode::After,
           InstrumentationMode::Before => FuncBodyInstrumentationMode::Before,
@@ -189,8 +206,8 @@ impl From<&InstrumentationMode> for FuncBodyInstrumentationMode{
     }
 }
 
-impl From<&FuncInstrMode> for FuncInstrumentationMode{
-    fn from(value: &FuncInstrMode) -> Self {
+impl From<FuncInstrMode> for FuncInstrumentationMode{
+    fn from(value: FuncInstrMode) -> Self {
        match value {
             FuncInstrMode::Entry=>FuncInstrumentationMode::Entry, 
             FuncInstrMode::Exit=>FuncInstrumentationMode::Exit, 

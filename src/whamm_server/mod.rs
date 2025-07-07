@@ -63,6 +63,7 @@ pub fn run(
                     new_script,
                     Vec::new(),
                 );
+                // let response :Result<Injection, Vec<WhammError>>= Err(Vec::new());
 
                 match response{
                     // handle valid response
@@ -71,7 +72,7 @@ pub fn run(
                         let mut api_response = Vec::new();
                         // Go through all the different inject types
                         // and convert their vec of injections to the wit supported type
-                        for (key, values) in &ok_response{
+                        for (key, values) in ok_response{
                             let mut injection_pair = InjectionPair{
                                 injection_type: key.to_string(),
                                 injection_value: Vec::new()
