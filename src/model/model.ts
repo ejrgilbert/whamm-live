@@ -3,19 +3,20 @@ import { WhammWebviewPanel } from "../user_interface/webviewPanel";
 import { FSM } from "../model/fsm";
 import { WhammResponse } from "./types";
 import * as vscode from 'vscode';
+import { whammServer } from "../whammServer";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
     static whamm_file_changing: boolean = false;
 
     // will be null if wizard option chosen
-    valid_wat_content!: string | null;
-    valid_wasm_content!: Uint8Array | undefined;
+    valid_wat_content!: string ;
+    valid_wasm_content!: Uint8Array;
 
-    response!: WhammResponse; 
+    response!: whammServer.InjectionPair[]; 
     webview: WhammWebviewPanel;
     // Will always be the latest API response with no error or 'null'
-    no_error_response: WhammResponse | null; 
+    no_error_response: whammServer.InjectionPair[] | null;
     fsm_mappings: FSM | undefined;
 
     constructor(webview: WhammWebviewPanel){
@@ -62,9 +63,39 @@ export class APIModel{
     }
 
     // Call the whamm API to update the model
-    update(): boolean{
-        // TODO
-        return true;
+    async update(): Promise<boolean>{
+        let file_path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
+        if (file_path && this.webview.fileName){
 
+            let file_contents = await APIModel.loadFileAsString(file_path, ExtensionContext.context);
+            if (!ExtensionContext.api.noChange(file_contents)){
+                try{
+                    // Call the whamm API to get the response
+                    this.response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
+                    this.no_error_response = this.response;
+
+                    // update the mappings now
+                    this.update_mappings();
+                } catch {
+                    // handle error response
+                    // TODO
+                }
+
+            } else{
+                // nothing to change
+                return true;
+            }
+        }
+        // unable to update since no whamm file
+        return false;
+    }
+
+    update_mappings(){
+        // TODO
+    }
+
+    static async loadFileAsString(path: string, context: vscode.ExtensionContext): Promise<string> {
+        const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
+        return new TextDecoder('utf-8').decode(encoded);
     }
 }

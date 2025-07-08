@@ -244,7 +244,7 @@ world whamm-server {
 	export end: func(app-name: string);
 	// No hash map support in wit. So, we usea list of key-value pairs
 	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string) -> result<bool, error-code>;
+	export no-change: func(new-script: string) -> bool;
 	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
 	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;
 }

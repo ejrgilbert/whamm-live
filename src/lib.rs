@@ -18,7 +18,7 @@ impl Guest for WhammServer {
 		result
 	}
 
-	fn no_change(new_script: String) -> Result<bool, ErrorCode>{
+	fn no_change(new_script: String) -> bool{
 		no_change(new_script)
 	}
 

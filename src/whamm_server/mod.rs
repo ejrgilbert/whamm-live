@@ -40,15 +40,13 @@ pub fn end(app_name: String){
 
 pub fn no_change(
     new_script: String,
-) -> Result<bool, ErrorCode> {
+) -> bool {
     return SCRIPT.with(|script| {
         let script_cache = &mut *script.borrow_mut();
-        return if !new_script.eq(script_cache) {
-            Result::Ok(true)
+        return if new_script.eq(script_cache) {
+            true
         } else {
-            Result::Err(ErrorCode::NoChange(
-                "No change between old and new whamm script".to_string(),
-            ))
+            false
         };
     });
 }
