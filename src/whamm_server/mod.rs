@@ -1,3 +1,7 @@
+use whamm::api::instrument::Injection;
+use whamm::common::error::WhammError;
+use wirm::ir::module::side_effects::InjectType;
+
 use crate::log;
 use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammInjection, WhammApiError, ErrorWrapper};
 use std::{cell::RefCell, collections::HashMap};
@@ -70,12 +74,13 @@ pub fn run(
                     new_script,
                     Vec::new(),
                 );
+                // let response:  Result<HashMap<InjectType, Vec<Injection>>, Vec<WhammError>> = Ok(HashMap::new());
 
                 match response{
                     // handle valid response
                     Ok(ok_response) => {
 
-                        let mut api_response = Vec::new();
+                        let mut api_response :Vec<InjectionPair>= Vec::new();
                         // Go through all the different inject types
                         // and convert their vec of injections to the wit supported type
                         for (key, values) in ok_response{
@@ -112,14 +117,16 @@ impl From<wat::Error> for ErrorCode {
     }
 }
 
-pub fn wat2wat(_content: String) -> Result<String, ErrorCode> {
+pub fn wat2watandwasm(_content: String) -> Result<(String, Vec<u8>), ErrorCode> {
     let binary = wat::parse_str(_content)?;
-    wasm2wat(binary)
+    let _wat = wasmprinter::print_bytes(&binary).expect("Problem parsing the wasm module");
+    Ok((_wat, binary))
 }
 
-pub fn wasm2wat(_content: Vec<u8>) -> Result<String, ErrorCode> {
+pub fn wasm2watandwasm(_content: Vec<u8>) -> Result<(String, Vec<u8>), ErrorCode> {
     let _wat = wasmprinter::print_bytes(_content).expect("Problem parsing the wasm module");
-    Ok(_wat)
+    let binary = wat::parse_str(&_wat)?;
+    Ok((_wat, binary))
 }
 
 // ===============

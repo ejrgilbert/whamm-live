@@ -469,11 +469,11 @@ export namespace whammServer {
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		wat2wat: (content: string) => string;
+		wat2watandwasm: (content: string) => [string, Uint8Array];
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		wasm2wat: (content: Uint8Array) => string;
+		wasm2watandwasm: (content: Uint8Array) => [string, Uint8Array];
 	};
 	export namespace Exports {
 		export type Promisified = $wcm.$exports.Promisify<Exports>;
@@ -692,12 +692,12 @@ export namespace whammServer.$ {
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
 		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
-		export const wat2wat = new $wcm.FunctionType<whammServer.Exports['wat2wat']>('wat2wat',[
+		export const wat2watandwasm = new $wcm.FunctionType<whammServer.Exports['wat2watandwasm']>('wat2watandwasm',[
 			['content', $wcm.wstring],
-		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
-		export const wasm2wat = new $wcm.FunctionType<whammServer.Exports['wasm2wat']>('wasm2wat',[
+		], new $wcm.ResultType<[string, Uint8Array], whammServer.ErrorCode>(new $wcm.TupleType<[string, Uint8Array]>([$wcm.wstring, new $wcm.Uint8ArrayType()]), ErrorCode, Types.ErrorCode.Error_));
+		export const wasm2watandwasm = new $wcm.FunctionType<whammServer.Exports['wasm2watandwasm']>('wasm2watandwasm',[
 			['content', new $wcm.Uint8ArrayType()],
-		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
+		], new $wcm.ResultType<[string, Uint8Array], whammServer.ErrorCode>(new $wcm.TupleType<[string, Uint8Array]>([$wcm.wstring, new $wcm.Uint8ArrayType()]), ErrorCode, Types.ErrorCode.Error_));
 	}
 }
 export namespace whammServer._ {
@@ -729,8 +729,8 @@ export namespace whammServer._ {
 			['end', $.exports.end],
 			['run', $.exports.run],
 			['noChange', $.exports.noChange],
-			['wat2wat', $.exports.wat2wat],
-			['wasm2wat', $.exports.wasm2wat]
+			['wat2watandwasm', $.exports.wat2watandwasm],
+			['wasm2watandwasm', $.exports.wasm2watandwasm]
 		]);
 		export function bind(exports: Exports, context: $wcm.WasmContext): whammServer.Exports {
 			return $wcm.$exports.bind<whammServer.Exports>(_, exports, context);
@@ -741,8 +741,8 @@ export namespace whammServer._ {
 		'end': (appName_ptr: i32, appName_len: i32) => void;
 		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
 		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
-		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'wat2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
+		'wasm2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 	};
 	export function bind(service: whammServer.Imports, code: $wcm.Code, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports>;
 	export function bind(service: whammServer.Imports.Promisified, code: $wcm.Code, port: $wcm.RAL.ConnectionPort, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports.Promisified>;
