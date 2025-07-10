@@ -79,7 +79,7 @@ interface types {
 	}
 	
 	variant whamm-cause {
-		user-pos(line-col-data),
+		user-pos(span-data),
 		user-span(span-data),
 		user-probe(span-data),
 		whamm

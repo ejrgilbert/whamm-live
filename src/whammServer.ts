@@ -137,8 +137,8 @@ export namespace Types {
 
 	export namespace WhammCause {
 		export const userPos = 'userPos' as const;
-		export type UserPos = { readonly tag: typeof userPos; readonly value: LineColData } & _common;
-		export function UserPos(value: LineColData): UserPos {
+		export type UserPos = { readonly tag: typeof userPos; readonly value: SpanData } & _common;
+		export function UserPos(value: SpanData): UserPos {
 			return new VariantImpl(userPos, value) as UserPos;
 		}
 
@@ -161,7 +161,7 @@ export namespace Types {
 		}
 
 		export type _tt = typeof userPos | typeof userSpan | typeof userProbe | typeof whamm;
-		export type _vt = LineColData | SpanData | SpanData | undefined;
+		export type _vt = SpanData | SpanData | SpanData | undefined;
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
 		export function _ctor(t: _tt, v: _vt): WhammCause {
 			return new VariantImpl(t, v) as WhammCause;
@@ -510,7 +510,7 @@ export namespace Types.$ {
 		['lc0', LineColData],
 		['lc1', LineColData],
 	]);
-	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', LineColData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
+	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', SpanData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
 	export const ImportRecord = new $wcm.RecordType<Types.ImportRecord>([
 		['module', $wcm.wstring],
 		['name', $wcm.wstring],

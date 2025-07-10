@@ -1,3 +1,4 @@
+import { Types, whammServer } from "../whammServer";
 // Different types and enums for API responses
 
 // Enums
@@ -55,16 +56,26 @@ export type ScriptLoc = {
     c: number,
 }
 
+// inclusive range
+export type WatLineRange = {
+    l1: number,
+    l2: number,
+}
+
+export type WhammLiveInjection = {
+    type: Types.WhammInjectType;
+    code: string[],
+    range: WatLineRange;
+}
+
 export type Metadata = {
     script_start: ScriptLoc;
     script_end: ScriptLoc | undefined;
 }
 export type Probe = {
-    target_fid: number,
-    target_opcode_idx: number,
-    mode: ModeKind,
+    original_wat_line_number: number,
+    mode: Types.FuncBodyInstrumentationMode,
     body: string[],
-    metadata: Metadata | undefined
 }
 
 export type WhammError = {
