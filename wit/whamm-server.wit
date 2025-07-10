@@ -2,47 +2,8 @@
 package vscode:example;
 
 interface types {
-	
-	enum whamm-inject-type {
-		type-inject,
-		import-inject,
-		export-inject,
-		memory-inject,
-		data-inject,
-		global-inject,
-		func-inject,
-		local-inject,
-		table-inject,
-		element-inject,
-		probe-inject
-	}
-	
 	record options {
 		as-monitor-module: bool
-	}
-
-	enum mode {
-		before,
-		after,
-		alt,
-		entry,
-		exit
-	}
-
-	record script-loc {
-		l: u32,
-		c: u32
-	}
-
-	record app-loc {
-		byte-offset: u64,
-		mode: mode
-	}
-	
-	record probe {
-    	app-loc: app-loc,
-		script-loc: script-loc,
-		wat: string
 	}
 
 	variant error-code {
@@ -237,7 +198,7 @@ interface types {
 }
 
 world whamm-server {
-	use types.{ options, probe, error-code, injection-pair, error-wrapper};
+	use types.{ options, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;

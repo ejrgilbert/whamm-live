@@ -7,46 +7,8 @@ import * as $wcm from '@vscode/wasm-component-model';
 import type { u32, u64, i32, ptr, result } from '@vscode/wasm-component-model';
 
 export namespace Types {
-	export enum WhammInjectType {
-		typeInject = 'typeInject',
-		importInject = 'importInject',
-		exportInject = 'exportInject',
-		memoryInject = 'memoryInject',
-		dataInject = 'dataInject',
-		globalInject = 'globalInject',
-		funcInject = 'funcInject',
-		localInject = 'localInject',
-		tableInject = 'tableInject',
-		elementInject = 'elementInject',
-		probeInject = 'probeInject'
-	}
-
 	export type Options = {
 		asMonitorModule: boolean;
-	};
-
-	export enum Mode {
-		before = 'before',
-		after = 'after',
-		alt = 'alt',
-		entry = 'entry',
-		exit = 'exit'
-	}
-
-	export type ScriptLoc = {
-		l: u32;
-		c: u32;
-	};
-
-	export type AppLoc = {
-		byteOffset: u64;
-		mode: Mode;
-	};
-
-	export type Probe = {
-		appLoc: AppLoc;
-		scriptLoc: ScriptLoc;
-		wat: string;
 	};
 
 	export namespace ErrorCode {
@@ -435,7 +397,6 @@ export type Types = {
 };
 export namespace whammServer {
 	export type Options = Types.Options;
-	export type Probe = Types.Probe;
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
 	export type InjectionPair = Types.InjectionPair;
@@ -481,23 +442,8 @@ export namespace whammServer {
 }
 
 export namespace Types.$ {
-	export const WhammInjectType = new $wcm.EnumType<Types.WhammInjectType>(['typeInject', 'importInject', 'exportInject', 'memoryInject', 'dataInject', 'globalInject', 'funcInject', 'localInject', 'tableInject', 'elementInject', 'probeInject']);
 	export const Options = new $wcm.RecordType<Types.Options>([
 		['asMonitorModule', $wcm.bool],
-	]);
-	export const Mode = new $wcm.EnumType<Types.Mode>(['before', 'after', 'alt', 'entry', 'exit']);
-	export const ScriptLoc = new $wcm.RecordType<Types.ScriptLoc>([
-		['l', $wcm.u32],
-		['c', $wcm.u32],
-	]);
-	export const AppLoc = new $wcm.RecordType<Types.AppLoc>([
-		['byteOffset', $wcm.u64],
-		['mode', Mode],
-	]);
-	export const Probe = new $wcm.RecordType<Types.Probe>([
-		['appLoc', AppLoc],
-		['scriptLoc', ScriptLoc],
-		['wat', $wcm.wstring],
 	]);
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
 	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
@@ -625,12 +571,7 @@ export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
 	export const witName = 'types' as const;
 	export const types: Map<string, $wcm.AnyComponentModelType> = new Map<string, $wcm.AnyComponentModelType>([
-		['WhammInjectType', $.WhammInjectType],
 		['Options', $.Options],
-		['Mode', $.Mode],
-		['ScriptLoc', $.ScriptLoc],
-		['AppLoc', $.AppLoc],
-		['Probe', $.Probe],
 		['ErrorCode', $.ErrorCode],
 		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
 		['FuncInstrumentationMode', $.FuncInstrumentationMode],
@@ -663,7 +604,6 @@ export namespace Types._ {
 }
 export namespace whammServer.$ {
 	export const Options = Types.$.Options;
-	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
 	export const InjectionPair = Types.$.InjectionPair;
 	export const ErrorWrapper = Types.$.ErrorWrapper;
