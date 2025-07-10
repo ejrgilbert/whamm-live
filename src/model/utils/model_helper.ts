@@ -1,3 +1,4 @@
+import { Types } from "../../whammServer";
 import { WhammLiveInjection } from "../types";
 
 export class ModelHelper{
@@ -22,5 +23,22 @@ export class ModelHelper{
             }
         }
         return injected_wat;
+    }
+
+    // remap the API response from whamm and wit so that 
+    // we can use the injections in sections order based on the line they are going to be injected in w.r.t to the wat file
+    // expected order: type, import, table, memory, tag, global, export, elem, (probes), func, data
+    static create_whamm_data_type_to_whamm_injection_mapping(whamm_response: Types.InjectionPair[]): Map<string, Types.WhammInjection>{
+        let mapping = new Map();
+        for (let key of Object.keys(Types.WhammDataType)){
+            mapping.set(key, []);
+        }
+
+        for (let injection_pair of whamm_response){
+            for (let injection of injection_pair.injectionValue){
+			    mapping.get(Types.WhammDataType[injection.dataType]).push(injection);
+                }
+            }
+        return mapping;
     }
 }
