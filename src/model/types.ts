@@ -44,12 +44,6 @@ export const stringToInjectType: Record<string, InjectType> = {
     'module': InjectType.Module,
 }
 
-export enum ModeKind{
-    before,
-    after,
-    alt
-}
-
 // Types
 export type ScriptLoc = {
     l: number,
@@ -62,20 +56,28 @@ export type WatLineRange = {
     l2: number,
 }
 
+export type line_col = {
+    l: number,
+    c: number
+}
+
+// span starting line and column
+// and ending line(inclusive) and column(exclusive)
+export type span = {
+    lc0: line_col,
+    lc1: line_col
+}
+
 export type WhammLiveInjection = {
-    type: Types.WhammInjectType;
+    type: Types.WhammDataType;
     code: string[],
-    range: WatLineRange;
+    wat_range: WatLineRange;
+    whamm_span: span | undefined,
 }
 
 export type Metadata = {
     script_start: ScriptLoc;
     script_end: ScriptLoc | undefined;
-}
-export type Probe = {
-    original_wat_line_number: number,
-    mode: Types.FuncBodyInstrumentationMode,
-    body: string[],
 }
 
 export type WhammError = {
@@ -83,7 +85,5 @@ export type WhammError = {
     err_loc: Metadata | undefined;
 }
 
-export type WhammResponse = {
-    response: undefined | Map<InjectType, Probe[]>;
-    error: WhammError[] | undefined;
-}
+export type InjectionRecord = Types.TypeRecord | Types.ImportRecord | Types.TableRecord | Types.MemoryRecord | Types.GlobalRecord | Types.ExportRecord |
+            Types.ElementRecord | Types.OpProbeRecord | Types.LocalRecord | Types.FuncProbeRecord | Types.FunctionRecord | Types.ActiveDataRecord | Types.PassiveDataRecord;

@@ -25,11 +25,12 @@ describe('testing Model Helper `inject_wat` function', () => {
       for (let i=0; i< number_of_injections; i++){
         let injection = config[key][`injection_${i+1}`];
         let whamm_live_injection = {
-          // type doesn't matter
-          type: Types.WhammInjectType.probeInject,
+          // type and whamm doesn't matter
+          type: Types.WhammDataType.opProbeType,
           code: injection["code"],
-          range: {l1: injection.range[0], l2: injection.range[1]}
-        }
+          wat_range: {l1: injection.range[0], l2: injection.range[1]},
+          whamm_span: undefined
+        } as WhammLiveInjection
         whamm_injections.push(whamm_live_injection)
 
       }
