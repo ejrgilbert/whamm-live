@@ -4,14 +4,17 @@ import toml from 'toml';
 import {ModelHelper} from '../src/model/utils/model_helper';
 import {WhammLiveInjection, WatLineRange} from '../src/model/types';
 import { Types } from '../src/whammServer';
+import { isNumberObject } from 'util/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 // const error_toml_file_path = path.resolve(__dirname, 'model_helper_errors.test.toml'); 
+
 describe('testing Model Helper `inject_wat` function', () => {
 
   const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
   
   for (let key of Object.keys(config)) {
+    if (config[key]["test"] === "inject_wat"){
 
     test('test the injected wat content', () => {
       let original = config[key]["original"].join('\n');
@@ -36,6 +39,28 @@ describe('testing Model Helper `inject_wat` function', () => {
       );
 
     });
+  }
+}
+});
 
+describe('testing Model Helper\'s static `create_jagged_array` method', () => {
+
+  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
+  
+  for (let key of Object.keys(config)) {
+    if (config[key]["test"] === "create_jagged_array"){
+
+    test('test the jagged array dimensions', () => {
+      let content: string= config[key]["content"];
+      let number_of_rows: number = config[key]["number_of_rows"];
+      let number_of_cols: number[] = config[key]["number_of_cols"];
+      let jagged_array= ModelHelper.create_jagged_array(content);
+
+      expect(jagged_array.length).toBe(number_of_rows);
+      for (let i=0; i < number_of_cols.length; i++){
+        expect(jagged_array[i].length).toBe(number_of_cols[i]);
+      }
+    });
+  }
 }
 });
