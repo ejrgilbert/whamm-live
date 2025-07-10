@@ -135,27 +135,83 @@ export class ModelHelper{
                                 break;
                             
                             case Types.WhammDataType.memoryType:
+                                {
+                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.memoryData,
+                                            InjectType.Memory, fsm, "Memory injection expected to be defined");
+                                    let memory_injection = inj as Types.MemoryRecord;
+                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance_for_one_line_injections(
+                                        memory_injection,
+                                        inject_type,
+                                        start_wat_line + (number_of_lines_injected++),
+                                    )
+                                    whamm_live_instance.code.push(`(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`);
+                                    whamm_live_injections_to_inject.push(whamm_live_instance);
+                                }
                                 break;
 
                             case Types.WhammDataType.activeDataType:
+                                {
+                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.activeData,
+                                            InjectType.Data, fsm, "Active data injection expected to be defined");
+                                    let activedata_injection = inj as Types.ActiveDataRecord;
+                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance_for_one_line_injections(
+                                        activedata_injection,
+                                        inject_type,
+                                        start_wat_line + (number_of_lines_injected++),
+                                    )
+                                    const offset = `(${activedata_injection.offsetExpr.join(" ")})`;
+                                    const byte_literal: string =[...activedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
+  .join("");
+                                    whamm_live_instance.code.push(`(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`);
+                                    whamm_live_injections_to_inject.push(whamm_live_instance);
+                                }
                                 break;
 
                             case Types.WhammDataType.passiveDataType:
+                                {
+                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.passiveData,
+                                            InjectType.Data, fsm, "Passive data injection expected to be defined");
+                                    let passivedata_injection = inj as Types.PassiveDataRecord;
+                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance_for_one_line_injections(
+                                        passivedata_injection,
+                                        inject_type,
+                                        start_wat_line + (number_of_lines_injected++),
+                                    )
+                                    const byte_literal: string =[...passivedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
+  .join("");
+                                    whamm_live_instance.code.push(`(data "${byte_literal}")`);
+                                    whamm_live_injections_to_inject.push(whamm_live_instance);
+                                }
                                 break;
 
                             case Types.WhammDataType.globalType:
+                                {
+                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.globalData,
+                                            InjectType.Global, fsm, "Global data injection expected to be defined");
+                                    let global_injection = inj as Types.GlobalRecord;
+                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance_for_one_line_injections(
+                                        global_injection,
+                                        inject_type,
+                                        start_wat_line + (number_of_lines_injected++),
+                                    )
+                                    
+                                    let type_string = `(${global_injection.mutable ? "mut " : ""}${global_injection.ty})`
+                                    whamm_live_instance.code.push(
+                                        `(global $global${global_injection.id}} ${type_string} (${global_injection.initExpr.join(" ")})`);
+                                    whamm_live_injections_to_inject.push(whamm_live_instance);
+                                }
                                 break;
 
                             case Types.WhammDataType.functionType:
-                                break;
-
-                            case Types.WhammDataType.localType:
                                 break;
 
                             case Types.WhammDataType.tableType:
                                 break;
 
                             case Types.WhammDataType.elementType:
+                                break;
+
+                            case Types.WhammDataType.localType:
                                 break;
 
                             case Types.WhammDataType.opProbeType:
