@@ -92,3 +92,15 @@ test="create_whamm_live_injection_instances"
 app="loops.wat"
 script="branch_monitor.mm"
 number_of_import_functions_injected=13
+
+[whamm_live_injection_instance_six]
+test="create_whamm_live_injection_instances"
+app="app.wat"
+script="global_map.mm"
+number_of_import_functions_injected=62
+
+[whamm_live_injection_instance_seven]
+test="create_whamm_live_injection_instances"
+app="loops.wat"
+script="global_map.mm"
+number_of_import_functions_injected=62

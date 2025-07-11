@@ -1,6 +1,6 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
-import { InjectionRecord, InjectType, span, WatLineRange, WhammLiveInjection } from "../types";
+import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammLiveInjection } from "../types";
 
 export class ModelHelper{
 
@@ -108,10 +108,23 @@ export class ModelHelper{
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
         var whamm_live_injections_to_not_inject : WhammLiveInjection[]= [];
 
-        // follow the section orderings
+        // Keep track of the injected functions to wat mapping because some opBodyProbes and funcProbes **can** target these injected functions
+        // this would look something like
+        // key: 1,
+        // value: {
+        //      'local': 3,
+        //      'func': 2,
+        //      'probe': [2,3]
+        //  }
+        var injected_func_id_to_wat_mapping: Map<number, InjectionFuncValue> = new Map();
+
+        // follow the section orderings BUT deal with the opProbeType, localType and funcProbeTypes at the end
+        // Why? Because they don't inject any lines
+        // and if we deal with the remaining sections, we will have a completed `injected_func_id_to_wat_mapping` which we can use to track
+        // the probes that targeted the injected functions
         for (let inject_type of
             [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
-            Types.WhammDataType.elementType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType
+            Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType 
             ]){
                 // get the mapping
                 let injections =  whamm_live_mappings.get(Types.WhammDataType[inject_type]);
@@ -247,15 +260,19 @@ export class ModelHelper{
                                         inject_type,
                                         start_wat_line + number_of_lines_injected,
                                     )
-                                    
+                                    let local_start_line = start_wat_line + number_of_lines_injected;
+
                                     // construct the function body and update the # of lines injected and it's wat range accordingly
                                     const name = func_injection.fname ? `$${func_injection.fname}`: `$func${func_injection.id}`;
                                     const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
                                     const result = func_injection.sig[1].length ? ` (result ${func_injection.sig[1].join(" ")})` : "";
 
                                     whamm_live_instance.code.push(`(func ${name}${param}${result}`);
-                                    if (func_injection.locals.length >0) 
+                                    if (func_injection.locals.length >0){ 
                                         whamm_live_instance.code.push(`(local ${func_injection.locals.join(" ")})`);
+                                        local_start_line++;
+                                    }
+
                                     whamm_live_instance.code.push(...func_injection.body);
                                     whamm_live_instance.code.push(')');
 
@@ -263,6 +280,14 @@ export class ModelHelper{
                                     whamm_live_instance.wat_range.l2 = start_wat_line + number_of_lines_injected -1;
 
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
+
+                                    // Also insert values in the `injected_func_id_to_wat_mapping` map to keep track of the **exact** line func starts, body starts and ends, and locals start
+                                    injected_func_id_to_wat_mapping.set(
+                                        func_injection.id, {func: whamm_live_instance.wat_range.l1,
+                                                            local: local_start_line,
+                                                            probe: [local_start_line+1, whamm_live_instance.wat_range.l2]
+                                    })
+
                                 }
                                 break;
 
@@ -319,7 +344,23 @@ export class ModelHelper{
                                                 break;
                                     }
                                     
-                                    let [inj , wat_line] = ModelHelper.get_required_inject_data_and_wat_line(record, inject, fsm);
+                                    let inj!: InjectionRecord;
+                                    let wat_line!: number;
+                                    try{
+                                        [inj , wat_line] = ModelHelper.get_required_inject_data_and_wat_line(record, inject, fsm);
+                                        wat_line = wat_line + number_of_lines_injected;
+                                    } catch (e){
+                                        // error if fsm mapping not present
+                                        if (e instanceof Error && e.message.includes('FSM error') && record)
+                                        {
+                                            // If so, check if the mapping present in the `injected_func_id_wat_mapping`
+                                            // because the funcID could have belonged to a injected function
+                                            wat_line = ModelHelper.get_wat_line_without_fsm(record, inject, injected_func_id_to_wat_mapping);
+                                            inj = record;
+                                        } else
+                                            throw e;
+                                    }
+
                                     let injection_record = (inject === InjectType.Local) ? inj as Types.LocalRecord :
                                             ((inject === InjectType.FuncProbe) ? inj as Types.FuncProbeRecord: inj as Types.OpProbeRecord);
 
@@ -327,7 +368,7 @@ export class ModelHelper{
                                         injection_record,
                                         inject_type,
                                         // no change in # of lines injected
-                                        wat_line + number_of_lines_injected,
+                                        wat_line,
                                     );
                                     switch (inject_type) {
                                         case Types.WhammDataType.localType:
@@ -433,8 +474,37 @@ export class ModelHelper{
                 }
                 break;
         }
-        if (start_wat_line === undefined) throw new Error("FSM error: Local fsm mapping not present");
+        if (start_wat_line === undefined) {
+            throw new Error("FSM error: fsm mapping not present");
+        }
         return [injection_data, start_wat_line + offset]
+    }
+
+    private static get_wat_line_without_fsm(
+            injection_data: InjectionRecordDanglingType,
+            injection_type: InjectTypeDanglingType,
+            injected_func_id_to_wat_mapping: Map<number, InjectionFuncValue>)
+                : number{
+
+        let wat_line: number | undefined;
+        let mapping = injected_func_id_to_wat_mapping.get(injection_data.targetFid)
+        if (mapping) {
+            switch (injection_type){
+                case InjectType.Local:
+                    wat_line=mapping.local;
+                    break;
+                case InjectType.FuncProbe:
+                    wat_line=mapping.func;
+                    break;
+                case InjectType.FuncBodyProbe:
+                    wat_line =mapping.probe[0];
+                    break;
+            }
+        }
+        if (wat_line === undefined) {
+            throw new Error("FSM error: fsm mapping not present");
+        }
+        return wat_line;
     }
 
     // not made private for test reasons

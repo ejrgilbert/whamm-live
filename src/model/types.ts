@@ -88,3 +88,18 @@ export type WhammError = {
 
 export type InjectionRecord = Types.TypeRecord | Types.ImportRecord | Types.TableRecord | Types.MemoryRecord | Types.GlobalRecord | Types.ExportRecord |
             Types.ElementRecord | Types.OpProbeRecord | Types.LocalRecord | Types.FuncProbeRecord | Types.FunctionRecord | Types.ActiveDataRecord | Types.PassiveDataRecord;
+
+export type InjectionRecordDanglingType = Types.OpProbeRecord | Types.LocalRecord | Types.FuncProbeRecord;
+export type InjectTypeDanglingType = InjectType.FuncBodyProbe | InjectType.Local | InjectType.FuncProbe;
+export type InjectionFuncValue = {
+    local: number
+    probe:[number, number]
+    func: number
+}
+
+export type WhammLiveInjections = {
+    lines_injected: number;
+    injecting_injections: WhammLiveInjection[];
+    other_injections: WhammLiveInjection[];
+    injected_funcid_wat_map: Map<number, InjectionFuncValue>;
+}
