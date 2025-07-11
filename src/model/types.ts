@@ -46,33 +46,34 @@ export const stringToInjectType: Record<string, InjectType> = {
 
 // Types
 export type ScriptLoc = {
-    l: number,
-    c: number,
+    l: number;
+    c: number;
 }
 
 // inclusive range
 export type WatLineRange = {
-    l1: number,
-    l2: number,
+    l1: number;
+    l2: number
 }
 
 export type line_col = {
-    l: number,
+    l: number;
     c: number
 }
 
 // span starting line and column
 // and ending line(inclusive) and column(exclusive)
 export type span = {
-    lc0: line_col,
+    lc0: line_col;
     lc1: line_col
 }
 
 export type WhammLiveInjection = {
     type: Types.WhammDataType;
-    code: string[],
+    mode: string | null;
+    code: string[];
     wat_range: WatLineRange;
-    whamm_span: span | undefined,
+    whamm_span: span | null;
 }
 
 export type Metadata = {
@@ -81,7 +82,7 @@ export type Metadata = {
 }
 
 export type WhammError = {
-    msg: string,
+    msg: string;
     err_loc: Metadata | undefined;
 }
 

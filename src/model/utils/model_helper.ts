@@ -85,7 +85,7 @@ export class ModelHelper{
                                     let import_injection = inj as Types.ImportRecord;
 
                                     // create whamm live instance with empty code block
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         import_injection,
                                         inject_type,
                                         // new line would be where it was initially supposed to be injected + the new offset because
@@ -105,7 +105,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.exportData, InjectType.Export, fsm);
                                     let export_injection = inj as Types.ExportRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         export_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -121,7 +121,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.typeData, InjectType.Type, fsm);
                                     let type_injection = inj as Types.TypeRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         type_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -135,7 +135,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.memoryData, InjectType.Memory, fsm);
                                     let memory_injection = inj as Types.MemoryRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         memory_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -149,7 +149,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.activeData, InjectType.Data, fsm);
                                     let activedata_injection = inj as Types.ActiveDataRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         activedata_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -166,7 +166,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.passiveData, InjectType.Data, fsm);
                                     let passivedata_injection = inj as Types.PassiveDataRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         passivedata_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -182,7 +182,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.globalData, InjectType.Global, fsm);
                                     let global_injection = inj as Types.GlobalRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         global_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -199,13 +199,12 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.functionData, InjectType.Func, fsm);
                                     let func_injection = inj as Types.FunctionRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         func_injection,
                                         inject_type,
                                         start_wat_line + number_of_lines_injected,
                                     )
                                     
-                                    // wat_range
                                     // construct the function body and update the # of lines injected and it's wat range accordingly
                                     const name = func_injection.fname ? `$${func_injection.fname}`: `$func${func_injection.id}`;
                                     const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
@@ -228,7 +227,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.tableData, InjectType.Table, fsm);
                                     let table_injection = inj as Types.TableRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         table_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -244,7 +243,7 @@ export class ModelHelper{
                                 {
                                     let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.elementData, InjectType.Element, fsm);
                                     let elem_injection = inj as Types.ElementRecord;
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         elem_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
@@ -281,7 +280,7 @@ export class ModelHelper{
                                     let injection_record = (inject === InjectType.Local) ? inj as Types.LocalRecord :
                                             ((inject === InjectType.FuncProbe) ? inj as Types.FuncProbeRecord: inj as Types.OpProbeRecord);
 
-                                    let whamm_live_instance = ModelHelper.create_whamm_live_instance(
+                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         injection_record,
                                         inject_type,
                                         // no change in # of lines injected
@@ -386,7 +385,7 @@ export class ModelHelper{
         return [injection_data, start_wat_line + offset]
     }
 
-    private static create_whamm_live_instance(record: InjectionRecord, inject_type: Types.WhammDataType, new_wat_line: number){
+    static __new_whamm_live_injection_instance(record: InjectionRecord, inject_type: Types.WhammDataType, new_wat_line: number){
         // create the whamm live instance for one line injections
         let [wat_range, whamm_span] = ModelHelper.create_wat_range_and_whamm_span(record, new_wat_line);
         return {

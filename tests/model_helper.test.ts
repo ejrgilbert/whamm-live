@@ -2,17 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import toml from 'toml';
 import {ModelHelper} from '../src/model/utils/model_helper';
-import {WhammLiveInjection, WatLineRange} from '../src/model/types';
+import {WhammLiveInjection, WatLineRange, span} from '../src/model/types';
 import { Types } from '../src/whammServer';
 import { isNumberObject } from 'util/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 // const error_toml_file_path = path.resolve(__dirname, 'model_helper_errors.test.toml'); 
+const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
+  
 
 describe('testing Model Helper `inject_wat` function', () => {
 
-  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
-  
   for (let key of Object.keys(config)) {
     if (config[key]["test"] === "inject_wat"){
 
@@ -28,8 +28,9 @@ describe('testing Model Helper `inject_wat` function', () => {
           // type and whamm doesn't matter
           type: Types.WhammDataType.opProbeType,
           code: injection["code"],
+          mode: null,
           wat_range: {l1: injection.range[0], l2: injection.range[1]},
-          whamm_span: undefined
+          whamm_span: null
         } as WhammLiveInjection
         whamm_injections.push(whamm_live_injection)
 
@@ -46,8 +47,6 @@ describe('testing Model Helper `inject_wat` function', () => {
 
 describe('testing Model Helper\'s static `create_jagged_array` method', () => {
 
-  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
-  
   for (let key of Object.keys(config)) {
     if (config[key]["test"] === "create_jagged_array"){
 
@@ -65,3 +64,25 @@ describe('testing Model Helper\'s static `create_jagged_array` method', () => {
   }
 }
 });
+
+describe('testing Model Helper\'s static `__new_whamm_live_injection_instance` method', () => {
+      
+      // the injection type doesn't matter for this static method
+      test('test the whamm live injection instance static method for func probes', () => {
+        // @ts-ignore
+        let whamm_cause: Types.WhammCause = {"_tag": "userProbe", "_value": {"lc0": {"l": 1,"c": 1}, "lc1": { "l": 4, "c": 2}}}
+        let func_record = {cause: whamm_cause, targetFid: 2, body:[], mode: Types.FuncInstrumentationMode.entry} as Types.FuncProbeRecord
+
+        let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(func_record, Types.WhammDataType.funcProbeType, 10);
+        expect(whamm_live_instance).toStrictEqual(
+          {
+            type: Types.WhammDataType.funcProbeType,
+            mode: null,
+            code: [],
+            wat_range: {l1: 10, l2: 10} as WatLineRange,
+            whamm_span: {"lc0": {"l": 1,"c": 1}, "lc1": { "l": 4, "c": 2}} as span,
+          }
+        )
+      });
+  }
+);
