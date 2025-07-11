@@ -62,7 +62,7 @@ export class ModelHelper{
 
     // This function's job is to update the funcID values for the different mappings like
     // the local mappings and func mappings since the funcID value changes after an injection
-    static create_injected_fsm_mappings(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
+    static update_fsm_funcIDs(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
         let import_injections = whamm_live_mappings.get(Types.WhammDataType[Types.WhammDataType.importType]);
 
         if (import_injections){
@@ -71,7 +71,6 @@ export class ModelHelper{
             for (let import_injection of import_injections){
                 if (import_injection.importData?.typeRef.toLowerCase().startsWith("func")) number_of_imported_functions++;
             }
-
             // no change in fsm funcID values since no import functions injected
             if (number_of_imported_functions === 0) return fsm;
 
@@ -82,7 +81,7 @@ export class ModelHelper{
             injected_fsm.local_mapping = new Map();
             injected_fsm.func_mapping = new Map();
 
-            for (let old_funcID of injected_fsm.func_mapping.keys()){
+            for (let old_funcID of fsm.func_mapping.keys()){
                 let new_funcID = old_funcID + number_of_imported_functions;
 
                 let old_probe_value = fsm.probe_mapping.get(old_funcID);

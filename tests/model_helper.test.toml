@@ -67,3 +67,4 @@ number_of_cols = [0,5,0,0,2,1,4]
 test="create_whamm_live_injection_instances"
 app="hello.wat"
 script="script.mm"
+number_of_import_functions_injected=13

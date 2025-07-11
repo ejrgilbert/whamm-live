@@ -1,9 +1,9 @@
 import { ExtensionContext } from "../extensionContext";
 import { WhammWebviewPanel } from "../user_interface/webviewPanel";
 import { FSM } from "../model/fsm";
-import { WhammResponse } from "./types";
 import * as vscode from 'vscode';
-import { whammServer } from "../whammServer";
+import { Types, whammServer } from "../whammServer";
+import { ModelHelper } from "./utils/model_helper";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
@@ -17,11 +17,12 @@ export class APIModel{
     webview: WhammWebviewPanel;
     // Will always be the latest API response with no error or 'null'
     no_error_response: whammServer.InjectionPair[] | null;
-    fsm_mappings: FSM | undefined;
+    fsm_mappings: FSM | null;
+    injected_fsm_mappings: FSM | null;
 
     constructor(webview: WhammWebviewPanel){
         this.webview = webview;
-        this.no_error_response = null;
+        this.no_error_response = this.fsm_mappings = this.injected_fsm_mappings = null;
     }
 
     async loadWatAndWasm(): Promise<boolean>{
@@ -52,7 +53,7 @@ export class APIModel{
                 this.fsm_mappings = new FSM(this.valid_wat_content)
 
                 // create the mappings
-                this.update();
+                this.update(true);
 
                 return [true, "success"];
             } catch(error){
@@ -62,17 +63,22 @@ export class APIModel{
         return [false, "Whamm setup failed"];
     }
 
+    // Should have already called `setup`
     // Call the whamm API to update the model
-    async update(): Promise<boolean>{
+    async update(force_update: boolean = false): Promise<boolean>{
         let file_path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
         if (file_path && this.webview.fileName){
 
             let file_contents = await APIModel.loadFileAsString(file_path, ExtensionContext.context);
-            if (!ExtensionContext.api.noChange(file_contents)){
+            if (force_update || !ExtensionContext.api.noChange(file_contents)){
                 try{
                     // Call the whamm API to get the response
-                    this.response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
-                    this.no_error_response = this.response;
+                    let response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
+                    let whamm_live_mappings = ModelHelper.create_whamm_data_type_to_whamm_injection_mapping(response);
+
+                    this.no_error_response = response;
+                    // store the new fsm mappings to account for funcID changes
+                    if (this.fsm_mappings != null) this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
 
                     // update the mappings now
                     this.update_mappings();
@@ -83,6 +89,7 @@ export class APIModel{
 
             } else{
                 // nothing to change
+                console.log('no need to update now');
                 return true;
             }
         }
@@ -91,11 +98,12 @@ export class APIModel{
     }
 
     update_mappings(){
-        // TODO
+        //TODO
     }
 
+    // file related helper methods
     static async loadFileAsString(path: string, context: vscode.ExtensionContext): Promise<string> {
-        const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
+        const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(path));
         return new TextDecoder('utf-8').decode(encoded);
     }
 }
