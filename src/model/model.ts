@@ -4,6 +4,7 @@ import { FSM } from "../model/fsm";
 import * as vscode from 'vscode';
 import { Types, whammServer } from "../whammServer";
 import { ModelHelper } from "./utils/model_helper";
+import { InjectType } from "./types";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
@@ -51,7 +52,7 @@ export class APIModel{
 
                 // use the fsm to have the mappings ready
                 this.fsm_mappings = new FSM(this.valid_wat_content)
-
+                this.fsm_mappings.run();
                 // create the mappings
                 this.update(true);
 
@@ -74,6 +75,7 @@ export class APIModel{
                 try{
                     // Call the whamm API to get the response
                     let response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
+                    console.log(response);
                     let whamm_live_mappings = ModelHelper.create_whamm_data_type_to_whamm_injection_mapping(response);
 
                     this.no_error_response = response;

@@ -102,7 +102,7 @@ export class ModelHelper{
     // to create `WhammLiveInjection` instances. These instances will store their new wat locations
     // This method returns a tuple with the first element being instances that are to be injected in the new wat
     // and the other element being a list of instances that are to **not** be injected and instead be used as dangling references like `funcProbes`, `OpBodyProbes`, `Locals`
-    static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): [WhammLiveInjection[], WhammLiveInjection[]]{
+    static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): [WhammLiveInjection[], WhammLiveInjection[], number]{
         // all the other injections except `funcProbes`, `OpBodyProbes`, `Locals` should update the number_of_lines_injected since they are literally injecting new wat content
         var number_of_lines_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
@@ -358,7 +358,7 @@ export class ModelHelper{
 
         // We need to follow the section ordering because if we do
         // then the injected wat line range is fixed and won't need to be updated until the next API call
-        return [whamm_live_injections_to_inject,whamm_live_injections_to_not_inject];
+        return [whamm_live_injections_to_inject,whamm_live_injections_to_not_inject, number_of_lines_injected];
     }
 
     /*
