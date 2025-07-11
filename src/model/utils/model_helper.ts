@@ -315,7 +315,7 @@ export class ModelHelper{
 
         // We need to follow the section ordering because if we do
         // then the injected wat line range is fixed and won't need to be updated until the next API call
-        return [[], []];
+        return [whamm_live_injections_to_inject,whamm_live_injections_to_not_inject];
     }
 
     // private helper methods to help with whamm live injection instance creation

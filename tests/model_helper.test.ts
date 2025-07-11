@@ -4,7 +4,7 @@ import toml from 'toml';
 import {ModelHelper} from '../src/model/utils/model_helper';
 import {WhammLiveInjection, WatLineRange, span} from '../src/model/types';
 import { Types } from '../src/whammServer';
-import { isNumberObject } from 'util/types';
+import { FSM } from '../src/model/fsm';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 // const error_toml_file_path = path.resolve(__dirname, 'model_helper_errors.test.toml'); 
@@ -86,3 +86,40 @@ describe('testing Model Helper\'s static `__new_whamm_live_injection_instance` m
       });
   }
 );
+
+describe('testing Model Helper\'s static `create_whamm_live_injection_instances` method', () => {
+      
+  for (let key of Object.keys(config)) {
+    if (config[key]["test"] === "create_whamm_live_injection_instances"){
+      test('test the **main** create_whamm_live_injection_instances static method', () => {
+        
+        let data: Types.InjectionPair[]= load_whamm_api_response(config[key].app, config[key].script)
+        let injection_mappings = ModelHelper.create_whamm_data_type_to_whamm_injection_mapping(data);
+        // Initially test that all the mappings are as expected
+        for (let injection_mapping of injection_mappings){
+          for (let injection of injection_mapping[1]){
+            expect(injection.dataType).toBe(injection_mapping[0]);
+          }
+        }
+
+        // load the FSM
+        const wat_file_path = path.resolve(__dirname, 'wat', config[key]["app"]); 
+        let fsm = new FSM(fs.readFileSync(wat_file_path, 'utf-8'));
+
+
+        // Create the whamm live injection object instances
+        // let [one, two ] = ModelHelper.create_whamm_live_injection_instances(fsm, injection_mappings)
+        // console.log(one);
+        // console.log(two);
+      });
+  }
+  }
+});
+
+// Test helper methods
+function load_whamm_api_response(app_name: string, script: string): Types.InjectionPair[]{
+  const response_file_path = path.resolve(__dirname, 'whamm_api_responses',script.split('.')[0], `${app_name.split('.')[0]}.json`); 
+  let file_string = fs.readFileSync(response_file_path, 'utf-8')
+  const data = JSON.parse(file_string);
+  return data;
+}
