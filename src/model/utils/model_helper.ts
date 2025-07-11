@@ -4,6 +4,11 @@ import { InjectionRecord, InjectType, span, WatLineRange, WhammLiveInjection } f
 
 export class ModelHelper{
 
+    /*
+        Wat injection and WhammLiveInjection object related methods
+        : to deal with the API response to have the extension model side ready
+    */
+
     // Inject wat builds the injected wat content
     // by combining the original wat string and the whamm_injections
     static inject_wat(original: string, whamm_injections: WhammLiveInjection[], number_of_lines_injected: number) :string[]{
@@ -53,6 +58,45 @@ export class ModelHelper{
             jagged_array[i] = new_array;
         }
         return jagged_array;
+    }
+
+    // This function's job is to update the funcID values for the different mappings like
+    // the local mappings and func mappings since the funcID value changes after an injection
+    static create_injected_fsm_mappings(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
+        let import_injections = whamm_live_mappings.get(Types.WhammDataType[Types.WhammDataType.importType]);
+
+        if (import_injections){
+            // calculate number of injected import functions
+            let number_of_imported_functions = 0;
+            for (let import_injection of import_injections){
+                if (import_injection.importData?.typeRef.toLowerCase().startsWith("func")) number_of_imported_functions++;
+            }
+
+            // no change in fsm funcID values since no import functions injected
+            if (number_of_imported_functions === 0) return fsm;
+
+            let injected_fsm = new FSM (fsm.wat_string);
+            injected_fsm.section_to_line_mapping = fsm.section_to_line_mapping;
+
+            injected_fsm.probe_mapping = new Map();
+            injected_fsm.local_mapping = new Map();
+            injected_fsm.func_mapping = new Map();
+
+            for (let old_funcID of injected_fsm.func_mapping.keys()){
+                let new_funcID = old_funcID + number_of_imported_functions;
+
+                let old_probe_value = fsm.probe_mapping.get(old_funcID);
+                let old_local_value = fsm.local_mapping.get(old_funcID);
+                let old_func_value = fsm.func_mapping.get(old_funcID);
+                if (old_probe_value) injected_fsm.probe_mapping.set(new_funcID, old_probe_value);
+                if (old_local_value) injected_fsm.local_mapping.set(new_funcID, old_local_value);
+                if (old_func_value) injected_fsm.func_mapping.set(new_funcID, old_func_value);
+            }
+            return injected_fsm;
+        }
+        // no change in fsm funcID values since no imports injected
+        return fsm;
+
     }
 
     // Use the injection mappings created from `ModelHelper.create_whamm_data_type_to_whamm_injection_mapping`
@@ -318,10 +362,19 @@ export class ModelHelper{
         return [whamm_live_injections_to_inject,whamm_live_injections_to_not_inject];
     }
 
-    // private helper methods to help with whamm live injection instance creation
+    /*
+    *
+    *    private helper methods
+    *   : to help with whamm live injection instance creation
+    *
+    */
 
-    private static create_whamm_span(cause: Types.WhammCause): null | span{
-        switch(cause.tag){
+    private static create_live_whamm_span(cause: Types.WhammCause): null | span{
+        let tag_value = cause.tag;
+        // _tag will be used during test API responses
+        // @ts-ignore 
+        if (tag_value === undefined) tag_value=cause["_tag"];
+        switch(tag_value){
             case "whamm":
                 return null;
             default:
@@ -341,7 +394,7 @@ export class ModelHelper{
     // create wat range and whamm span for injections which only inject one line
     private static create_wat_range_and_whamm_span(injection_record: InjectionRecord, new_wat_line: number): [WatLineRange, span|null]{
         let wat_range = {l1: new_wat_line,l2: new_wat_line} as WatLineRange;
-        let whamm_span = ModelHelper.create_whamm_span(injection_record.cause);
+        let whamm_span = ModelHelper.create_live_whamm_span(injection_record.cause);
         return [wat_range, whamm_span];
     }
 
@@ -385,6 +438,8 @@ export class ModelHelper{
         return [injection_data, start_wat_line + offset]
     }
 
+    // not made private for test reasons
+    // but think of it as `protected`
     static __new_whamm_live_injection_instance(record: InjectionRecord, inject_type: Types.WhammDataType, new_wat_line: number){
         // create the whamm live instance for one line injections
         let [wat_range, whamm_span] = ModelHelper.create_wat_range_and_whamm_span(record, new_wat_line);
