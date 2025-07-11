@@ -1,13 +1,44 @@
 [
     {
-        "injectionType": "type",
+        "injectionType": "global",
         "injectionValue": [
             {
-                "dataType": "typeType",
-                "typeData": {
-                    "ty": "FuncType { params: [I64, I32], results: [I32], super_type: None, is_final: true, shared: false, tag: Some(Tag { data: [0] }) }",
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 0,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(247))] }"
+                    ],
                     "cause": {
                         "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 1,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(0))] }"
+                    ],
+                    "cause": {
+                        "_tag": "userSpan",
+                        "_value": {
+                            "lc0": {
+                                "l": 2,
+                                "c": 16
+                            },
+                            "lc1": {
+                                "l": 2,
+                                "c": 21
+                            }
+                        }
                     }
                 }
             }
@@ -552,6 +583,31 @@
         ]
     },
     {
+        "injectionType": "memory",
+        "injectionValue": [
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 0,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 1,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
         "injectionType": "func",
         "injectionValue": [
             {
@@ -824,70 +880,14 @@
         ]
     },
     {
-        "injectionType": "memory",
+        "injectionType": "type",
         "injectionValue": [
             {
-                "dataType": "memoryType",
-                "memoryData": {
-                    "id": 0,
-                    "initial": "[BigInt 1]",
+                "dataType": "typeType",
+                "typeData": {
+                    "ty": "FuncType { params: [I64, I32], results: [I32], super_type: None, is_final: true, shared: false, tag: Some(Tag { data: [0] }) }",
                     "cause": {
                         "_tag": "whamm"
-                    }
-                }
-            },
-            {
-                "dataType": "memoryType",
-                "memoryData": {
-                    "id": 1,
-                    "initial": "[BigInt 1]",
-                    "cause": {
-                        "_tag": "whamm"
-                    }
-                }
-            }
-        ]
-    },
-    {
-        "injectionType": "global",
-        "injectionValue": [
-            {
-                "dataType": "globalType",
-                "globalData": {
-                    "id": 0,
-                    "ty": "DataType: I32",
-                    "shared": false,
-                    "mutable": true,
-                    "initExpr": [
-                        "InitExpr { exprs: [Value(I32(247))] }"
-                    ],
-                    "cause": {
-                        "_tag": "whamm"
-                    }
-                }
-            },
-            {
-                "dataType": "globalType",
-                "globalData": {
-                    "id": 1,
-                    "ty": "DataType: I32",
-                    "shared": false,
-                    "mutable": true,
-                    "initExpr": [
-                        "InitExpr { exprs: [Value(I32(0))] }"
-                    ],
-                    "cause": {
-                        "_tag": "userSpan",
-                        "_value": {
-                            "lc0": {
-                                "l": 2,
-                                "c": 16
-                            },
-                            "lc1": {
-                                "l": 2,
-                                "c": 21
-                            }
-                        }
                     }
                 }
             }
