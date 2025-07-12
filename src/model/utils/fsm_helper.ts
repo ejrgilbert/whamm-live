@@ -1,5 +1,5 @@
-import {FSM} from './fsm';
-import { InjectType, stringToInjectType } from './types';
+import {FSM} from '../fsm';
+import { InjectType, stringToInjectType } from '../types';
 
 export class FSMHelper{
     // helper static methods for updating data(mapping) purposes

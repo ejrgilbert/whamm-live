@@ -1,0 +1,555 @@
+[
+    {
+        "injectionType": "type",
+        "injectionValue": [
+            {
+                "dataType": "typeType",
+                "typeData": {
+                    "ty": "FuncType { params: [I64, I32], results: [I32], super_type: None, is_final: true, shared: false, tag: Some(Tag { data: [0] }) }",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "probe",
+        "injectionValue": [
+            {
+                "dataType": "funcProbeType",
+                "funcProbeData": {
+                    "targetFid": 14,
+                    "mode": "exit",
+                    "body": [
+                        "Call { function_index: 19 }\n"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "opProbeType",
+                "opProbeData": {
+                    "targetFid": 14,
+                    "targetOpcodeIdx": 2,
+                    "mode": "before",
+                    "body": [
+                        "I32Const { value: 0 }\n",
+                        "LocalSet { local_index: 0 }\n",
+                        "LocalGet { local_index: 0 }\n",
+                        "LocalGet { local_index: 0 }\n",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 28, memory: 2 } }\n",
+                        "I32Const { value: 1 }\n",
+                        "I32Add\n",
+                        "I32Store { memarg: MemArg { align: 0, max_align: 0, offset: 28, memory: 2 } }\n"
+                    ],
+                    "cause": {
+                        "_tag": "userProbe",
+                        "_value": {
+                            "lc0": {
+                                "l": 1,
+                                "c": 1
+                            },
+                            "lc1": {
+                                "l": 4,
+                                "c": 2
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "import",
+        "injectionValue": [
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putc",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puts",
+                    "typeRef": "Func(0)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu8",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti8",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu16",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti16",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu32",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti32",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu64",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti64",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putf32",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putf64",
+                    "typeRef": "Func(5)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putbool",
+                    "typeRef": "Func(2)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "memory",
+        "injectionValue": [
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 1,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 2,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "global",
+        "injectionValue": [
+            {
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 0,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(239))] }"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 1,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(0))] }"
+                    ],
+                    "cause": {
+                        "_tag": "userSpan",
+                        "_value": {
+                            "lc0": {
+                                "l": 2,
+                                "c": 16
+                            },
+                            "lc1": {
+                                "l": 2,
+                                "c": 21
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "func",
+        "injectionValue": [
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 15,
+                    "fname": "puts_internal",
+                    "sig": [
+                        [
+                            "DataType: I32",
+                            "DataType: I32"
+                        ],
+                        []
+                    ],
+                    "locals": [
+                        "DataType: I32"
+                    ],
+                    "body": [
+                        "Loop { blockty: Empty }",
+                        "LocalGet { local_index: 2 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32LtU",
+                        "I32Eqz",
+                        "BrIf { relative_depth: 1 }",
+                        "LocalGet { local_index: 0 }",
+                        "LocalGet { local_index: 2 }",
+                        "I32Add",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 1 } }",
+                        "Call { function_index: 2 }",
+                        "LocalGet { local_index: 2 }",
+                        "I32Const { value: 1 }",
+                        "I32Add",
+                        "LocalSet { local_index: 2 }",
+                        "Br { relative_depth: 0 }",
+                        "End",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 16,
+                    "fname": "flush_var_metadata",
+                    "sig": [
+                        [
+                            "DataType: I64",
+                            "DataType: I32"
+                        ],
+                        [
+                            "DataType: I32"
+                        ]
+                    ],
+                    "locals": [
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32"
+                    ],
+                    "body": [
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 2 } }",
+                        "LocalSet { local_index: 2 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 4, memory: 2 } }",
+                        "LocalSet { local_index: 3 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 5, memory: 2 } }",
+                        "LocalSet { local_index: 4 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 9, memory: 2 } }",
+                        "LocalSet { local_index: 5 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 13, memory: 2 } }",
+                        "LocalSet { local_index: 6 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 17, memory: 2 } }",
+                        "LocalSet { local_index: 7 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 18, memory: 2 } }",
+                        "LocalSet { local_index: 8 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 19, memory: 2 } }",
+                        "LocalSet { local_index: 9 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 23, memory: 2 } }",
+                        "LocalSet { local_index: 10 }",
+                        "LocalGet { local_index: 1 }",
+                        "Call { function_index: 9 }",
+                        "I32Const { value: 210 }",
+                        "I32Const { value: 11 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 6 }",
+                        "LocalGet { local_index: 7 }",
+                        "Call { function_index: 15 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 0 }",
+                        "I64Const { value: -2005570450770458313 }",
+                        "I64Eq",
+                        "If { blockty: Empty }",
+                        "I32Const { value: 229 }",
+                        "I32Const { value: 5 }",
+                        "Call { function_index: 15 }",
+                        "I32Const { value: 234 }",
+                        "I32Const { value: 5 }",
+                        "Call { function_index: 15 }",
+                        "Else",
+                        "Unreachable",
+                        "End",
+                        "I32Const { value: 223 }",
+                        "I32Const { value: 6 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 8 }",
+                        "Call { function_index: 9 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 2 }",
+                        "LocalGet { local_index: 3 }",
+                        "Call { function_index: 15 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 4 }",
+                        "Call { function_index: 9 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 5 }",
+                        "Call { function_index: 9 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 9 }",
+                        "LocalGet { local_index: 10 }",
+                        "Call { function_index: 15 }",
+                        "I32Const { value: 221 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 15 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Const { value: 24 }",
+                        "I32Add",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 17,
+                    "fname": "flush_u32_vars",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [
+                        "DataType: I32",
+                        "DataType: I32"
+                    ],
+                    "body": [
+                        "Block { blockty: Empty }",
+                        "GlobalGet { global_index: 1 }",
+                        "I32Const { value: -1 }",
+                        "I32Eq",
+                        "BrIf { relative_depth: 0 }",
+                        "GlobalGet { global_index: 1 }",
+                        "LocalSet { local_index: 0 }",
+                        "Loop { blockty: Empty }",
+                        "LocalGet { local_index: 0 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 2 } }",
+                        "LocalTee { local_index: 1 }",
+                        "I32Const { value: -1 }",
+                        "I32Ne",
+                        "If { blockty: Empty }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Eqz",
+                        "If { blockty: Empty }",
+                        "Unreachable",
+                        "End",
+                        "LocalGet { local_index: 0 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Add",
+                        "LocalSet { local_index: 1 }",
+                        "End",
+                        "I32Const { value: 4 }",
+                        "LocalGet { local_index: 0 }",
+                        "I32Add",
+                        "LocalSet { local_index: 0 }",
+                        "I64Const { value: -2005570450770458313 }",
+                        "LocalGet { local_index: 0 }",
+                        "Call { function_index: 16 }",
+                        "LocalTee { local_index: 0 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 2 } }",
+                        "Call { function_index: 8 }",
+                        "I32Const { value: 10 }",
+                        "Call { function_index: 2 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Const { value: -1 }",
+                        "I32Ne",
+                        "If { blockty: Empty }",
+                        "LocalGet { local_index: 1 }",
+                        "LocalSet { local_index: 0 }",
+                        "Br { relative_depth: 1 }",
+                        "End",
+                        "End",
+                        "End",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 18,
+                    "fname": "flush_reports",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [],
+                    "body": [
+                        "I32Const { value: 34 }",
+                        "I32Const { value: 176 }",
+                        "Call { function_index: 15 }",
+                        "I32Const { value: 10 }",
+                        "Call { function_index: 2 }",
+                        "Call { function_index: 17 }",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 19,
+                    "fname": "on_exit",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [],
+                    "body": [
+                        "Call { function_index: 18 }",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    }
+]

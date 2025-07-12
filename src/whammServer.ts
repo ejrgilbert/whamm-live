@@ -7,46 +7,8 @@ import * as $wcm from '@vscode/wasm-component-model';
 import type { u32, u64, i32, ptr, result } from '@vscode/wasm-component-model';
 
 export namespace Types {
-	export enum WhammInjectType {
-		typeInject = 'typeInject',
-		importInject = 'importInject',
-		exportInject = 'exportInject',
-		memoryInject = 'memoryInject',
-		dataInject = 'dataInject',
-		globalInject = 'globalInject',
-		funcInject = 'funcInject',
-		localInject = 'localInject',
-		tableInject = 'tableInject',
-		elementInject = 'elementInject',
-		probeInject = 'probeInject'
-	}
-
 	export type Options = {
 		asMonitorModule: boolean;
-	};
-
-	export enum Mode {
-		before = 'before',
-		after = 'after',
-		alt = 'alt',
-		entry = 'entry',
-		exit = 'exit'
-	}
-
-	export type ScriptLoc = {
-		l: u32;
-		c: u32;
-	};
-
-	export type AppLoc = {
-		byteOffset: u64;
-		mode: Mode;
-	};
-
-	export type Probe = {
-		appLoc: AppLoc;
-		scriptLoc: ScriptLoc;
-		wat: string;
 	};
 
 	export namespace ErrorCode {
@@ -137,8 +99,8 @@ export namespace Types {
 
 	export namespace WhammCause {
 		export const userPos = 'userPos' as const;
-		export type UserPos = { readonly tag: typeof userPos; readonly value: LineColData } & _common;
-		export function UserPos(value: LineColData): UserPos {
+		export type UserPos = { readonly tag: typeof userPos; readonly value: SpanData } & _common;
+		export function UserPos(value: SpanData): UserPos {
 			return new VariantImpl(userPos, value) as UserPos;
 		}
 
@@ -161,7 +123,7 @@ export namespace Types {
 		}
 
 		export type _tt = typeof userPos | typeof userSpan | typeof userProbe | typeof whamm;
-		export type _vt = LineColData | SpanData | SpanData | undefined;
+		export type _vt = SpanData | SpanData | SpanData | undefined;
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
 		export function _ctor(t: _tt, v: _vt): WhammCause {
 			return new VariantImpl(t, v) as WhammCause;
@@ -303,6 +265,11 @@ export namespace Types {
 		funcProbeType = 'funcProbeType'
 	}
 
+	/**
+	 * TODO
+	 * Need to configure how variant can be used instead of this gross struct
+	 * Note: Using a variant gives an error
+	 */
 	export type WhammInjection = {
 		dataType: WhammDataType;
 		importData?: ImportRecord | undefined;
@@ -430,7 +397,6 @@ export type Types = {
 };
 export namespace whammServer {
 	export type Options = Types.Options;
-	export type Probe = Types.Probe;
 	export type ErrorCode = Types.ErrorCode;
 	export const ErrorCode = Types.ErrorCode;
 	export type InjectionPair = Types.InjectionPair;
@@ -450,24 +416,22 @@ export namespace whammServer {
 		 * @throws ErrorCode.Error_
 		 */
 		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
+		end: (appName: string) => void;
 		/**
 		 * No hash map support in wit. So, we usea list of key-value pairs
 		 *
 		 * @throws ErrorWrapper.Error_
 		 */
 		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
-		/**
-		 * @throws ErrorCode.Error_
-		 */
 		noChange: (newScript: string) => boolean;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		wat2wat: (content: string) => string;
+		wat2watandwasm: (content: string) => [string, Uint8Array];
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		wasm2wat: (content: Uint8Array) => string;
+		wasm2watandwasm: (content: Uint8Array) => [string, Uint8Array];
 	};
 	export namespace Exports {
 		export type Promisified = $wcm.$exports.Promisify<Exports>;
@@ -478,23 +442,8 @@ export namespace whammServer {
 }
 
 export namespace Types.$ {
-	export const WhammInjectType = new $wcm.EnumType<Types.WhammInjectType>(['typeInject', 'importInject', 'exportInject', 'memoryInject', 'dataInject', 'globalInject', 'funcInject', 'localInject', 'tableInject', 'elementInject', 'probeInject']);
 	export const Options = new $wcm.RecordType<Types.Options>([
 		['asMonitorModule', $wcm.bool],
-	]);
-	export const Mode = new $wcm.EnumType<Types.Mode>(['before', 'after', 'alt', 'entry', 'exit']);
-	export const ScriptLoc = new $wcm.RecordType<Types.ScriptLoc>([
-		['l', $wcm.u32],
-		['c', $wcm.u32],
-	]);
-	export const AppLoc = new $wcm.RecordType<Types.AppLoc>([
-		['byteOffset', $wcm.u64],
-		['mode', Mode],
-	]);
-	export const Probe = new $wcm.RecordType<Types.Probe>([
-		['appLoc', AppLoc],
-		['scriptLoc', ScriptLoc],
-		['wat', $wcm.wstring],
 	]);
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
 	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
@@ -507,7 +456,7 @@ export namespace Types.$ {
 		['lc0', LineColData],
 		['lc1', LineColData],
 	]);
-	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', LineColData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
+	export const WhammCause = new $wcm.VariantType<Types.WhammCause, Types.WhammCause._tt, Types.WhammCause._vt>([['userPos', SpanData], ['userSpan', SpanData], ['userProbe', SpanData], ['whamm', undefined]], Types.WhammCause._ctor);
 	export const ImportRecord = new $wcm.RecordType<Types.ImportRecord>([
 		['module', $wcm.wstring],
 		['name', $wcm.wstring],
@@ -622,12 +571,7 @@ export namespace Types._ {
 	export const id = 'vscode:example/types' as const;
 	export const witName = 'types' as const;
 	export const types: Map<string, $wcm.AnyComponentModelType> = new Map<string, $wcm.AnyComponentModelType>([
-		['WhammInjectType', $.WhammInjectType],
 		['Options', $.Options],
-		['Mode', $.Mode],
-		['ScriptLoc', $.ScriptLoc],
-		['AppLoc', $.AppLoc],
-		['Probe', $.Probe],
 		['ErrorCode', $.ErrorCode],
 		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
 		['FuncInstrumentationMode', $.FuncInstrumentationMode],
@@ -660,7 +604,6 @@ export namespace Types._ {
 }
 export namespace whammServer.$ {
 	export const Options = Types.$.Options;
-	export const Probe = Types.$.Probe;
 	export const ErrorCode = Types.$.ErrorCode;
 	export const InjectionPair = Types.$.InjectionPair;
 	export const ErrorWrapper = Types.$.ErrorWrapper;
@@ -675,6 +618,9 @@ export namespace whammServer.$ {
 			['appBytes', new $wcm.Uint8ArrayType()],
 			['opts', Options],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
+		export const end = new $wcm.FunctionType<whammServer.Exports['end']>('end',[
+			['appName', $wcm.wstring],
+		], undefined);
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
 			['appName', $wcm.wstring],
@@ -682,13 +628,13 @@ export namespace whammServer.$ {
 		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.ErrorWrapper>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), ErrorWrapper, Types.ErrorWrapper.Error_));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
-		], new $wcm.ResultType<boolean, whammServer.ErrorCode>($wcm.bool, ErrorCode, Types.ErrorCode.Error_));
-		export const wat2wat = new $wcm.FunctionType<whammServer.Exports['wat2wat']>('wat2wat',[
+		], $wcm.bool);
+		export const wat2watandwasm = new $wcm.FunctionType<whammServer.Exports['wat2watandwasm']>('wat2watandwasm',[
 			['content', $wcm.wstring],
-		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
-		export const wasm2wat = new $wcm.FunctionType<whammServer.Exports['wasm2wat']>('wasm2wat',[
+		], new $wcm.ResultType<[string, Uint8Array], whammServer.ErrorCode>(new $wcm.TupleType<[string, Uint8Array]>([$wcm.wstring, new $wcm.Uint8ArrayType()]), ErrorCode, Types.ErrorCode.Error_));
+		export const wasm2watandwasm = new $wcm.FunctionType<whammServer.Exports['wasm2watandwasm']>('wasm2watandwasm',[
 			['content', new $wcm.Uint8ArrayType()],
-		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
+		], new $wcm.ResultType<[string, Uint8Array], whammServer.ErrorCode>(new $wcm.TupleType<[string, Uint8Array]>([$wcm.wstring, new $wcm.Uint8ArrayType()]), ErrorCode, Types.ErrorCode.Error_));
 	}
 }
 export namespace whammServer._ {
@@ -717,10 +663,11 @@ export namespace whammServer._ {
 	export namespace exports {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
 			['setup', $.exports.setup],
+			['end', $.exports.end],
 			['run', $.exports.run],
 			['noChange', $.exports.noChange],
-			['wat2wat', $.exports.wat2wat],
-			['wasm2wat', $.exports.wasm2wat]
+			['wat2watandwasm', $.exports.wat2watandwasm],
+			['wasm2watandwasm', $.exports.wasm2watandwasm]
 		]);
 		export function bind(exports: Exports, context: $wcm.WasmContext): whammServer.Exports {
 			return $wcm.$exports.bind<whammServer.Exports>(_, exports, context);
@@ -728,10 +675,11 @@ export namespace whammServer._ {
 	}
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'end': (appName_ptr: i32, appName_len: i32) => void;
 		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
-		'no-change': (newScript_ptr: i32, newScript_len: i32, result: ptr<result<boolean, ErrorCode>>) => void;
-		'wat2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'wasm2wat': (content_ptr: i32, content_len: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'no-change': (newScript_ptr: i32, newScript_len: i32) => i32;
+		'wat2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
+		'wasm2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 	};
 	export function bind(service: whammServer.Imports, code: $wcm.Code, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports>;
 	export function bind(service: whammServer.Imports.Promisified, code: $wcm.Code, port: $wcm.RAL.ConnectionPort, context?: $wcm.ComponentModelContext): Promise<whammServer.Exports.Promisified>;

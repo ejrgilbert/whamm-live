@@ -1,20 +1,20 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
 import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
+import { APIModel } from '../model/model';
 
 export class WhammWebviewPanel{
 
     fileName: string | undefined;
     webviewPanel!: vscode.WebviewPanel;
     is_wasm: boolean;
-
-    // content sent back from svelte frontend
-    // will be null if wizard option chosen
-    valid_wat_content!: string | null;
     
     // Mapping from whamm script line number to
     // a tuple of injected content and lines in webview where it is injected
     line_to_probe_mapping: Map<number, [string, number[]]>
+    
+    // model which contains all the necessary information for APImodel data
+    model: APIModel;
 
     static number_of_webviews: number = 0;
     static webviews: WhammWebviewPanel[] = [];
@@ -23,7 +23,7 @@ export class WhammWebviewPanel{
         this.fileName = fileName;
         this.is_wasm = this.fileName?.endsWith(".wasm") || false;
         this.line_to_probe_mapping = new Map();
-        this.valid_wat_content = null;
+        this.model = new APIModel(this);
     }
 
     async init(){
@@ -43,10 +43,16 @@ export class WhammWebviewPanel{
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
+                if (this.fileName) ExtensionContext.api.end(this.fileName);
         })
-        let success = await this.getWat();
+
+        let success = await this.model.loadWatAndWasm();
+        let message = "Error parsing the wasm module! Make sure the file is valid";
+        if (success){
+            [success, message] = await this.model.setup();
+        }
         if (!success) {
-            vscode.window.showErrorMessage("Error parsing the wasm module! Make sure the file is valid");
+            vscode.window.showErrorMessage(message);
             this.webviewPanel.dispose();
         }
     }
@@ -111,25 +117,9 @@ export class WhammWebviewPanel{
         this.webviewPanel.webview.postMessage({
                 command: 'init-data',
                 show_wizard: this.fileName === undefined,
-                wat_content: this.valid_wat_content,
+                wat_content: this.model.valid_wat_content,
                 file_name: this.fileName
         });
     }
 
-    private async getWat(): Promise<boolean>{
-        if (this.fileName){
-
-            try{
-                let file_content = await vscode.workspace.fs.readFile(vscode.Uri.file(this.fileName));
-                if (this.is_wasm){
-                    this.valid_wat_content = ExtensionContext.api.wasm2wat(file_content);
-                } else
-                    this.valid_wat_content= ExtensionContext.api.wat2wat(
-                        new TextDecoder('utf-8').decode(file_content));
-            } catch(error){
-                return false;
-            }
-        }
-        return true;
-    }
 }

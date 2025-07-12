@@ -1,5 +1,5 @@
 import {FSM } from '../src/model/fsm';
-import {FSMHelper} from '../src/model/fsm_helper';
+import {FSMHelper} from '../src/model/utils/fsm_helper';
 
 // DO NOT CHANGE THE CONTENTS OF THE STRING UNLESS YOU KNOW WHAT YOU ARE DOING
 function create_fsm_instance(){

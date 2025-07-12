@@ -1,0 +1,1149 @@
+[
+    {
+        "injectionType": "global",
+        "injectionValue": [
+            {
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 0,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(288))] }"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "globalType",
+                "globalData": {
+                    "id": 1,
+                    "ty": "DataType: I32",
+                    "shared": false,
+                    "mutable": true,
+                    "initExpr": [
+                        "InitExpr { exprs: [Value(I32(1))] }"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "import",
+        "injectionValue": [
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "memory",
+                    "typeRef": "Memory(MemoryType { memory64: false, shared: false, initial: 0, maximum: None, page_size_log2: None })",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_i32_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_i32",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_bool_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_bool",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_string_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_string",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_tuple_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_tuple",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_map_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_i32_map",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_i32_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_i32",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_bool_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_bool",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_string_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_string",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_tuple_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_tuple",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_map_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_string_map",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_i32_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_i32",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_bool_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_bool",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_string_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_string",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_tuple_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_tuple",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_map_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_bool_map",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_i32_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_i32",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_bool_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_bool",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_string_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_string",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_tuple_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_tuple",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_map_with_id",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "create_tuple_map",
+                    "typeRef": "Func(4)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "insert_i32_i32",
+                    "typeRef": "Func(5)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "insert_i32_string",
+                    "typeRef": "Func(6)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "insert_string_i32",
+                    "typeRef": "Func(6)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "insert_i32i32i32tuple_i32",
+                    "typeRef": "Func(7)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "get_i32_i32",
+                    "typeRef": "Func(8)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "get_i32_string",
+                    "typeRef": "Func(5)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "get_string_i32",
+                    "typeRef": "Func(9)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "get_i32i32i32tuple_i32",
+                    "typeRef": "Func(10)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "print_map",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putc",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puts",
+                    "typeRef": "Func(0)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu8",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti8",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu16",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti16",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu32",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti32",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putu64",
+                    "typeRef": "Func(11)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "puti64",
+                    "typeRef": "Func(11)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putf32",
+                    "typeRef": "Func(12)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putf64",
+                    "typeRef": "Func(13)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "importType",
+                "importData": {
+                    "module": "whamm_core",
+                    "name": "putbool",
+                    "typeRef": "Func(3)",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "type",
+        "injectionValue": [
+            {
+                "dataType": "typeType",
+                "typeData": {
+                    "ty": "FuncType { params: [I64, I32], results: [I32], super_type: None, is_final: true, shared: false, tag: Some(Tag { data: [0] }) }",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "probe",
+        "injectionValue": [
+            {
+                "dataType": "funcProbeType",
+                "funcProbeData": {
+                    "targetFid": 63,
+                    "mode": "exit",
+                    "body": [
+                        "Call { function_index: 71 }\n"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "funcProbeType",
+                "funcProbeData": {
+                    "targetFid": 68,
+                    "mode": "entry",
+                    "body": [
+                        "I32Const { value: 0 }\n",
+                        "Call { function_index: 31 }\n"
+                    ],
+                    "cause": {
+                        "_tag": "userProbe",
+                        "_value": {
+                            "lc0": {
+                                "l": 2,
+                                "c": 12
+                            },
+                            "lc1": {
+                                "l": 2,
+                                "c": 44
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "dataType": "opProbeType",
+                "opProbeData": {
+                    "targetFid": 63,
+                    "targetOpcodeIdx": 5,
+                    "mode": "before",
+                    "body": [
+                        "LocalSet { local_index: 1 }\n",
+                        "GlobalGet { global_index: 1 }\n",
+                        "If { blockty: Empty }\n",
+                        "I32Const { value: 0 }\n",
+                        "GlobalSet { global_index: 1 }\n",
+                        "Call { function_index: 68 }\n",
+                        "End\n",
+                        "LocalGet { local_index: 1 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Ne\n",
+                        "If { blockty: Type(I32) }\n",
+                        "I32Const { value: 1 }\n",
+                        "Else\n",
+                        "I32Const { value: 0 }\n",
+                        "End\n",
+                        "LocalSet { local_index: 2 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Const { value: 1 }\n",
+                        "I32Const { value: 5 }\n",
+                        "LocalGet { local_index: 2 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Const { value: 1 }\n",
+                        "I32Const { value: 5 }\n",
+                        "LocalGet { local_index: 2 }\n",
+                        "Call { function_index: 48 }\n",
+                        "I32Const { value: 1 }\n",
+                        "I32Add\n",
+                        "Call { function_index: 44 }\n",
+                        "LocalGet { local_index: 1 }\n"
+                    ],
+                    "cause": {
+                        "_tag": "userProbe",
+                        "_value": {
+                            "lc0": {
+                                "l": 14,
+                                "c": 1
+                            },
+                            "lc1": {
+                                "l": 25,
+                                "c": 2
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "dataType": "opProbeType",
+                "opProbeData": {
+                    "targetFid": 64,
+                    "targetOpcodeIdx": 2,
+                    "mode": "before",
+                    "body": [
+                        "LocalSet { local_index: 1 }\n",
+                        "GlobalGet { global_index: 1 }\n",
+                        "If { blockty: Empty }\n",
+                        "I32Const { value: 0 }\n",
+                        "GlobalSet { global_index: 1 }\n",
+                        "Call { function_index: 68 }\n",
+                        "End\n",
+                        "LocalGet { local_index: 1 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Ne\n",
+                        "If { blockty: Type(I32) }\n",
+                        "I32Const { value: 1 }\n",
+                        "Else\n",
+                        "I32Const { value: 0 }\n",
+                        "End\n",
+                        "LocalSet { local_index: 2 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Const { value: 2 }\n",
+                        "I32Const { value: 2 }\n",
+                        "LocalGet { local_index: 2 }\n",
+                        "I32Const { value: 0 }\n",
+                        "I32Const { value: 2 }\n",
+                        "I32Const { value: 2 }\n",
+                        "LocalGet { local_index: 2 }\n",
+                        "Call { function_index: 48 }\n",
+                        "I32Const { value: 1 }\n",
+                        "I32Add\n",
+                        "Call { function_index: 44 }\n",
+                        "LocalGet { local_index: 1 }\n"
+                    ],
+                    "cause": {
+                        "_tag": "userProbe",
+                        "_value": {
+                            "lc0": {
+                                "l": 14,
+                                "c": 1
+                            },
+                            "lc1": {
+                                "l": 25,
+                                "c": 2
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "memory",
+        "injectionValue": [
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 1,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "memoryType",
+                "memoryData": {
+                    "id": 3,
+                    "initial": "[BigInt 1]",
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "injectionType": "func",
+        "injectionValue": [
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 67,
+                    "fname": "puts_internal",
+                    "sig": [
+                        [
+                            "DataType: I32",
+                            "DataType: I32"
+                        ],
+                        []
+                    ],
+                    "locals": [
+                        "DataType: I32"
+                    ],
+                    "body": [
+                        "Loop { blockty: Empty }",
+                        "LocalGet { local_index: 2 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32LtU",
+                        "I32Eqz",
+                        "BrIf { relative_depth: 1 }",
+                        "LocalGet { local_index: 0 }",
+                        "LocalGet { local_index: 2 }",
+                        "I32Add",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 1 } }",
+                        "Call { function_index: 54 }",
+                        "LocalGet { local_index: 2 }",
+                        "I32Const { value: 1 }",
+                        "I32Add",
+                        "LocalSet { local_index: 2 }",
+                        "Br { relative_depth: 0 }",
+                        "End",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 68,
+                    "fname": "instr_init",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [],
+                    "body": [
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 69,
+                    "fname": "flush_var_metadata",
+                    "sig": [
+                        [
+                            "DataType: I64",
+                            "DataType: I32"
+                        ],
+                        [
+                            "DataType: I32"
+                        ]
+                    ],
+                    "locals": [
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32",
+                        "DataType: I32"
+                    ],
+                    "body": [
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 0, memory: 3 } }",
+                        "LocalSet { local_index: 2 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 4, memory: 3 } }",
+                        "LocalSet { local_index: 3 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 5, memory: 3 } }",
+                        "LocalSet { local_index: 4 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 9, memory: 3 } }",
+                        "LocalSet { local_index: 5 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 13, memory: 3 } }",
+                        "LocalSet { local_index: 6 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 17, memory: 3 } }",
+                        "LocalSet { local_index: 7 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 18, memory: 3 } }",
+                        "LocalSet { local_index: 8 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load { memarg: MemArg { align: 0, max_align: 0, offset: 19, memory: 3 } }",
+                        "LocalSet { local_index: 9 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Load8U { memarg: MemArg { align: 0, max_align: 0, offset: 23, memory: 3 } }",
+                        "LocalSet { local_index: 10 }",
+                        "LocalGet { local_index: 1 }",
+                        "Call { function_index: 61 }",
+                        "I32Const { value: 176 }",
+                        "I32Const { value: 11 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 6 }",
+                        "LocalGet { local_index: 7 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 0 }",
+                        "I64Const { value: -2661505650882471559 }",
+                        "I64Eq",
+                        "If { blockty: Empty }",
+                        "I32Const { value: 195 }",
+                        "I32Const { value: 24 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 219 }",
+                        "I32Const { value: 5 }",
+                        "Call { function_index: 67 }",
+                        "Else",
+                        "Unreachable",
+                        "End",
+                        "I32Const { value: 189 }",
+                        "I32Const { value: 6 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 8 }",
+                        "Call { function_index: 61 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 2 }",
+                        "LocalGet { local_index: 3 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 4 }",
+                        "Call { function_index: 61 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 5 }",
+                        "Call { function_index: 61 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 9 }",
+                        "LocalGet { local_index: 10 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 187 }",
+                        "I32Const { value: 2 }",
+                        "Call { function_index: 67 }",
+                        "LocalGet { local_index: 1 }",
+                        "I32Const { value: 24 }",
+                        "I32Add",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 70,
+                    "fname": "flush_reports",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [],
+                    "body": [
+                        "I32Const { value: 0 }",
+                        "I32Const { value: 176 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 10 }",
+                        "Call { function_index: 54 }",
+                        "I32Const { value: 224 }",
+                        "I32Const { value: 64 }",
+                        "Call { function_index: 67 }",
+                        "I32Const { value: 0 }",
+                        "Call { function_index: 53 }",
+                        "I32Const { value: 10 }",
+                        "Call { function_index: 54 }",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            },
+            {
+                "dataType": "functionType",
+                "functionData": {
+                    "id": 71,
+                    "fname": "on_exit",
+                    "sig": [
+                        [],
+                        []
+                    ],
+                    "locals": [],
+                    "body": [
+                        "Call { function_index: 70 }",
+                        "End"
+                    ],
+                    "cause": {
+                        "_tag": "whamm"
+                    }
+                }
+            }
+        ]
+    }
+]

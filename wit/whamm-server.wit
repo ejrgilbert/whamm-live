@@ -2,47 +2,8 @@
 package vscode:example;
 
 interface types {
-	
-	enum whamm-inject-type {
-		type-inject,
-		import-inject,
-		export-inject,
-		memory-inject,
-		data-inject,
-		global-inject,
-		func-inject,
-		local-inject,
-		table-inject,
-		element-inject,
-		probe-inject
-	}
-	
 	record options {
 		as-monitor-module: bool
-	}
-
-	enum mode {
-		before,
-		after,
-		alt,
-		entry,
-		exit
-	}
-
-	record script-loc {
-		l: u32,
-		c: u32
-	}
-
-	record app-loc {
-		byte-offset: u64,
-		mode: mode
-	}
-	
-	record probe {
-    	app-loc: app-loc,
-		script-loc: script-loc,
-		wat: string
 	}
 
 	variant error-code {
@@ -79,7 +40,7 @@ interface types {
 	}
 	
 	variant whamm-cause {
-		user-pos(line-col-data),
+		user-pos(span-data),
 		user-span(span-data),
 		user-probe(span-data),
 		whamm
@@ -183,6 +144,9 @@ interface types {
 		func-probe-type 
 	}
 
+	// TODO
+	// Need to configure how variant can be used instead of this gross struct
+	// Note: Using a variant gives an error 
 	record whamm-injection {
 		data-type: whamm-data-type,
 		import-data: option<import-record>,
@@ -234,13 +198,14 @@ interface types {
 }
 
 world whamm-server {
-	use types.{ options, probe, error-code, injection-pair, error-wrapper};
+	use types.{ options, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
+	export end: func(app-name: string);
 	// No hash map support in wit. So, we usea list of key-value pairs
 	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string) -> result<bool, error-code>;
-	export wat2wat: func(content: string) -> result<string, error-code>;
-	export wasm2wat: func(content: list<u8>) -> result<string, error-code>;
+	export no-change: func(new-script: string) -> bool;
+	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
+	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;
 }
