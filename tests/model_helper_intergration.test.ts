@@ -83,7 +83,8 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
 
     for (let inject_type of
         [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType,
-           Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType, Types.WhammDataType.elementType]){
+           Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType, Types.WhammDataType.elementType,
+           Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType]){
 
             let whamm_api_injections = injection_mappings.get(inject_type);
             if (whamm_api_injections){
@@ -96,18 +97,41 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
                     let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, injected_fsm)
                     expect(injection_record).not.toBe(undefined);
                     expect(original_wat).not.toBe(undefined);
+                    if (injection_record && original_wat){
 
-                    // Check the instance object's wat range
-                    expect(whamm_live_instance.wat_range).toMatchObject({
-                          //@ts-ignore
-                          l1: original_wat + (++lines_injected),
-                          //@ts-ignore
-                          l2: original_wat + lines_injected
-                    } as WatLineRange);
+                      // Test the instance object's whamm cause span
+                      validate_whamm_span(whamm_live_instance, injection_record);
 
-                    validate_whamm_span(whamm_live_instance, injection_record);
+                      // Check the instance object's wat range
+                      switch(inject_type){
+                        case Types.WhammDataType.functionType:{
+                          let func_record = injection_record as Types.FunctionRecord;
 
-                    // Test the instance object's whamm cause span
+                          // calculate all the line mappings for the injected function
+                          let l1 = original_wat + lines_injected + 1;
+                          let func_lines_injected = func_record.body.length + ((func_record.locals.length > 0) ? 1 : 0) + 2;
+                          let l2= l1 + func_lines_injected -1;
+                          let local_line = (func_record.locals.length === 0) ? l1 : l1+1;
+
+                          expect(whamm_live_instance.wat_range).toMatchObject({l1: l1,l2: l2});
+                          lines_injected = lines_injected + func_lines_injected;
+                          
+                          // check for injected funcid_wat_map values
+                          expect(response.injected_funcid_wat_map.get(func_record.id)).toMatchObject({
+                            local: local_line,
+                            probe: [local_line+1,l2],
+                            func: l1
+                          })
+                        }
+                          break;
+                        default:
+                          expect(whamm_live_instance.wat_range).toMatchObject({
+                                l1: original_wat + (++lines_injected),
+                                l2: original_wat + lines_injected
+                          } as WatLineRange);
+                        break;
+                      }
+                  }
                 }
             }
     }
@@ -139,6 +163,12 @@ function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjecti
         return [record.exportData, fsm.section_to_line_mapping.get(InjectType.Export)];
       case Types.WhammDataType.elementType:
         return [record.elementData, fsm.section_to_line_mapping.get(InjectType.Element)];
+      case Types.WhammDataType.functionType:
+        return [record.functionData, fsm.section_to_line_mapping.get(InjectType.Func)];
+      case Types.WhammDataType.activeDataType:
+        return [record.activeData, fsm.section_to_line_mapping.get(InjectType.Data)];
+      case Types.WhammDataType.passiveDataType:
+        return [record.passiveData, fsm.section_to_line_mapping.get(InjectType.Data)];
   }
   return [undefined, undefined];
 }
