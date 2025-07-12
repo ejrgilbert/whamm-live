@@ -4,7 +4,7 @@ import {ModelHelper} from '../src/model/utils/model_helper';
 import { Types } from '../src/whammServer';
 import { FSM } from '../src/model/fsm';
 import toml from 'toml';
-import { InjectionRecord, WhammLiveInjection } from '../src/model/types';
+import { InjectionRecord, InjectType, span, WatLineRange, WhammLiveInjection, WhammLiveInjections } from '../src/model/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
@@ -61,7 +61,7 @@ describe('testing Model Helper\'s static `create_whamm_live_injection_instances`
         // Create the whamm live injection object instances
         let response = ModelHelper.create_whamm_live_injection_instances(injected_fsm, injection_mappings)
         // test the injections and whether their wat ranges are what we expect
-        // validate_whamm_live_injection_instances(injected_fsm, injection_mappings, ...response)
+        validate_whamm_live_injection_instances(injected_fsm, injection_mappings, response)
 
       });
     }
@@ -76,27 +76,69 @@ function load_whamm_api_response(app_name: string, script: string): Types.Inject
   return data;
 }
 
-function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, whamm_live_instances_to_inject: WhammLiveInjection[], whamm_live_instances_to_not_inject: WhammLiveInjection[], lines_injected: number){
+function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveInjections){
     // validate in section order
     let injection_index = 0;
-    let lines_injected_counter = 0;
+    let lines_injected= 0;
 
     for (let inject_type of
-        [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
-        Types.WhammDataType.elementType]){
-            let mapping = injection_mappings.get(inject_type);
-            if (mapping){
-                for (let inj of mapping){
-                    let whamm_live_instance = whamm_live_instances_to_inject[injection_index++];
-                    let record = inj.typeData;
-                    if (record === undefined) throw new Error("Failed to validate whamm live injection instance because injection type is different than expected");
+        [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType,
+           Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType, Types.WhammDataType.elementType]){
 
-                    compare_whamm_live_instance_and_whamm_injection(whamm_live_instance, inj.dataType, record, injected_fsm);
+            let whamm_api_injections = injection_mappings.get(inject_type);
+            if (whamm_api_injections){
+                for (let whamm_api_injection of whamm_api_injections){
+                    let whamm_live_instance = response.injecting_injections[injection_index++];
+
+                    // Check the injection type
+                    expect(whamm_live_instance.type).toBe(whamm_api_injection.dataType);
+                    
+                    let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, injected_fsm)
+                    expect(injection_record).not.toBe(undefined);
+                    expect(original_wat).not.toBe(undefined);
+
+                    // Check the instance object's wat range
+                    expect(whamm_live_instance.wat_range).toMatchObject({
+                          //@ts-ignore
+                          l1: original_wat + (++lines_injected),
+                          //@ts-ignore
+                          l2: original_wat + lines_injected
+                    } as WatLineRange);
+
+                    validate_whamm_span(whamm_live_instance, injection_record);
+
+                    // Test the instance object's whamm cause span
                 }
             }
     }
 }
 
-function compare_whamm_live_instance_and_whamm_injection(whamm_live_instance: WhammLiveInjection, inj_type: Types.WhammDataType, record: InjectionRecord | undefined, fsm: FSM){
-    expect(whamm_live_instance.type).toBe(inj_type);
+function validate_whamm_span(whamm_live_instance: WhammLiveInjection, injection_record: InjectionRecord | undefined){
+  if (injection_record && injection_record.cause["_tag"] != 'whamm'){
+    let whamm_span = injection_record.cause["_value"];
+    expect(whamm_live_instance.whamm_span).toMatchObject({
+        lc0: {l:whamm_span.lc0.l, c: whamm_span.lc0.c},
+        lc1: {l:whamm_span.lc1.l, c: whamm_span.lc1.c},
+    } as span)
+  }
+}
+
+function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM) : [InjectionRecord | undefined, undefined| number]{
+  switch (record.dataType) {
+      case Types.WhammDataType.typeType:
+        return [record.typeData, fsm.section_to_line_mapping.get(InjectType.Type)];
+      case Types.WhammDataType.importType:
+        return [record.importData, fsm.section_to_line_mapping.get(InjectType.Import)];
+      case Types.WhammDataType.tableType:
+        return [record.tableData, fsm.section_to_line_mapping.get(InjectType.Table)];
+      case Types.WhammDataType.memoryType:
+        return [record.memoryData, fsm.section_to_line_mapping.get(InjectType.Memory)];
+      case Types.WhammDataType.globalType:
+        return [record.globalData, fsm.section_to_line_mapping.get(InjectType.Global)];
+      case Types.WhammDataType.exportType:
+        return [record.exportData, fsm.section_to_line_mapping.get(InjectType.Export)];
+      case Types.WhammDataType.elementType:
+        return [record.elementData, fsm.section_to_line_mapping.get(InjectType.Element)];
+  }
+  return [undefined, undefined];
 }

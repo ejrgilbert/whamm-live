@@ -1,6 +1,6 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
-import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammLiveInjection } from "../types";
+import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammLiveInjection, WhammLiveInjections } from "../types";
 
 export class ModelHelper{
 
@@ -102,7 +102,7 @@ export class ModelHelper{
     // to create `WhammLiveInjection` instances. These instances will store their new wat locations
     // This method returns a tuple with the first element being instances that are to be injected in the new wat
     // and the other element being a list of instances that are to **not** be injected and instead be used as dangling references like `funcProbes`, `OpBodyProbes`, `Locals`
-    static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): [WhammLiveInjection[], WhammLiveInjection[], number]{
+    static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): WhammLiveInjections{
         // all the other injections except `funcProbes`, `OpBodyProbes`, `Locals` should update the number_of_lines_injected since they are literally injecting new wat content
         var number_of_lines_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
@@ -399,7 +399,12 @@ export class ModelHelper{
 
         // We need to follow the section ordering because if we do
         // then the injected wat line range is fixed and won't need to be updated until the next API call
-        return [whamm_live_injections_to_inject,whamm_live_injections_to_not_inject, number_of_lines_injected];
+        return {
+            lines_injected: number_of_lines_injected,
+            injecting_injections: whamm_live_injections_to_inject,
+            other_injections: whamm_live_injections_to_not_inject,
+            injected_funcid_wat_map: injected_func_id_to_wat_mapping
+        } as WhammLiveInjections;
     }
 
     /*
@@ -477,7 +482,7 @@ export class ModelHelper{
         if (start_wat_line === undefined) {
             throw new Error("FSM error: fsm mapping not present");
         }
-        return [injection_data, start_wat_line + offset]
+        return [injection_data, start_wat_line + offset];
     }
 
     private static get_wat_line_without_fsm(
