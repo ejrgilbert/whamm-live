@@ -57,6 +57,8 @@ export class Node{
         // if start_col exceeeds length then the value will be 0(move to the next row)
         // and number of rows increases
         let total_columns = 0;
+        if (current_row > end_row || ((current_row == end_row) && current_col >= end_col)) return 0;
+
         while (current_row !== end_row || current_col !== end_col){
             if (jagged_array[current_row].length == 0){
                 current_col = 0;
