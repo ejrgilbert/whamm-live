@@ -4,7 +4,7 @@ import {ModelHelper} from '../src/model/utils/model_helper';
 import { Types } from '../src/whammServer';
 import { FSM } from '../src/model/fsm';
 import toml from 'toml';
-import { InjectionRecord, InjectType, span, WatLineRange, WhammLiveInjection, WhammLiveInjections } from '../src/model/types';
+import { InjectionRecord, InjectionRecordDanglingType, InjectType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveInjections } from '../src/model/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
@@ -78,23 +78,26 @@ function load_whamm_api_response(app_name: string, script: string): Types.Inject
 
 function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveInjections){
     // validate in section order
-    let injection_index = 0;
+    // 0th element is index for the injections to be injected in wat
+    // 1st element is index for the injections to not be injected in wat
+    let indexes: [number, number] = [0, 0];
     let lines_injected= 0;
 
-    for (let inject_type of
-        [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType,
-           Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType, Types.WhammDataType.elementType,
-           Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType]){
+    // The idea is to compare every `whamm_api_injection` with its corresponding `whamm_live_injection` object
+    // instance that is in the `response` variable
+    // It is pretty much a one-on-one comparison
 
+    for (let inject_type of WhammDataTypes){
             let whamm_api_injections = injection_mappings.get(inject_type);
             if (whamm_api_injections){
+
                 for (let whamm_api_injection of whamm_api_injections){
-                    let whamm_live_instance = response.injecting_injections[injection_index++];
+                    let whamm_live_instance: WhammLiveInjection = get_whamm_live_instance(inject_type, response, indexes);
 
                     // Check the injection type
                     expect(whamm_live_instance.type).toBe(whamm_api_injection.dataType);
                     
-                    let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, injected_fsm)
+                    let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, injected_fsm, response)
                     expect(injection_record).not.toBe(undefined);
                     expect(original_wat).not.toBe(undefined);
                     if (injection_record && original_wat){
@@ -113,7 +116,9 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
                           let l2= l1 + func_lines_injected -1;
                           let local_line = (func_record.locals.length === 0) ? l1 : l1+1;
 
+                          // Check the func wat range
                           expect(whamm_live_instance.wat_range).toMatchObject({l1: l1,l2: l2});
+
                           lines_injected = lines_injected + func_lines_injected;
                           
                           // check for injected funcid_wat_map values
@@ -124,6 +129,27 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
                           })
                         }
                           break;
+                        case Types.WhammDataType.funcProbeType:
+                        case Types.WhammDataType.localType:
+                        case Types.WhammDataType.opProbeType:
+                          {
+                            let l1 =original_wat;
+                            let l2 = original_wat;
+                            let record = injection_record as InjectionRecordDanglingType;
+
+                            // If the wat values are from the fsm, then that doesn't account for the newly injected lines
+                            // so, we need to add those values
+                            if (!response.injected_funcid_wat_map.has(record.targetFid)){
+                              l1 = l1 + lines_injected;
+                              l2 = l2 + lines_injected;
+                            }
+                            expect(whamm_live_instance.wat_range).toMatchObject({
+                                  l1: l1,
+                                  l2: l2
+                            } as WatLineRange);
+                          }
+                          break;
+                        // All the other injections should only inject **one** line
                         default:
                           expect(whamm_live_instance.wat_range).toMatchObject({
                                 l1: original_wat + (++lines_injected),
@@ -137,6 +163,8 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
     }
 }
 
+// Validate to make sure the whamm live injection object has the same span value(s) as its corresponding injection record
+// that we recieved from the API response
 function validate_whamm_span(whamm_live_instance: WhammLiveInjection, injection_record: InjectionRecord | undefined){
   if (injection_record && injection_record.cause["_tag"] != 'whamm'){
     let whamm_span = injection_record.cause["_value"];
@@ -147,7 +175,9 @@ function validate_whamm_span(whamm_live_instance: WhammLiveInjection, injection_
   }
 }
 
-function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM) : [InjectionRecord | undefined, undefined| number]{
+// Get the correct injection record and also the corresponding wat line number using the fsm
+// Also handles wat line values for locals, funcProbes and opBodyProbes which are inserted by whamm using the injected funcid to wat mapping if the funcID doesn't exist in the FSM
+function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM, response: WhammLiveInjections) : [InjectionRecord | undefined, undefined| number]{
   switch (record.dataType) {
       case Types.WhammDataType.typeType:
         return [record.typeData, fsm.section_to_line_mapping.get(InjectType.Type)];
@@ -169,6 +199,59 @@ function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjecti
         return [record.activeData, fsm.section_to_line_mapping.get(InjectType.Data)];
       case Types.WhammDataType.passiveDataType:
         return [record.passiveData, fsm.section_to_line_mapping.get(InjectType.Data)];
+      case Types.WhammDataType.funcProbeType:
+        {
+          let func_probe_data = record.funcProbeData;
+          if (func_probe_data){
+            let wat_line = fsm.func_mapping.get(func_probe_data.targetFid);
+            if (wat_line === undefined) wat_line = response.injected_funcid_wat_map.get(func_probe_data.targetFid)?.func;
+            return [record.funcProbeData, wat_line];
+          }
+        }
+        break;
+        case Types.WhammDataType.opProbeType:
+        {
+          let op_probe_data = record.opProbeData;
+          let wat_line;
+
+          if (op_probe_data){
+            let probe_range = fsm.probe_mapping.get(op_probe_data.targetFid);
+            
+            // look at the injected funcid mapping incase it is there
+            if (probe_range === undefined){
+              wat_line = response.injected_funcid_wat_map.get(op_probe_data.targetFid)?.probe[0];
+              if (wat_line !== undefined) wat_line = wat_line + op_probe_data.targetOpcodeIdx;
+
+            } else wat_line = probe_range[0] + op_probe_data.targetOpcodeIdx
+
+            return [op_probe_data, wat_line];
+          }
+        }
+        break;
+        case Types.WhammDataType.localType:
+        {
+          let local_data = record.localData;
+          if (local_data){
+            let wat_line = fsm.local_mapping.get(local_data.targetFid);
+            if (wat_line === undefined) wat_line = response.injected_funcid_wat_map.get(local_data.targetFid)?.local;
+            return [local_data, wat_line];
+          }
+        }
+        break;
   }
   return [undefined, undefined];
+
+}
+
+// Get the correct whamm live injection object from `response` since it contains two arrays:
+// one for injections to inject in the wat file and one for injections to show as dangling pointers
+function get_whamm_live_instance(inject_type: Types.WhammDataType, response: WhammLiveInjections, indexes: [number, number]){
+  switch (inject_type){
+    case Types.WhammDataType.opProbeType:
+    case Types.WhammDataType.funcProbeType:
+    case Types.WhammDataType.localType:
+      return response.other_injections[(indexes[1])++];
+    default:
+      return response.injecting_injections[(indexes[0])++];
+  }
 }

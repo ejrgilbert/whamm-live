@@ -1,6 +1,6 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
-import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammLiveInjection, WhammLiveInjections } from "../types";
+import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveInjections } from "../types";
 
 export class ModelHelper{
 
@@ -123,9 +123,7 @@ export class ModelHelper{
         // and if we deal with the remaining sections, we will have a completed `injected_func_id_to_wat_mapping` which we can use to track
         // the probes that targeted the injected functions
         for (let inject_type of
-            [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
-            Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType 
-            ]){
+            WhammDataTypes){
                 // get the mapping
                 let injections =  whamm_live_mappings.get(Types.WhammDataType[inject_type]);
                 if (injections){
@@ -355,7 +353,7 @@ export class ModelHelper{
                                         {
                                             // If so, check if the mapping present in the `injected_func_id_wat_mapping`
                                             // because the funcID could have belonged to a injected function
-                                            wat_line = ModelHelper.get_wat_line_without_fsm(record, inject, injected_func_id_to_wat_mapping);
+                                            wat_line = ModelHelper.get_wat_line_without_fsm(record, inject, injected_func_id_to_wat_mapping),
                                             inj = record;
                                         } else
                                             throw e;
@@ -502,7 +500,10 @@ export class ModelHelper{
                     wat_line=mapping.func;
                     break;
                 case InjectType.FuncBodyProbe:
-                    wat_line =mapping.probe[0];
+                    {
+                        let probe_data = injection_data as Types.OpProbeRecord;
+                        wat_line =mapping.probe[0] + probe_data.targetOpcodeIdx;
+                    }
                     break;
             }
         }

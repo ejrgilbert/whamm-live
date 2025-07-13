@@ -103,3 +103,6 @@ export type WhammLiveInjections = {
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
 }
+
+export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
+    Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]
