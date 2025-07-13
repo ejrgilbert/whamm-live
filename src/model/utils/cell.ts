@@ -1,17 +1,71 @@
 import { span, WhammLiveInjection } from "../types";
+import { ModelHelper } from "./model_helper";
 
 export class Cell{
-    private __head: Node | null;
+    private __head: Node ;
     private __length: number;
 
-    constructor(head: Node | null, initial_length: number){
+    constructor(head: Node, initial_length: number){
         this.__head = head;
         this.__length = initial_length;
     }
 
+    // span cols calculated beforehand since it makes it time efficient
+    // linked list is supposed to be sorted from biggest span size to the smallest span size
+    add(live_injection: WhammLiveInjection, span_cols: number){
+        if (live_injection.whamm_span === null) throw new Error("Cannot add a live injection with no span");
+        
+        // Current node is the node **before** which we need to insert
+        let current_node : Node | null = this.__head;
+        // only null initially
+        let previous_node: null | Node = null;
+        let injection_inserted = false;
+
+        while (!injection_inserted){
+
+            // Insert at the end case
+            if (current_node === null){
+                if (previous_node === null) throw new Error("Previous node cannot be null when current node is also null")
+                let new_node = new Node(null, live_injection.whamm_span, [live_injection], span_cols);
+                previous_node.next = new_node;
+                injection_inserted = true;
+
+            // Insert 
+            } else if (span_cols < current_node.whamm_spansize){
+                // go to the next node
+                previous_node = current_node;
+                current_node = current_node.next;
+
+            } else if (span_cols == current_node.whamm_spansize){
+                // check if whamm span is the same
+                if (current_node.whamm_span === null) throw new Error("Cell value cannot have a null whamm span");
+                if (ModelHelper.compare_live_whamm_spans(live_injection.whamm_span, current_node.whamm_span)){
+                    current_node.values.push(live_injection);
+                    injection_inserted = true;
+                } else{
+                    // then just move on to the next node
+                    previous_node = current_node;
+                    current_node = current_node.next;
+                }
+            
+            // found the place to insert (new node should be inserted before)
+            } else if (span_cols > current_node.whamm_spansize){
+                let new_node = new Node(current_node, live_injection.whamm_span, [live_injection], span_cols);
+                
+                // This means the new node is being inserted at the very beginning
+                if (previous_node === null){
+                    this.__head = new_node;
+                } else {
+                    previous_node.next = new_node
+                }
+                injection_inserted = true;
+            }
+        }
+    }
+
     /* Getter and setters */
 
-    get head(): Node | null{
+    get head(): Node {
         return this.__head;
     }
 
@@ -34,11 +88,11 @@ export class Node{
     values: WhammLiveInjection[];
     whamm_span: span | null;
 
-    constructor(next: Node| null, whamm_span: span | null, values: WhammLiveInjection[], jagged_array: (Cell | null)[][]){
+    constructor(next: Node| null , whamm_span: span | null, values: WhammLiveInjection[], span_size: number){
         this.next = next;
         this.whamm_span = whamm_span;
         this.values = values;
-        this.whamm_spansize = Node.calculate_span_size(whamm_span, jagged_array);
+        this.whamm_spansize = span_size;
     }
 
     // Calculate the whamm span size in columns

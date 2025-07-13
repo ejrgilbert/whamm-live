@@ -434,6 +434,11 @@ export class ModelHelper{
         }
     }
 
+    static compare_live_whamm_spans(a: span , b:span ) : boolean{
+        return (a.lc0.c == b.lc0.c && a.lc0.l == b.lc0.l) &&
+            (a.lc1.c == b.lc1.c && a.lc1.l == b.lc1.l)
+    }
+
     // create wat range and whamm span for injections which only inject one line
     private static create_wat_range_and_whamm_span(injection_record: InjectionRecord, new_wat_line: number): [WatLineRange, span|null]{
         let wat_range = {l1: new_wat_line,l2: new_wat_line} as WatLineRange;
