@@ -3,11 +3,9 @@ import { ModelHelper } from "./model_helper";
 
 export class Cell{
     private __head: Node ;
-    private __length: number;
 
-    constructor(head: Node, initial_length: number){
-        this.__head = head;
-        this.__length = initial_length;
+    constructor(whamm_live_injection: WhammLiveInjection, span_size: number){
+        this.__head = new Node(null, whamm_live_injection.whamm_span, [whamm_live_injection], span_size);
     }
 
     // span cols calculated beforehand since it makes it time efficient
@@ -69,16 +67,8 @@ export class Cell{
         return this.__head;
     }
 
-    get length(){
-        return this.__length;
-    }
-
     set head(new_value: Node){
         this.__head = new_value;
-    }
-
-    set length(new_length: number){
-        this.__length = new_length;
     }
 }
 
