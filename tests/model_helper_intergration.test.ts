@@ -138,7 +138,7 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
                             let record = injection_record as InjectionRecordDanglingType;
 
                             // If the wat values are from the fsm, then that doesn't account for the newly injected lines
-                            // so, we need to add those values
+                            // so, we need to add that offset
                             if (!response.injected_funcid_wat_map.has(record.targetFid)){
                               l1 = l1 + lines_injected;
                               l2 = l2 + lines_injected;
