@@ -4,7 +4,6 @@ import toml from 'toml';
 import {ModelHelper} from '../src/model/utils/model_helper';
 import {WhammLiveInjection, WatLineRange, span} from '../src/model/types';
 import { Types } from '../src/whammServer';
-import { FSM } from '../src/model/fsm';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 // const error_toml_file_path = path.resolve(__dirname, 'model_helper_errors.test.toml'); 
@@ -86,3 +85,43 @@ describe('testing Model Helper\'s static `__new_whamm_live_injection_instance` m
       });
   }
 );
+
+describe('testing whamm span', () => {
+
+  for (let key of Object.keys(config)) {
+    if (config[key]["test"] === "calculate_span_values_and_size"){
+        test('test the span size and line-col values', () => {
+
+            // create valid span
+            let lc0 = config[key]["lc0"];
+            let lc1 = config[key]["lc1"];
+            let span = {
+                lc0: {l: lc0.l, c:lc0.c},
+                lc1: {l: lc1.l, c:lc1.c},
+            } as span;
+
+            // create jagged array based on string contents
+            let jagged_array = ModelHelper.create_jagged_array(config[key]["string_contents"]);
+            let span_size = ModelHelper.calculate_span_size(span, jagged_array);
+            expect(span_size).toBe(config[key]["span_size"]);
+
+            // get the line-col values
+            let recieved_line_col_values = ModelHelper.get_line_col_values(span, jagged_array);
+
+            // Build the expected line-col values and check whether it is as expected
+            let line_col_config = config[key]["line_col_values"];
+            let expected_line_col_values : [number, number][]= []
+            for (const [key, value] of Object.entries(line_col_config)){
+              let line: number = parseInt(key);
+              let col_range : [number, number] = value as [number, number];
+
+              for (let col=col_range[0]; col< col_range[1]; col++){
+                expected_line_col_values.push([line, col]);
+              }
+            }
+
+            expect(recieved_line_col_values).toMatchObject(expected_line_col_values);
+        });
+      }
+    }
+});

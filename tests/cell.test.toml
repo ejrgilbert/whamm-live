@@ -1,49 +1,6 @@
-[span_size_1]
-test="calculate_span_size"
-lc0={l=1, c=1}
-lc1={l=3, c=5}
-# String content is what is used to create the jagged array
-string_contents="abcdef\nghi\njklmnop"
-span_size=13
-
-[span_size_2]
-test="calculate_span_size"
-lc0={l=1, c=1}
-lc1={l=4, c=5}
-string_contents="abcdef\ng\nhi\njklmnop"
-span_size=13
-
-[span_size_3]
-test="calculate_span_size"
-lc0={l=1, c=3}
-lc1={l=4, c=1}
-string_contents="abcdef\ng\nhi\njklmnop"
-span_size=7
-
-[span_size_4]
-test="calculate_span_size"
-lc0={l=1, c=3}
-lc1={l=8, c=2}
-string_contents="abcdef\n\n\nabcde\n\ng\nhi\njklmnop"
-span_size=13
-
-[span_size_5]
-test="calculate_span_size"
-lc0={l=4, c=3}
-lc1={l=4, c=4}
-string_contents="\n\n\nabcdef\n\n\njklmnop"
-span_size=1
-
-[span_size_6]
-test="calculate_span_size"
-lc0={l=2, c=1}
-lc1={l=1, c=1}
-string_contents="abcd\ndef"
-span_size=0
-
-[span_size_7]
-test="calculate_span_size"
-lc0={l=1, c=3}
-lc1={l=1, c=1}
-string_contents="abcd\ndef"
-span_size=0
+[linked_list_config]
+number_of_tests=10
+min_number_of_insertions=0
+max_number_of_insertions=20
+min_span_size=2
+max_span_size=10

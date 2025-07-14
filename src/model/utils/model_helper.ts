@@ -1,6 +1,7 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
 import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveInjections } from "../types";
+import { Cell } from "./cell";
 
 export class ModelHelper{
 
@@ -405,6 +406,50 @@ export class ModelHelper{
         } as WhammLiveInjections;
     }
 
+    static compare_live_whamm_spans(a: span , b:span ) : boolean{
+        return (a.lc0.c == b.lc0.c && a.lc0.l == b.lc0.l) &&
+            (a.lc1.c == b.lc1.c && a.lc1.l == b.lc1.l)
+    }
+
+    static get_line_col_values(whamm_span: span | null, jagged_array: (Cell|null)[][]): [number, number][]{
+        if (whamm_span == null) return [];
+        let line_col_values : [number, number][]= [];
+
+        let current_row = whamm_span.lc0.l -1;
+        // inclusive end row
+        const end_row = whamm_span.lc1.l -1;
+        let current_col= whamm_span.lc0.c - 1;
+        // exclusive col value
+        const end_col = whamm_span.lc1.c - 1; 
+
+        // The idea: increase the 
+        // if start_col exceeeds length then the value will be 0(move to the next row)
+        // and number of rows increases
+        if (current_row > end_row || ((current_row == end_row) && current_col >= end_col)) return [];
+
+        while (current_row !== end_row || current_col !== end_col){
+            if (jagged_array[current_row].length == 0){
+                current_col = 0;
+                current_row++;
+            } else {
+                line_col_values.push([current_row+1, current_col+1]);
+                current_col++;
+                if (current_col >= jagged_array[current_row].length){
+                    current_col = 0;
+                    current_row++;
+                }
+            }
+        }
+        return line_col_values;
+    }
+    // Calculate the whamm span size in columns
+    // returns -1 if no whamm span
+    static calculate_span_size(whamm_span: span | null, jagged_array: (Cell|null)[][]) : number{
+        if (whamm_span === null) return -1;
+        let line_col_values = ModelHelper.get_line_col_values(whamm_span, jagged_array)
+        return line_col_values.length;
+    }
+
     /*
     *
     *    private helper methods
@@ -432,11 +477,6 @@ export class ModelHelper{
                     lc1: {l: lc1.l, c:lc1.c}
                 } as span;
         }
-    }
-
-    static compare_live_whamm_spans(a: span , b:span ) : boolean{
-        return (a.lc0.c == b.lc0.c && a.lc0.l == b.lc0.l) &&
-            (a.lc1.c == b.lc1.c && a.lc1.l == b.lc1.l)
     }
 
     // create wat range and whamm span for injections which only inject one line

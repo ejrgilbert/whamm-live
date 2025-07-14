@@ -7,6 +7,7 @@ import {Cell, Node} from '../src/model/utils/cell';
 import { Types } from '../src/whammServer';
 
 const toml_file_path = path.resolve(__dirname, 'cell.test.toml'); 
+const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
 describe('testing linked list implementation for a cell', () => {
 
         // Use random numbers to simulate the testing
@@ -15,13 +16,14 @@ describe('testing linked list implementation for a cell', () => {
         // sort those numbers in reverse from biggest span size to smallest with each element being a tuple of (value: # of times it got generated)
         // Now, we just need to check whether or not the linked list has the values inserted in the right order and the right number
         test('test the cell linked list `add` method', () => {
-            let number_of_tests = 1;
+            let linked_list_config = config.linked_list_config;
+            let number_of_tests = linked_list_config["number_of_tests"];
             for (let i =0; i < number_of_tests; i++){
-                let number_of_insertions = randomInteger(5, 20);
+                let number_of_insertions = randomInteger(linked_list_config.min_number_of_insertions, linked_list_config.max_number_of_insertions);
                 
                 // generate **that** many dummy live injections and add them to the cell
                 let values : number[]= [];
-                values.push(randomInteger(1, 5));
+                values.push(randomInteger(linked_list_config.min_span_size, linked_list_config.max_span_size));
                 const CELL = new Cell(create_dummy_whamm_live_injection(values[0]),values[0]);
 
                 for (let j=1; j < number_of_insertions; j++){
@@ -46,30 +48,6 @@ describe('testing linked list implementation for a cell', () => {
                 expect(current_node).toBe(null);
             }
         });
-});
-
-describe('testing whamm span size', () => {
-
-  const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
-  for (let key of Object.keys(config)) {
-    if (config[key]["test"] === "calculate_span_size"){
-        test('test the span size value in columns', () => {
-
-            // create valid span
-            let lc0 = config[key]["lc0"];
-            let lc1 = config[key]["lc1"];
-            let span = {
-                lc0: {l: lc0.l, c:lc0.c},
-                lc1: {l: lc1.l, c:lc1.c},
-            } as span;
-
-            // create jagged array based on string contents
-            let jagged_array = ModelHelper.create_jagged_array(config[key]["string_contents"]);
-            let span_size = Node.calculate_span_size(span, jagged_array);
-            expect(span_size).toBe(config[key]["span_size"]);
-        });
-}
-}
 });
 
 // Helper functions
