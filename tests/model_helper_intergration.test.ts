@@ -37,6 +37,14 @@ describe('testing Model Helper\'s static `create_whamm_live_injection_instances`
           }
         }
 
+        
+        /**
+         * @todo: Upon Orca ID fix:
+         * Remove calling the `update_fsm_funcIDs` static method
+         * Remove the tests that follow the method call which tests whether the funcIDs were updated properly
+         * Use `fsm` instead of `injected_fsm` as arguments for `ModelHelper.create_whamm_live_injection_instances` method and the `validate_whamm_live_injection_instances` function
+        */
+
         /*
          Check for injected FSM funcID values
         */
@@ -76,7 +84,7 @@ function load_whamm_api_response(app_name: string, script: string): Types.Inject
   return data;
 }
 
-function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveInjections){
+function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveInjections){
     // validate in section order
     // 0th element is index for the injections to be injected in wat
     // 1st element is index for the injections to not be injected in wat
@@ -97,7 +105,7 @@ function validate_whamm_live_injection_instances(injected_fsm: FSM, injection_ma
                     // Check the injection type
                     expect(whamm_live_instance.type).toBe(whamm_api_injection.dataType);
                     
-                    let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, injected_fsm, response)
+                    let [injection_record, original_wat] = get_injection_record_and_fsm_wat_line_number(whamm_api_injection, fsm, response)
                     expect(injection_record).not.toBe(undefined);
                     expect(original_wat).not.toBe(undefined);
                     if (injection_record && original_wat){

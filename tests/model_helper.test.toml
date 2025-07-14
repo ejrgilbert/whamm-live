@@ -63,6 +63,10 @@ content="\n12345\n\n\n67\n9\n1011"
 number_of_rows=7
 number_of_cols = [0,5,0,0,2,1,4]
 
+##
+## TODO: Upon Orca funcID fix
+## { Remove `number_of_import_functions_injected` from each test="create_whamm_live_injection_instances" }
+##
 [whamm_live_injection_instance_one]
 test="create_whamm_live_injection_instances"
 app="hello.wat"

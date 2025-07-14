@@ -20,6 +20,11 @@ export class APIModel{
     webview: WhammWebviewPanel;
     // Will always be the latest API response with no error or 'null'
     fsm_mappings: FSM | null;
+
+    /**
+     *  @todo: Remove every `injected_fsm_mappings` usage in this and model_helper.ts file upon
+     **/
+    // orca ( or wirm as they now say it) funcID fix
     injected_fsm_mappings: FSM | null;
 
     constructor(webview: WhammWebviewPanel){
@@ -88,6 +93,11 @@ export class APIModel{
 
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){
+                        
+                        /**
+                         *  @todo: Remove once orca fixes the injected fsm mappings and pass in `this.fsm_mappings` instead of `this.injected_fsm_mappings`
+                         *          for the `ModelHelper.create_whamm_live_injection_instances` static method
+                         **/
                         this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
                         let whamm_live_injections = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 
@@ -95,6 +105,9 @@ export class APIModel{
                         this.injected_wat_content = ModelHelper.inject_wat(this.valid_wat_content, whamm_live_injections.injecting_injections, whamm_live_injections.lines_injected).join('\n');
                         // update the jagged array
                         this.update_jagged_array(whamm_live_injections);
+
+                        // success so return true
+                        return true;
                     } else{
                         throw new Error("FSM setup error: FSM mappings shouldn't be null");
                     }
