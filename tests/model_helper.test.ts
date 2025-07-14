@@ -102,8 +102,6 @@ describe('testing whamm span', () => {
 
             // create jagged array based on string contents
             let jagged_array = ModelHelper.create_jagged_array(config[key]["string_contents"]);
-            let span_size = ModelHelper.calculate_span_size(span, jagged_array);
-            expect(span_size).toBe(config[key]["span_size"]);
 
             // get the line-col values
             let recieved_line_col_values = ModelHelper.get_line_col_values(span, jagged_array);
@@ -121,6 +119,7 @@ describe('testing whamm span', () => {
             }
 
             expect(recieved_line_col_values).toMatchObject(expected_line_col_values);
+            expect(recieved_line_col_values.length).toBe(config[key]["span_size"]);
         });
       }
     }

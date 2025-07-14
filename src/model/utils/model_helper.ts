@@ -55,7 +55,7 @@ export class ModelHelper{
         let string_contents_array = string_contents.split('\n');
         let jagged_array: null[][]= new Array(string_contents_array.length);
         for (let i=0; i < jagged_array.length; i++){
-            let new_array: null[] = new Array(string_contents_array[i].length);
+            let new_array: null[] = new Array(string_contents_array[i].length).fill(null);
             jagged_array[i] = new_array;
         }
         return jagged_array;
@@ -415,28 +415,26 @@ export class ModelHelper{
         if (whamm_span == null) return [];
         let line_col_values : [number, number][]= [];
 
-        let current_row = whamm_span.lc0.l -1;
+        var current_row_index = whamm_span.lc0.l -1;
         // inclusive end row
-        const end_row = whamm_span.lc1.l -1;
-        let current_col= whamm_span.lc0.c - 1;
+        const end_row_index = whamm_span.lc1.l -1;
+        var current_col_index = whamm_span.lc0.c - 1;
         // exclusive col value
-        const end_col = whamm_span.lc1.c - 1; 
+        const end_col_index = whamm_span.lc1.c - 1; 
 
         // The idea: increase the 
         // if start_col exceeeds length then the value will be 0(move to the next row)
         // and number of rows increases
-        if (current_row > end_row || ((current_row == end_row) && current_col >= end_col)) return [];
-
-        while (current_row !== end_row || current_col !== end_col){
-            if (jagged_array[current_row].length == 0){
-                current_col = 0;
-                current_row++;
+        while (!((current_row_index > end_row_index) || ((current_row_index == end_row_index) && (current_col_index >= end_col_index)))){
+            if (jagged_array[current_row_index].length == 0){
+                current_col_index = 0;
+                current_row_index++;
             } else {
-                line_col_values.push([current_row+1, current_col+1]);
-                current_col++;
-                if (current_col >= jagged_array[current_row].length){
-                    current_col = 0;
-                    current_row++;
+                line_col_values.push([current_row_index+1, current_col_index+1]);
+                current_col_index++;
+                if (current_col_index >= jagged_array[current_row_index].length){
+                    current_col_index = 0;
+                    current_row_index++;
                 }
             }
         }
