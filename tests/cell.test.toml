@@ -1,0 +1,6 @@
+[linked_list_config]
+number_of_tests=10
+min_number_of_insertions=0
+max_number_of_insertions=20
+min_span_size=2
+max_span_size=10

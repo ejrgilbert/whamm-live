@@ -1,3 +1,4 @@
+import { Types, whammServer } from "../whammServer";
 // Different types and enums for API responses
 
 // Enums
@@ -43,36 +44,65 @@ export const stringToInjectType: Record<string, InjectType> = {
     'module': InjectType.Module,
 }
 
-export enum ModeKind{
-    before,
-    after,
-    alt
-}
-
 // Types
 export type ScriptLoc = {
-    l: number,
-    c: number,
+    l: number;
+    c: number;
+}
+
+// inclusive range
+export type WatLineRange = {
+    l1: number;
+    l2: number
+}
+
+export type line_col = {
+    l: number;
+    c: number
+}
+
+// span starting line and column
+// and ending line(inclusive) and column(exclusive)
+export type span = {
+    lc0: line_col;
+    lc1: line_col
+}
+
+export type WhammLiveInjection = {
+    type: Types.WhammDataType;
+    mode: string | null;
+    code: string[];
+    wat_range: WatLineRange;
+    whamm_span: span | null;
 }
 
 export type Metadata = {
     script_start: ScriptLoc;
     script_end: ScriptLoc | undefined;
 }
-export type Probe = {
-    target_fid: number,
-    target_opcode_idx: number,
-    mode: ModeKind,
-    body: string[],
-    metadata: Metadata | undefined
-}
 
 export type WhammError = {
-    msg: string,
+    msg: string;
     err_loc: Metadata | undefined;
 }
 
-export type WhammResponse = {
-    response: undefined | Map<InjectType, Probe[]>;
-    error: WhammError[] | undefined;
+export type InjectionRecord = Types.TypeRecord | Types.ImportRecord | Types.TableRecord | Types.MemoryRecord | Types.GlobalRecord | Types.ExportRecord |
+            Types.ElementRecord | Types.OpProbeRecord | Types.LocalRecord | Types.FuncProbeRecord | Types.FunctionRecord | Types.ActiveDataRecord | Types.PassiveDataRecord;
+
+export type InjectionRecordDanglingType = Types.OpProbeRecord | Types.LocalRecord | Types.FuncProbeRecord;
+export type InjectTypeDanglingType = InjectType.FuncBodyProbe | InjectType.Local | InjectType.FuncProbe;
+export type InjectionFuncValue = {
+    local: number
+    probe:[number, number]
+    func: number
 }
+
+export type WhammLiveInjections = {
+    lines_injected: number;
+    injecting_injections: WhammLiveInjection[];
+    other_injections: WhammLiveInjection[];
+    injected_funcid_wat_map: Map<number, InjectionFuncValue>;
+}
+
+export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
+    Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]

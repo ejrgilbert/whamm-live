@@ -4,7 +4,7 @@
 ///
 
 import { InjectType, stringToInjectType } from "./types";
-import { FSMHelper, stack_value } from "./fsm_helper";
+import { FSMHelper, stack_value } from "./utils/fsm_helper";
 
 // Consider looking at https://github.com/ejrgilbert/whamm-live/issues/12 to
 // We have 5 states in our FSM: start_state, main_state, function_state, local_state, default_state, null_state

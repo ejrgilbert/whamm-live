@@ -173,7 +173,9 @@ impl From<Cause> for WhammCause{
     fn from(value: Cause) -> Self {
        match value{
         Cause::UserPos { lc }=>{
-            WhammCause::UserPos(LineColData { l: lc.l, c: lc.c })
+            WhammCause::UserPos( SpanData{
+                lc0: LineColData { l: lc.l, c: lc.c },
+                lc1: LineColData { l: lc.l, c: lc.c + 1}})
         },
         Cause::UserProbe { lc0, lc1 }=>{
             WhammCause::UserProbe(
