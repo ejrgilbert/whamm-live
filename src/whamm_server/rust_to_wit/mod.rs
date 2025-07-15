@@ -15,7 +15,7 @@ impl From<Injection> for WhammInjection{
                 let import_record = ImportRecord {
                     module,
                     name,
-                    type_ref,
+                    type_ref: format!("{:?}", type_ref),
                     cause:  WhammCause::from(cause) };
                 
                 WhammInjection {
@@ -28,7 +28,7 @@ impl From<Injection> for WhammInjection{
             Injection::Export { name, kind, index, cause } =>{
                 let export_record = ExportRecord{
                     name,
-                    kind,
+                    kind: format!("{:?}", kind),
                     index,
                     cause: WhammCause::from(cause) };
                 WhammInjection {
@@ -40,7 +40,7 @@ impl From<Injection> for WhammInjection{
 
             Injection::Type { ty, cause } =>{
                 let type_record = TypeRecord{
-                    ty,
+                    ty: format!("{:?}", ty),
                     cause: WhammCause::from(cause) };
                 WhammInjection {
                     data_type: WhammDataType::TypeType,
@@ -86,7 +86,7 @@ impl From<Injection> for WhammInjection{
             Injection::Global { id, ty, shared, mutable, init_expr, cause } =>{
                 let global_record = GlobalRecord{
                     id,
-                    ty,
+                    ty: format!("{:?}", ty),
                     shared,
                     mutable,
                     init_expr,
@@ -99,11 +99,13 @@ impl From<Injection> for WhammInjection{
             },
 
             Injection::Func { id, fname, sig, locals, body, cause } =>{
+                let params = get_string_contents(&sig.0);
+                let results = get_string_contents(&sig.1);
                 let function_record = FunctionRecord{
                     id,
                     fname,
-                    sig,
-                    locals,
+                    sig: (params, results),
+                    locals: get_string_contents(&locals),
                     body,
                     cause: WhammCause::from(cause),
                 };
@@ -116,7 +118,7 @@ impl From<Injection> for WhammInjection{
             Injection::Local { target_fid, ty, cause } =>{
                 let local_record = LocalRecord{
                     target_fid: target_fid,
-                    ty: ty,
+                    ty: format!("{:?}", ty),
                     cause: WhammCause::from(cause),
                 };
                 WhammInjection {
@@ -215,4 +217,8 @@ impl From<FuncInstrMode> for FuncInstrumentationMode{
             FuncInstrMode::Exit=>FuncInstrumentationMode::Exit, 
        } 
     }
+}
+
+pub fn get_string_contents<T: std::fmt::Display>(array: &Vec<T>) -> Vec<String> {
+    array. iter().map(|p| p.to_string()).collect()
 }

@@ -295,62 +295,18 @@ export namespace Types {
 	/**
 	 * whamm error types
 	 */
-	export namespace LineColumnLocation {
-		export const pos = 'pos' as const;
-		export type Pos = { readonly tag: typeof pos; readonly value: [u64, u64] } & _common;
-		export function Pos(value: [u64, u64]): Pos {
-			return new VariantImpl(pos, value) as Pos;
-		}
-
-		export const span = 'span' as const;
-		export type Span = { readonly tag: typeof span; readonly value: [[u64, u64], [u64, u64]] } & _common;
-		export function Span(value: [[u64, u64], [u64, u64]]): Span {
-			return new VariantImpl(span, value) as Span;
-		}
-
-		export type _tt = typeof pos | typeof span;
-		export type _vt = [u64, u64] | [[u64, u64], [u64, u64]];
-		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): LineColumnLocation {
-			return new VariantImpl(t, v) as LineColumnLocation;
-		}
-		class VariantImpl {
-			private readonly _tag: _tt;
-			private readonly _value: _vt;
-			constructor(t: _tt, value: _vt) {
-				this._tag = t;
-				this._value = value;
-			}
-			get tag(): _tt {
-				return this._tag;
-			}
-			get value(): _vt {
-				return this._value;
-			}
-			isPos(): this is Pos {
-				return this._tag === LineColumnLocation.pos;
-			}
-			isSpan(): this is Span {
-				return this._tag === LineColumnLocation.span;
-			}
-		}
-	}
-	export type LineColumnLocation = LineColumnLocation.Pos | LineColumnLocation.Span;
-
 	export type ErrorCodeLocation = {
 		isErr: boolean;
 		message?: string | undefined;
-		lineCol: LineColumnLocation;
+		lineCol: SpanData;
 		lineStr?: string | undefined;
 		line2Str?: string | undefined;
 	};
 
 	export type WhammApiError = {
-		matchRule?: string | undefined;
-		fatal: boolean;
 		errLoc?: ErrorCodeLocation | undefined;
 		infoLoc?: ErrorCodeLocation | undefined;
-		ty: string;
+		message: string;
 	};
 
 	export namespace ErrorWrapper {
@@ -550,20 +506,17 @@ export namespace Types.$ {
 		['injectionType', $wcm.wstring],
 		['injectionValue', new $wcm.ListType<Types.WhammInjection>(WhammInjection)],
 	]);
-	export const LineColumnLocation = new $wcm.VariantType<Types.LineColumnLocation, Types.LineColumnLocation._tt, Types.LineColumnLocation._vt>([['pos', new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])], ['span', new $wcm.TupleType<[[u64, u64], [u64, u64]]>([new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64]), new $wcm.TupleType<[u64, u64]>([$wcm.u64, $wcm.u64])])]], Types.LineColumnLocation._ctor);
 	export const ErrorCodeLocation = new $wcm.RecordType<Types.ErrorCodeLocation>([
 		['isErr', $wcm.bool],
 		['message', new $wcm.OptionType<string>($wcm.wstring)],
-		['lineCol', LineColumnLocation],
+		['lineCol', SpanData],
 		['lineStr', new $wcm.OptionType<string>($wcm.wstring)],
 		['line2Str', new $wcm.OptionType<string>($wcm.wstring)],
 	]);
 	export const WhammApiError = new $wcm.RecordType<Types.WhammApiError>([
-		['matchRule', new $wcm.OptionType<string>($wcm.wstring)],
-		['fatal', $wcm.bool],
 		['errLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
 		['infoLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
-		['ty', $wcm.wstring],
+		['message', $wcm.wstring],
 	]);
 	export const ErrorWrapper = new $wcm.VariantType<Types.ErrorWrapper, Types.ErrorWrapper._tt, Types.ErrorWrapper._vt>([['errors', new $wcm.ListType<Types.WhammApiError>(WhammApiError)]], Types.ErrorWrapper._ctor);
 }
@@ -594,7 +547,6 @@ export namespace Types._ {
 		['WhammDataType', $.WhammDataType],
 		['WhammInjection', $.WhammInjection],
 		['InjectionPair', $.InjectionPair],
-		['LineColumnLocation', $.LineColumnLocation],
 		['ErrorCodeLocation', $.ErrorCodeLocation],
 		['WhammApiError', $.WhammApiError],
 		['ErrorWrapper', $.ErrorWrapper]

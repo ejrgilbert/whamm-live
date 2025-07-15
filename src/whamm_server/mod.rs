@@ -1,7 +1,3 @@
-use whamm::api::instrument::Injection;
-use whamm::common::error::WhammError;
-use wirm::ir::module::side_effects::InjectType;
-
 use crate::log;
 use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammInjection, WhammApiError, ErrorWrapper};
 use std::{cell::RefCell, collections::HashMap};
@@ -99,7 +95,7 @@ pub fn run(
                     // handle error response
                     Err(whamm_errors) =>{
                         let mut api_response = Vec::new();
-                        for whamm_error in &whamm_errors{
+                        for whamm_error in whamm_errors{
                             api_response.push(WhammApiError::from(whamm_error));
                         }
                         Result::Err(ErrorWrapper::Errors(api_response))

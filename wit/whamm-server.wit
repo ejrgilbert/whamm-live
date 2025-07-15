@@ -171,25 +171,18 @@ interface types {
 
 	// whamm error types
 
-	variant line-column-location{
-		pos(tuple<u64, u64>),
-		span(tuple<tuple<u64, u64>, tuple<u64, u64>>)
-	}
-
 	record error-code-location{
 		is-err: bool,
 		message: option<string>,
-		line-col: line-column-location,
+		line-col: span-data,
 		line-str: option<string>,
 		line2-str: option<string>,
 	}
 
 	record whamm-api-error {
-    	match-rule: option<string>,
-    	fatal: bool,
     	err-loc: option<error-code-location>,
     	info-loc: option<error-code-location>,
-    	ty: string,
+    	message: string,
 	}
 
 	variant error-wrapper{
