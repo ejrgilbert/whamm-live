@@ -3,7 +3,7 @@ import { WhammWebviewPanel } from "../user_interface/webviewPanel";
 import { FSM } from "../model/fsm";
 import * as vscode from 'vscode';
 import { ModelHelper } from "./utils/model_helper";
-import { WhammLiveInjections } from "./types";
+import { WhammLiveInjection, WhammLiveInjections } from "./types";
 import { Cell } from "./utils/cell";
 
 // Class to store API responses [ MVC pattern's model ] 
@@ -15,6 +15,9 @@ export class APIModel{
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
     whamm_live_injections!: WhammLiveInjections;
+
+    // key is the wat line number and value is the whamm live injection at that line number
+    wat_to_whamm_mapping: Map<number, WhammLiveInjection> = new Map();
 
     injected_wat_content!: string;
     jagged_array: (Cell|null)[][];
@@ -112,9 +115,17 @@ export class APIModel{
                         this.whamm_live_injections = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 
                         // update the injected wat content
-                        this.injected_wat_content = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_injections.injecting_injections, this.whamm_live_injections.lines_injected).join('\n');
+                        {
+                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_injections.injecting_injections, this.whamm_live_injections.lines_injected);
+                            this.injected_wat_content = injected_wat_content.join('\n');
+                            this.wat_to_whamm_mapping = wat_to_whamm_mapping;
+                        }
                         // update the jagged array
                         this.update_jagged_array(this.whamm_live_injections, file_contents);
+
+                        // console.log(this.jagged_array);
+                        // console.log(this.injected_wat_content);
+                        // console.log(this.whamm_live_injections);
                         // success so return true
                         return true;
                     } else{

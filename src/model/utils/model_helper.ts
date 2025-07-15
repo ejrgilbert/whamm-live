@@ -12,14 +12,19 @@ export class ModelHelper{
 
     // Inject wat builds the injected wat content
     // by combining the original wat string and the whamm_injections
-    static inject_wat(original: string, whamm_injections: WhammLiveInjection[], number_of_lines_injected: number) :string[]{
+    // also returns a mapping from the wat line numbet to the whamm live injection for that line number
+    static inject_wat(original: string, whamm_injections: WhammLiveInjection[], number_of_lines_injected: number) :[string[], Map<number, WhammLiveInjection>]{
 
         let lines = original.split('\n');
         let injected_wat = new Array(lines.length + number_of_lines_injected);
+        
+        // key is the wat line number and value is the whamm live injection at that line number
+        let wat_to_whamm_mapping: Map<number, WhammLiveInjection> = new Map();
 
         for (let whamm_injection of whamm_injections){
             for (let i =whamm_injection.wat_range.l1; i <= whamm_injection.wat_range.l2; i++){
                 injected_wat[i-1] = whamm_injection.code[i - whamm_injection.wat_range.l1];
+                wat_to_whamm_mapping.set(i, whamm_injection);
             }
         }
         
@@ -29,7 +34,7 @@ export class ModelHelper{
                 injected_wat[i] = lines[index++]
             }
         }
-        return injected_wat;
+        return [injected_wat, wat_to_whamm_mapping];
     }
 
     // Create a mapping from specific inject-type to the vec of related injections from the API response from whamm and wit so that 

@@ -35,7 +35,7 @@ describe('testing Model Helper `inject_wat` function', () => {
 
       }
 
-      expect(ModelHelper.inject_wat(original, whamm_injections, number_of_lines_injected)).toMatchObject(
+      expect(ModelHelper.inject_wat(original, whamm_injections, number_of_lines_injected)[0]).toMatchObject(
         config[key]["expected"]
       );
 

@@ -60,7 +60,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const app_path = "demo/cf.wasm";
 	const script_path = "demo/script.mm";
 	const app_bytes = await loadFileAsBytes(app_path, context);
-	const script_content = await APIModel.loadFileAsString(script_path, context);
+	const script_content = await loadFileAsString(script_path, context);
 
 	// Register vscode commands
 	context.subscriptions.push(vscode.commands.registerCommand("live-whamm:select-whamm-file", ()=>{
@@ -100,8 +100,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// TODO: this should be split out to a different async func callback! (should update script content each time)
 		try {
-			let data = api.run(script_content, app_path, script_path);
-			// TODO (handle the recieved data)
+			var data = api.run(script_content, app_path, script_path);
 		} catch (error) {
 			channel.appendLine(`whamm run failed`)
 			handleError(error, channel);
@@ -142,20 +141,11 @@ function handleError(error: unknown, channel: vscode.OutputChannel) {
 	channel.appendLine(`${name}: ${message}`);
 }
 
-function printProbe(probes: Types.Probe[], channel: vscode.OutputChannel) {
-	probes.forEach ( ({
-		appLoc,
-		scriptLoc,
-		wat
-	}, i) => {
-		channel.appendLine(`probe${i}:`);
-		channel.appendLine(`  app_loc -> ${appLoc.byteOffset}:${appLoc.mode}`);
-		channel.appendLine(`  script_loc -> ${scriptLoc.l}:${scriptLoc.c}`);
-		channel.appendLine(`  wat -> ${wat}`);
-	});
-	channel.appendLine(`whamm run success!`)
-}
-
 async function loadFileAsBytes(path: string, context: vscode.ExtensionContext): Promise<Uint8Array> {
 	return await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
+}
+
+async function loadFileAsString(path: string, context: vscode.ExtensionContext): Promise<string> {
+	const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(context.asAbsolutePath(path)));
+	return new TextDecoder('utf-8').decode(encoded);
 }
