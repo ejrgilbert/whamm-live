@@ -98,7 +98,8 @@ pub fn run(
                         for whamm_error in whamm_errors{
                             api_response.push(WhammApiError::from(whamm_error));
                         }
-                        Result::Err(ErrorWrapper::Errors(api_response))
+                        log(format!("{api_response:#?}").as_str());
+                        Result::Err(ErrorWrapper::ApiError(api_response))
                     }
                 }
         });

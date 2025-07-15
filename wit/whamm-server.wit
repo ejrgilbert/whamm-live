@@ -186,7 +186,7 @@ interface types {
 	}
 
 	variant error-wrapper{
-		errors(list<whamm-api-error>)
+		api-error(list<whamm-api-error>)
 	}
 }
 

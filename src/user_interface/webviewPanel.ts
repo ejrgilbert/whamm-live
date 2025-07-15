@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
-import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
+import { handleDocumentChanges} from '../extensionListeners/documentChangesListener';
 import { APIModel } from '../model/model';
 
 export class WhammWebviewPanel{

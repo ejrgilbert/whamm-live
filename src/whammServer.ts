@@ -310,13 +310,13 @@ export namespace Types {
 	};
 
 	export namespace ErrorWrapper {
-		export const errors = 'errors' as const;
-		export type Errors = { readonly tag: typeof errors; readonly value: WhammApiError[] } & _common;
-		export function Errors(value: WhammApiError[]): Errors {
-			return new VariantImpl(errors, value) as Errors;
+		export const apiError = 'apiError' as const;
+		export type ApiError = { readonly tag: typeof apiError; readonly value: WhammApiError[] } & _common;
+		export function ApiError(value: WhammApiError[]): ApiError {
+			return new VariantImpl(apiError, value) as ApiError;
 		}
 
-		export type _tt = typeof errors;
+		export type _tt = typeof apiError;
 		export type _vt = WhammApiError[];
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
 		export function _ctor(t: _tt, v: _vt): ErrorWrapper {
@@ -335,12 +335,12 @@ export namespace Types {
 			get value(): _vt {
 				return this._value;
 			}
-			isErrors(): this is Errors {
-				return this._tag === ErrorWrapper.errors;
+			isApiError(): this is ApiError {
+				return this._tag === ErrorWrapper.apiError;
 			}
 		}
 	}
-	export type ErrorWrapper = ErrorWrapper.Errors;
+	export type ErrorWrapper = ErrorWrapper.ApiError;
 	export namespace ErrorWrapper {
 		export class Error_ extends $wcm.ResultError<ErrorWrapper> {
 			constructor(cause: ErrorWrapper) {
@@ -518,7 +518,7 @@ export namespace Types.$ {
 		['infoLoc', new $wcm.OptionType<Types.ErrorCodeLocation>(ErrorCodeLocation)],
 		['message', $wcm.wstring],
 	]);
-	export const ErrorWrapper = new $wcm.VariantType<Types.ErrorWrapper, Types.ErrorWrapper._tt, Types.ErrorWrapper._vt>([['errors', new $wcm.ListType<Types.WhammApiError>(WhammApiError)]], Types.ErrorWrapper._ctor);
+	export const ErrorWrapper = new $wcm.VariantType<Types.ErrorWrapper, Types.ErrorWrapper._tt, Types.ErrorWrapper._vt>([['apiError', new $wcm.ListType<Types.WhammApiError>(WhammApiError)]], Types.ErrorWrapper._ctor);
 }
 export namespace Types._ {
 	export const id = 'vscode:example/types' as const;

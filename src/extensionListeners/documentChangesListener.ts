@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
 import { isExtensionActive, DiagnosticCollection} from './listenerHelper';
 import { ExtensionContext } from '../extensionContext';
-import { Model } from '../model/model';
-import { sample_whamm_api_error_response, sample_whamm_api_response } from '../model/sampleAPIData';
+import { APIModel } from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
-import { WhammResponse } from '../model/types';
+import { Types } from '../whammServer';
 
 export function shouldUpdateModel(): boolean{
     // The extension should be active and we must be making changes 
@@ -16,24 +15,34 @@ export function shouldUpdateModel(): boolean{
 
 // Is only called when we NEED to update the model
 export function handleDocumentChanges(){
-    Model.whamm_file_changing = true;
-    // TODO [ fetch from the actual WHAMM API ]
-    Model.response = sample_whamm_api_response;
-    update_webview_model(Model.response);
+    APIModel.whamm_file_changing = true;
+    let whamm_errors : Types.WhammApiError[]= [];
+
+    for (let webview of WhammWebviewPanel.webviews){
+        if (!webview.model.api_response_setup_completed) continue;
+
+        let success = webview.model.update();
+        if (!success) {
+            vscode.window.showInformationMessage("Error: Failed to update the model");
+            webview.webviewPanel.dispose();
+            return;
+        }
+        if (webview.model.whamm_live_response.is_err && whamm_errors.length == 0) {
+            whamm_errors = webview.model.whamm_live_response.whamm_errors;
+        }
+    }
+
     DiagnosticCollection.collection.clear();
-    
+
     // If there is an error, we want to act like a LSP
     // by displaying the red swiggly lines in the appropriate source code
-    if (Model.response.error !== undefined){
-        displayErrorInWhammFile();
-    } else{
-        // Only update the model, no need to update the view
-        Model.no_error_response = Model.response;
+    if (whamm_errors.length > 0){
+        displayErrorInWhammFile(whamm_errors);
     }
-    Model.whamm_file_changing = false;
+    APIModel.whamm_file_changing = false;
 }
 
-function displayErrorInWhammFile(){
+function displayErrorInWhammFile(whamm_errors: Types.WhammApiError[]){
 
     let path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
     if (path !== undefined && isExtensionActive()){
@@ -42,41 +51,21 @@ function displayErrorInWhammFile(){
 
         // For each error from our API response, create a new diagnostic
         // based on the line and column information
-        Model.response.error?.forEach(error =>{
-            let script_start = error.err_loc?.script_start;
-            let script_end = error.err_loc?.script_end;
+        whamm_errors.forEach(error =>{
+            let line_column = error.errLoc?.lineCol;
 
-            if (script_start && script_end){
-                const start_pos = new vscode.Position(script_start.l, script_start.c);
-                const end_pos = new vscode.Position(script_end.l, script_end.c);
+            if (line_column){
+                const start_pos = new vscode.Position(line_column.lc0.l -1, line_column.lc0.c - 1);
+                const end_pos = new vscode.Position(line_column.lc1.l -1, line_column.lc1.c - 1);
                 const range = new vscode.Range(start_pos, end_pos);
                 
                 diagnostics.push(new vscode.Diagnostic(
                     range,
-                    error.msg,
+                    error.message,
                     vscode.DiagnosticSeverity.Error
                 ));
             }
         })
         DiagnosticCollection.collection.set(textEditor, diagnostics);
-    }
-}
-
-// Update the model for the webviews
-function update_webview_model(response: WhammResponse){
-    // TODO
-    if (response.error !== undefined){
-        reset_webview_model();
-    } else{
-        for (let webview of WhammWebviewPanel.webviews){
-            webview.line_to_probe_mapping.set(8, ["i32.const 10", [1,5]]);
-            webview.line_to_probe_mapping.set(0, ["i32.const 10", [3,6]]);
-        }
-    }
-}
-
-function reset_webview_model(){
-    for (let webview of WhammWebviewPanel.webviews){
-        webview.line_to_probe_mapping.clear();
     }
 }

@@ -3,8 +3,9 @@ import { WhammWebviewPanel } from "../user_interface/webviewPanel";
 import { FSM } from "../model/fsm";
 import * as vscode from 'vscode';
 import { ModelHelper } from "./utils/model_helper";
-import { WhammLiveInjection, WhammLiveInjections } from "./types";
+import { WhammLiveInjection, WhammLiveResponse } from "./types";
 import { Cell } from "./utils/cell";
+import { Types } from "../whammServer";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
@@ -14,7 +15,7 @@ export class APIModel{
     // will be null if wizard option chosen
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
-    whamm_live_injections!: WhammLiveInjections;
+    whamm_live_response!: WhammLiveResponse;
 
     // key is the wat line number and value is the whamm live injection at that line number
     wat_to_whamm_mapping: Map<number, WhammLiveInjection> = new Map();
@@ -66,7 +67,10 @@ export class APIModel{
                 this.fsm_mappings = new FSM(this.valid_wat_content)
                 this.fsm_mappings.run();
                 // create the mappings
-                this.update(true);
+                // Handle like this show that the wat document can be rendered quick
+                this.update(true).then((success) =>{
+
+                });
                 this.api_response_setup_completed = true;
 
                 return [true, "success"];
@@ -95,15 +99,7 @@ export class APIModel{
                 try{
                     // Call the whamm API to get the response
                     var response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
-                } catch (err){
-                    // handle error response
-                    // TODO
-                    console.log(err);
-                    throw err;
-                }
-
                     let whamm_live_mappings = ModelHelper.create_whamm_data_type_to_whamm_injection_mapping(response);
-
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){
                         
@@ -112,26 +108,33 @@ export class APIModel{
                          *          for the `ModelHelper.create_whamm_live_injection_instances` static method
                          **/
                         this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
-                        this.whamm_live_injections = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
+                        this.whamm_live_response = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 
                         // update the injected wat content
                         {
-                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_injections.injecting_injections, this.whamm_live_injections.lines_injected);
+                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_response.injecting_injections, this.whamm_live_response.lines_injected);
                             this.injected_wat_content = injected_wat_content.join('\n');
                             this.wat_to_whamm_mapping = wat_to_whamm_mapping;
                         }
                         // update the jagged array
-                        this.update_jagged_array(this.whamm_live_injections, file_contents);
+                        this.update_jagged_array(this.whamm_live_response, file_contents);
 
-                        // console.log(this.jagged_array);
-                        // console.log(this.injected_wat_content);
-                        // console.log(this.whamm_live_injections);
+                        console.log(this.jagged_array);
+                        console.log(this.injected_wat_content);
+                        console.log(this.whamm_live_response);
                         // success so return true
                         return true;
                     } else{
                         throw new Error("FSM setup error: FSM mappings shouldn't be null");
                     }
-
+                } catch (err){
+                    if(err instanceof Types.ErrorWrapper.Error_){
+                        ModelHelper.handle_error_response(this, err.cause.value);
+                        console.log(this.whamm_live_response)
+                        return true;
+                    } else
+                        return false;
+                }
 
             } else{
                 // nothing to change
@@ -142,7 +145,7 @@ export class APIModel{
         return false;
     }
 
-    async update_jagged_array(response: WhammLiveInjections, file_contents: string){
+    async update_jagged_array(response: WhammLiveResponse, file_contents: string){
         this.jagged_array = ModelHelper.create_jagged_array(file_contents);
 
         // loop over every injection
