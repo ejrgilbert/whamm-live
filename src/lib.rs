@@ -11,15 +11,15 @@ struct WhammServer;
 
 impl Guest for WhammServer {
 
-	fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
+	fn setup(app_name: String, app_bytes: Vec<u8>, script: String, opts: Options) -> Result<String, ErrorCode> {
 		log("Starting whamm setup");
-		let result = setup(app_name, app_bytes, opts);
+		let result = setup(app_name, app_bytes, script, opts);
 		log("Finished whamm setup");
 		result
 	}
 
-	fn no_change(new_script: String) -> bool{
-		no_change(new_script)
+	fn no_change(new_script: String, app_name: String) -> bool{
+		no_change(new_script, app_name)
 	}
 
 	fn end(app_name: String){

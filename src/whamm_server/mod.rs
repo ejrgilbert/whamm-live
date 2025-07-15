@@ -4,20 +4,25 @@ use std::{cell::RefCell, collections::HashMap};
 
 thread_local! {
     static APP_TO_BYTES: RefCell<HashMap<String, RefCell<Vec<u8>>>> = RefCell::new(HashMap::new());
-    static SCRIPT: RefCell<String> = RefCell::new(String::default());
+    static APP_TO_SCRIPT: RefCell<HashMap<String, String>> = RefCell::new(HashMap::new());
     static OPTIONS: RefCell<Options> = RefCell::new(Options::default())
 }
 
 mod rust_to_wit_error;
 mod rust_to_wit;
 
-pub fn setup(app_name: String, app_bytes: Vec<u8>, opts: Options) -> Result<String, ErrorCode> {
+pub fn setup(app_name: String, app_bytes: Vec<u8>, script: String, opts: Options) -> Result<String, ErrorCode> {
     APP_TO_BYTES.with(|app_to_bytes| {
         let mut app_to_bytes = app_to_bytes.borrow_mut();
         let all_bytes = RefCell::new(Vec::new());
         *all_bytes.borrow_mut() = app_bytes;
         app_to_bytes.insert(app_name.clone(), all_bytes);
         log(&format!("{app_name} is setup"));
+    });
+
+    APP_TO_SCRIPT.with(|app_to_script|{
+        let mut app_to_script = app_to_script.borrow_mut();
+        app_to_script.insert(app_name.clone(), script)
     });
 
     // cache app bytes and options
@@ -32,13 +37,19 @@ pub fn end(app_name: String){
         let mut app_to_bytes = app_to_bytes.borrow_mut();
         app_to_bytes.remove(&app_name);
     });
+    APP_TO_SCRIPT.with(|app_to_script| {
+        let mut app_to_script = app_to_script.borrow_mut();
+        app_to_script.remove(&app_name);
+    });
 }
 
 pub fn no_change(
     new_script: String,
+    app_name: String
 ) -> bool {
-    return SCRIPT.with(|script| {
-        let script_cache = &mut *script.borrow_mut();
+    return APP_TO_SCRIPT.with(|app_to_script|{
+        let app_to_script = app_to_script.borrow_mut();
+        let script_cache = app_to_script.get(&app_name).unwrap();
         return if new_script.eq(script_cache) {
             true
         } else {
@@ -47,6 +58,8 @@ pub fn no_change(
     });
 }
 
+// Only runs if it absolutely needs to
+// if `no_change` gives false
 pub fn run(
     new_script: String,
     app_name: String,
@@ -57,9 +70,10 @@ pub fn run(
         let bytes = app_to_bytes.get(&app_name).unwrap();
         let bytes = &*bytes.borrow();
 
-        return SCRIPT.with(|script| {
-            let script_cache = &mut *script.borrow_mut();
-                *script_cache = new_script.clone();
+        return APP_TO_SCRIPT.with(|app_to_script| {
+            let app_to_script = app_to_script.borrow_mut();
+            let script_cache = &mut app_to_script.get(&app_name).unwrap();
+                *script_cache = &new_script.clone();
                 
                 // Call the WHAMM api
                 let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(

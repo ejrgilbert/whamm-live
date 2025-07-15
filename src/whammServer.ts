@@ -371,7 +371,7 @@ export namespace whammServer {
 		/**
 		 * @throws ErrorCode.Error_
 		 */
-		setup: (appName: string, appBytes: Uint8Array, opts: Options) => string;
+		setup: (appName: string, appBytes: Uint8Array, script: string, opts: Options) => string;
 		end: (appName: string) => void;
 		/**
 		 * No hash map support in wit. So, we usea list of key-value pairs
@@ -379,7 +379,7 @@ export namespace whammServer {
 		 * @throws ErrorWrapper.Error_
 		 */
 		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
-		noChange: (newScript: string) => boolean;
+		noChange: (newScript: string, appName: string) => boolean;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -568,6 +568,7 @@ export namespace whammServer.$ {
 		export const setup = new $wcm.FunctionType<whammServer.Exports['setup']>('setup',[
 			['appName', $wcm.wstring],
 			['appBytes', new $wcm.Uint8ArrayType()],
+			['script', $wcm.wstring],
 			['opts', Options],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
 		export const end = new $wcm.FunctionType<whammServer.Exports['end']>('end',[
@@ -580,6 +581,7 @@ export namespace whammServer.$ {
 		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.ErrorWrapper>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), ErrorWrapper, Types.ErrorWrapper.Error_));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
+			['appName', $wcm.wstring],
 		], $wcm.bool);
 		export const wat2watandwasm = new $wcm.FunctionType<whammServer.Exports['wat2watandwasm']>('wat2watandwasm',[
 			['content', $wcm.wstring],
@@ -626,10 +628,10 @@ export namespace whammServer._ {
 		}
 	}
 	export type Exports = {
-		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
+		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, script_ptr: i32, script_len: i32, opts_Options_asMonitorModule: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'end': (appName_ptr: i32, appName_len: i32) => void;
 		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
-		'no-change': (newScript_ptr: i32, newScript_len: i32) => i32;
+		'no-change': (newScript_ptr: i32, newScript_len: i32, appName_ptr: i32, appName_len: i32) => i32;
 		'wat2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 		'wasm2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 	};

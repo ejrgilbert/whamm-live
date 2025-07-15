@@ -194,11 +194,11 @@ world whamm-server {
 	use types.{ options, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
 
-	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
+	export setup: func(app-name: string, app-bytes: list<u8>, script: string, opts: options) -> result<string, error-code>;
 	export end: func(app-name: string);
 	// No hash map support in wit. So, we usea list of key-value pairs
 	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string) -> bool;
+	export no-change: func(new-script: string, app-name: string) -> bool;
 	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
 	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;
 }
