@@ -58,6 +58,13 @@ pub fn no_change(
     });
 }
 
+pub fn update_whamm(new_script: String, app_name: String){
+    APP_TO_SCRIPT.with(|app_to_script|{
+        let mut app_to_script = app_to_script.borrow_mut();
+        app_to_script.insert(app_name, new_script);
+    });
+}
+
 // Only runs if it absolutely needs to
 // if `no_change` gives false
 pub fn run(
@@ -71,9 +78,8 @@ pub fn run(
         let bytes = &*bytes.borrow();
 
         return APP_TO_SCRIPT.with(|app_to_script| {
-            let app_to_script = app_to_script.borrow_mut();
-            let script_cache = &mut app_to_script.get(&app_name).unwrap();
-                *script_cache = &new_script.clone();
+            let mut app_to_script = app_to_script.borrow_mut();
+            app_to_script.insert(app_name, new_script.clone());
                 
                 // Call the WHAMM api
                 let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
@@ -101,7 +107,6 @@ pub fn run(
                             }
                             api_response.push(injection_pair);
                         }
-                        log(format!("{api_response:#?}").as_str());
                         Result::Ok(api_response)
 
                     },
@@ -112,7 +117,6 @@ pub fn run(
                         for whamm_error in whamm_errors{
                             api_response.push(WhammApiError::from(whamm_error));
                         }
-                        log(format!("{api_response:#?}").as_str());
                         Result::Err(ErrorWrapper::ApiError(api_response))
                     }
                 }

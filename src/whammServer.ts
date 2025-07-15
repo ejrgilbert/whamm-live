@@ -380,6 +380,7 @@ export namespace whammServer {
 		 */
 		run: (script: string, appName: string, scriptPath: string) => InjectionPair[];
 		noChange: (newScript: string, appName: string) => boolean;
+		updateWhamm: (newScript: string, appName: string) => void;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -583,6 +584,10 @@ export namespace whammServer.$ {
 			['newScript', $wcm.wstring],
 			['appName', $wcm.wstring],
 		], $wcm.bool);
+		export const updateWhamm = new $wcm.FunctionType<whammServer.Exports['updateWhamm']>('update-whamm',[
+			['newScript', $wcm.wstring],
+			['appName', $wcm.wstring],
+		], undefined);
 		export const wat2watandwasm = new $wcm.FunctionType<whammServer.Exports['wat2watandwasm']>('wat2watandwasm',[
 			['content', $wcm.wstring],
 		], new $wcm.ResultType<[string, Uint8Array], whammServer.ErrorCode>(new $wcm.TupleType<[string, Uint8Array]>([$wcm.wstring, new $wcm.Uint8ArrayType()]), ErrorCode, Types.ErrorCode.Error_));
@@ -620,6 +625,7 @@ export namespace whammServer._ {
 			['end', $.exports.end],
 			['run', $.exports.run],
 			['noChange', $.exports.noChange],
+			['updateWhamm', $.exports.updateWhamm],
 			['wat2watandwasm', $.exports.wat2watandwasm],
 			['wasm2watandwasm', $.exports.wasm2watandwasm]
 		]);
@@ -632,6 +638,7 @@ export namespace whammServer._ {
 		'end': (appName_ptr: i32, appName_len: i32) => void;
 		'run': (script_ptr: i32, script_len: i32, appName_ptr: i32, appName_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
 		'no-change': (newScript_ptr: i32, newScript_len: i32, appName_ptr: i32, appName_len: i32) => i32;
+		'update-whamm': (newScript_ptr: i32, newScript_len: i32, appName_ptr: i32, appName_len: i32) => void;
 		'wat2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 		'wasm2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 	};
