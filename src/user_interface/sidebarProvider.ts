@@ -135,9 +135,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
 
         const css_src_1 = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this.extension_uri, 'media', 'vscode.css'));
-
         const css_src_2 = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this.extension_uri, 'media', 'reset.css'));
+        const css_src_3 = webviewView.webview.asWebviewUri(
+            vscode.Uri.joinPath(this.extension_uri, 'media', 'whamm_title.css'));
         
         const script_src = webviewView.webview.asWebviewUri(
             vscode.Uri.joinPath(this.extension_uri, 'svelte', 'dist', 'sidebar.js'));
@@ -149,26 +150,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link rel="stylesheet" href=${css_src_1}>
                 <link rel="stylesheet" href=${css_src_2}>
-                <style>
-                    img:hover {
-                    animation: shake 0.5s;
-                    animation-iteration-count: infinite;
-                    }
-
-                    @keyframes shake {
-                    0% { transform: translate(1px, 1px) rotate(0deg); }
-                    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-                    20% { transform: translate(-3px, 0px) rotate(1deg); }
-                    30% { transform: translate(3px, 2px) rotate(0deg); }
-                    40% { transform: translate(1px, -1px) rotate(1deg); }
-                    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-                    60% { transform: translate(-3px, 1px) rotate(0deg); }
-                    70% { transform: translate(3px, 1px) rotate(-1deg); }
-                    80% { transform: translate(-1px, -1px) rotate(1deg); }
-                    90% { transform: translate(1px, 2px) rotate(0deg); }
-                    100% { transform: translate(1px, -2px) rotate(-1deg); }
-                    }
-                </style>
+                <link rel="stylesheet" href=${css_src_3}>
                 <script>
                     const vscode = acquireVsCodeApi();
                 </script>
@@ -176,7 +158,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
                 <title>Live Whamm</title>
             </head>
             <body>
-            <img id="whamm" src=${img_src} alt="whamm">
+
+            <div class="whamm-title-container">
+            <div id="whamm-logo">
+                <img id="whamm" src=${img_src} alt="whamm" />
+            </div>
+            <div id="whamm-title">Live Whamm</div>
+            </div>
+
+
             <div id="main-body"></div>
             </body>
             <script> 
