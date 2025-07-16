@@ -116,7 +116,8 @@ export class Helper_sidebar_provider{
         Helper_sidebar_provider.helper_update_whamm_workspace_state(
             ExtensionContext.context.workspaceState.get('whamm-file'),
         )
-
+        Helper_sidebar_provider.post_message('whamm-api-models-update',
+                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
     static async helper_get_whamm_file_contents(): Promise<string | null>{
