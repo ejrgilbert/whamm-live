@@ -63,7 +63,8 @@
                         }
                     break;
                 case 'api-response-update':{
-                    api_response.set(message.response);
+                        api_response.out_of_date = message.response.out_of_date;
+                        api_response.codemirror_code_updated = false;
                     }
                     break;
             }
