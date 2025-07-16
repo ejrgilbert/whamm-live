@@ -2,6 +2,8 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
 import { WhammWebviewPanel } from './webviewPanel'; 
+import { APIModel } from '../model/model';
+import { ModelHelper } from '../model/utils/model_helper';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -49,6 +51,17 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_wasm_file(path: string | undefined){
+        if (path){
+            // Check if webview for this path already exists
+            // if it does, then just reveal and make that active
+            for (let webview of WhammWebviewPanel.webviews){
+                if (webview.fileName === path){
+                    webview.webviewPanel.reveal();
+                    return;
+                }
+            }
+        }
+
         let panel = new WhammWebviewPanel(path);
         await panel.init();
         panel.loadHTML();
@@ -104,5 +117,21 @@ export class Helper_sidebar_provider{
             ExtensionContext.context.workspaceState.get('whamm-file'),
         )
 
+    }
+
+    static async helper_get_whamm_file_contents(): Promise<string | null>{
+        let file_path: string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
+        if (file_path){
+
+            var file_contents: string;
+            let editor = vscode.window.activeTextEditor;
+            if (editor?.document.uri.fsPath === file_path){
+                file_contents = editor.document.getText();
+            } else{
+                file_contents = await APIModel.loadFileAsString(file_path, ExtensionContext.context);
+            }
+            return file_contents;
+        }
+        return null;
     }
 }

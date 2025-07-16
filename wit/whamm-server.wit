@@ -171,29 +171,22 @@ interface types {
 
 	// whamm error types
 
-	variant line-column-location{
-		pos(tuple<u64, u64>),
-		span(tuple<tuple<u64, u64>, tuple<u64, u64>>)
-	}
-
 	record error-code-location{
 		is-err: bool,
 		message: option<string>,
-		line-col: line-column-location,
+		line-col: span-data,
 		line-str: option<string>,
 		line2-str: option<string>,
 	}
 
 	record whamm-api-error {
-    	match-rule: option<string>,
-    	fatal: bool,
     	err-loc: option<error-code-location>,
     	info-loc: option<error-code-location>,
-    	ty: string,
+    	message: string,
 	}
 
 	variant error-wrapper{
-		errors(list<whamm-api-error>)
+		api-error(list<whamm-api-error>)
 	}
 }
 
@@ -201,11 +194,12 @@ world whamm-server {
 	use types.{ options, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
 
-	export setup: func(app-name: string, app-bytes: list<u8>, opts: options) -> result<string, error-code>;
+	export setup: func(app-name: string, app-bytes: list<u8>, script: string, opts: options) -> result<string, error-code>;
 	export end: func(app-name: string);
 	// No hash map support in wit. So, we usea list of key-value pairs
 	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string) -> bool;
+	export no-change: func(new-script: string, app-name: string) -> bool;
+	export update-whamm: func(new-script: string, app-name: string);
 	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
 	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;
 }

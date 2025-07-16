@@ -1,54 +1,60 @@
 // From trait implementation for whamm API responses
-use crate::vscode::example::types::{ErrorCodeLocation, LineColumnLocation, WhammApiError};
-use whamm::common::error::{self};
+use crate::vscode::example::types::{ErrorCodeLocation, LineColData, SpanData, WhammApiError};
+use whamm::api::instrument::WhammError;
+use whamm::common::error::CodeLocation;
 
-impl From<&error::WhammError> for WhammApiError{
-    fn from(value: &error::WhammError) -> Self {
+impl From<WhammError> for WhammApiError{
+    fn from(value: WhammError) -> Self {
         WhammApiError {
-            match_rule: value.match_rule.clone(),
-            fatal: value.fatal,
-            err_loc: match &value.err_loc{
-                    Some(value) => Some(ErrorCodeLocation::from(value)),
+            err_loc:
+                match value.err_loc {
                     None => None,
+                    Some(value) => Some(ErrorCodeLocation::from(value))
                 },
-            info_loc: match &value.info_loc{
-                    Some(value) => Some(ErrorCodeLocation::from(value)),
+            info_loc:
+                match value.info_loc {
                     None => None,
+                    Some(value) => Some(ErrorCodeLocation::from(value))
                 },
-            ty: {
-                let name = value.ty.name();
-                let message = value.ty.message();
-                format!("{name}: {message}")
-            }
+            message: value.msg
         }
     } 
 }
 
-impl From<&error::CodeLocation> for ErrorCodeLocation{
-    fn from(value: &error::CodeLocation) -> Self {
+impl From<CodeLocation> for ErrorCodeLocation{
+    fn from(value: CodeLocation) -> Self {
         ErrorCodeLocation {
             is_err: value.is_err,
-            message: value.message.clone(),
-            line_col: LineColumnLocation::from(value.line_col.clone()),
-            line_str: value.line_str.clone(),
-            line2_str: value.line2_str.clone()}
+            message: value.message,
+            line_col: SpanData::from(value.line_col),
+            line_str: value.line_str,
+            line2_str: value.line2_str}
     }
 }
 
 use pest::error::LineColLocation;
-impl From<LineColLocation> for LineColumnLocation{
+impl From<LineColLocation> for SpanData{
     fn from(value: LineColLocation) -> Self {
         match value{
             LineColLocation::Pos(value) => {
-                LineColumnLocation::Pos(from_usize_to_u64(value))
+                let value = from_usize_to_u32(value);
+                SpanData{
+                    lc0: LineColData{l: value.0, c: value.1},
+                    lc1: LineColData{l: value.0, c: value.1 + 1},
+                }
             }
             LineColLocation::Span(value1, value2) =>{
-                LineColumnLocation::Span(((from_usize_to_u64(value1)), from_usize_to_u64(value2)))
+                let value1 = from_usize_to_u32(value1);
+                let value2 = from_usize_to_u32(value2);
+                SpanData{
+                    lc0: LineColData{l: value1.0, c: value1.1},
+                    lc1: LineColData{l: value2.0, c: value2.1},
+                }
             }
         }
     }
 }
 
-fn from_usize_to_u64(value: (usize, usize)) -> (u64, u64){
-    (value.0 as u64, value.1 as u64)
+fn from_usize_to_u32(value: (usize, usize)) -> (u32, u32){
+    (value.0 as u32, value.1 as u32)
 }

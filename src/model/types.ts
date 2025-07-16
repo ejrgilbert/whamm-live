@@ -97,11 +97,13 @@ export type InjectionFuncValue = {
     func: number
 }
 
-export type WhammLiveInjections = {
+export type WhammLiveResponse = {
     lines_injected: number;
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
+    whamm_errors: Types.WhammApiError[],
+    is_err: boolean
 }
 
 export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
