@@ -134,4 +134,11 @@ export class Helper_sidebar_provider{
         }
         return null;
     }
+
+    static post_message(command: string, values: any){
+        Helper_sidebar_provider.webview.postMessage({
+                command: command,
+                values: values
+        });
+    }
 }

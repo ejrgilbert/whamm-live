@@ -1,4 +1,3 @@
-import { WhammWebviewPanel } from "../../user_interface/webviewPanel";
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
 import { APIModel } from "../model";
@@ -598,13 +597,4 @@ export class ModelHelper{
         instance.jagged_array = [];
     }
 
-    // set all models's api out of date and notify the related svelte side(s) only once!
-    static set_api_out_of_date(value: boolean){
-        for (let webview of WhammWebviewPanel.webviews){
-            webview.model.__api_response_out_of_date = value;
-        }
-
-        // send only one post message to the sidebar side to notify them of the changes
-        // TODO
-    }
 }

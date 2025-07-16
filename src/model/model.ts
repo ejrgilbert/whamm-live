@@ -7,7 +7,6 @@ import { WhammLiveInjection, WhammLiveResponse } from "./types";
 import { Cell } from "./utils/cell";
 import { Types } from "../whammServer";
 import { show_and_handle_error_response } from "../extensionListeners/documentChangesListener";
-import { SidebarProvider } from "../user_interface/sidebarProvider";
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
 
 // Class to store API responses [ MVC pattern's model ] 
@@ -41,7 +40,6 @@ export class APIModel{
         this.webview = webview;
         this.fsm_mappings = this.injected_fsm_mappings = null;
         this.jagged_array = [];
-        this.api_response_out_of_date = true;
     }
 
     async loadWatAndWasm(): Promise<boolean>{
@@ -62,6 +60,7 @@ export class APIModel{
 
     // setup initial mappings and other necessary stuff
     async setup(): Promise<[boolean, string]>{
+        this.api_response_out_of_date = true;
         // loadWatAndWasm should have been called to load the content
         let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
         if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content && whamm_contents){
@@ -191,7 +190,18 @@ export class APIModel{
     set api_response_out_of_date(value: boolean){
         this.__api_response_out_of_date = value;
         // nofify the sidebar side of the change
-        //TODO
+        Helper_sidebar_provider.post_message('whamm-api-models-update',
+                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+    }
+
+    // set all models's api out of date and notify the related svelte side(s) only once!
+    static set_api_out_of_date(value: boolean){
+        for (let webview of WhammWebviewPanel.webviews){
+            webview.model.__api_response_out_of_date = value;
+        }
+        // send only one post message to the sidebar side to notify them of the changes
+        Helper_sidebar_provider.post_message('whamm-api-models-update',
+                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
     // file related helper static method(s)

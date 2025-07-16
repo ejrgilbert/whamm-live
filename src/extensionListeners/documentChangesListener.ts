@@ -18,7 +18,7 @@ export function shouldUpdateModel(): boolean{
 // Is only called when we NEED to update the model
 export async function handleDocumentChanges(){
     APIModel.whamm_file_changing = true;
-    ModelHelper.set_api_out_of_date(true);
+    APIModel.set_api_out_of_date(true);
 
     let whamm_errors : Types.WhammApiError[]= [];
     // It won't be null if this function is called
@@ -91,7 +91,7 @@ export function show_and_handle_error_response(file_contents: string, whamm_erro
             if (webview.fileName) ExtensionContext.api.updateWhamm(file_contents, webview.fileName);
         }
         
-        ModelHelper.set_api_out_of_date(false);
+        APIModel.set_api_out_of_date(false);
         displayErrorInWhammFile(whamm_errors);
     }
 }

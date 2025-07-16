@@ -1,5 +1,6 @@
 <script lang="ts">
     import {slide} from 'svelte/transition';
+    import WhammApiTracker from './WhammApiTracker.svelte';
 
     let show_wat_button = $state(true)
     let wat_button_text = $derived(show_wat_button ? "Open <i>.wat</i> or <i>.wasm</i> file</button>" : "Open Wizard wasm monitor");
@@ -24,6 +25,8 @@
     <button class="webview-display-button" type="button" onclick={openWatWasmFile}>{@html wat_button_text}</button>   
     <button class="webview-display-button-inline" onclick={changeShowWatButton}>{arrow_value}</button>
 </div>
+
+<WhammApiTracker />
 
 <style>
 
