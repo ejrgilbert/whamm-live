@@ -6,6 +6,9 @@ import { ModelHelper } from "./utils/model_helper";
 import { WhammLiveInjection, WhammLiveResponse } from "./types";
 import { Cell } from "./utils/cell";
 import { Types } from "../whammServer";
+import { show_and_handle_error_response } from "../extensionListeners/documentChangesListener";
+import { SidebarProvider } from "../user_interface/sidebarProvider";
+import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
@@ -56,12 +59,13 @@ export class APIModel{
     }
 
     // setup initial mappings and other necessary stuff
-    setup(): [boolean, string]{
+    async setup(): Promise<[boolean, string]>{
         // loadWatAndWasm should have been called to load the content
-        if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content){
+        let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
+        if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content && whamm_contents){
             try{
                 // setup in rust side
-                ExtensionContext.api.setup(this.webview.fileName, this.valid_wasm_content, {asMonitorModule: false});
+                ExtensionContext.api.setup(this.webview.fileName, this.valid_wasm_content, whamm_contents, {asMonitorModule: false});
 
                 // use the fsm to have the mappings ready
                 this.fsm_mappings = new FSM(this.valid_wat_content)
@@ -69,7 +73,12 @@ export class APIModel{
                 // create the mappings
                 // Handle like this show that the wat document can be rendered quick
                 this.update(true).then((success) =>{
-
+                    if (!success) {
+                        vscode.window.showInformationMessage("Error: Failed to update the model");
+                        this.webview.webviewPanel.dispose();
+                        return;
+                    }
+                   show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
                 });
                 this.api_response_setup_completed = true;
 
@@ -95,7 +104,7 @@ export class APIModel{
                 file_contents = await APIModel.loadFileAsString(file_path, ExtensionContext.context);
             }
 
-            if (force_update || !ExtensionContext.api.noChange(file_contents)){
+            if (force_update || !ExtensionContext.api.noChange(file_contents, this.webview.fileName)){
                 try{
                     // Call the whamm API to get the response
                     var response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
@@ -118,10 +127,6 @@ export class APIModel{
                         }
                         // update the jagged array
                         this.update_jagged_array(this.whamm_live_response, file_contents);
-
-                        console.log(this.jagged_array);
-                        console.log(this.injected_wat_content);
-                        console.log(this.whamm_live_response);
                         // success so return true
                         return true;
                     } else{
@@ -130,7 +135,6 @@ export class APIModel{
                 } catch (err){
                     if(err instanceof Types.ErrorWrapper.Error_){
                         ModelHelper.handle_error_response(this, err.cause.value);
-                        console.log(this.whamm_live_response)
                         return true;
                     } else
                         return false;

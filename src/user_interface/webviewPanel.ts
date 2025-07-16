@@ -61,7 +61,6 @@ export class WhammWebviewPanel{
     private static addPanel(webview: WhammWebviewPanel){
         WhammWebviewPanel.number_of_webviews++;
         WhammWebviewPanel.webviews.push(webview);
-        handleDocumentChanges();
     }
 
     static removePanel(webview: WhammWebviewPanel){
