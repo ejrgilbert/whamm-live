@@ -29,13 +29,9 @@ export class APIModel{
     jagged_array: (Cell|null)[][];
 
     webview: WhammWebviewPanel;
-    // Will always be the latest API response with no error or 'null'
     fsm_mappings: FSM | null;
-
-    /**
-     *  @todo: Upon orca funcID fix: Remove every `injected_fsm_mappings` usage in this and model_helper.ts file upon
-     * orca ( or wirm as they now say it) funcID fix
-     **/
+    // funcID's change if whamm injects functions/ func imports
+    // So, we need to a mapping to handle that 
     injected_fsm_mappings: FSM | null;
 
     constructor(webview: WhammWebviewPanel){
@@ -116,10 +112,6 @@ export class APIModel{
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){
                         
-                        /**
-                         *  @todo: Upon orca funcID fix: Remove once orca fixes the injected fsm mappings and pass in `this.fsm_mappings` instead of `this.injected_fsm_mappings`
-                         *          for the `ModelHelper.create_whamm_live_injection_instances` static method
-                         **/
                         this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
                         this.whamm_live_response = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 

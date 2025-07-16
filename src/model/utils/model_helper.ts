@@ -68,9 +68,6 @@ export class ModelHelper{
     }
 
 
-    /**
-     * @todo: Upon orca funcID fix: Remove this static method
-     */
     // This function's job is to update the funcID values for the different mappings like
     // the local mappings and func mappings since the funcID value changes after an injection
     static update_fsm_funcIDs(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
