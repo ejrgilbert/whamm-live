@@ -7,7 +7,7 @@
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap} from "@codemirror/view";
-    import {probe_data} from './lib/probe_data.svelte';
+    import { api_response} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
 
     let wizard_tab = $state(false);
@@ -61,6 +61,10 @@
                             }
                         }
                         }
+                    break;
+                case 'api-response-update':{
+                    api_response.set(message.response);
+                    }
                     break;
             }
     });
