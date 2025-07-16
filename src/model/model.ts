@@ -14,6 +14,7 @@ import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper
 export class APIModel{
     static whamm_file_changing: boolean = false;
     api_response_setup_completed: boolean = false;
+    __api_response_out_of_date!: boolean;
 
     // will be null if wizard option chosen
     valid_wat_content!: string ;
@@ -40,6 +41,7 @@ export class APIModel{
         this.webview = webview;
         this.fsm_mappings = this.injected_fsm_mappings = null;
         this.jagged_array = [];
+        this.api_response_out_of_date = true;
     }
 
     async loadWatAndWasm(): Promise<boolean>{
@@ -78,6 +80,7 @@ export class APIModel{
                         this.webview.webviewPanel.dispose();
                         return;
                     }
+                   this.api_response_out_of_date = false;
                    show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
                 });
                 this.api_response_setup_completed = true;
@@ -178,7 +181,20 @@ export class APIModel{
         }}
     }
 
-    // file related helper methods
+    /* getter and setters */
+
+    get api_response_out_of_date(){
+        return this.__api_response_out_of_date;
+    }
+
+    // Updates the variables as well as notifies the svelte side by posting the messages
+    set api_response_out_of_date(value: boolean){
+        this.__api_response_out_of_date = value;
+        // nofify the sidebar side of the change
+        //TODO
+    }
+
+    // file related helper static method(s)
     static async loadFileAsString(path: string, context: vscode.ExtensionContext): Promise<string> {
         const encoded = await vscode.workspace.fs.readFile(vscode.Uri.file(path));
         return new TextDecoder('utf-8').decode(encoded);
