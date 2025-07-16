@@ -8,11 +8,25 @@ import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
 
 export function shouldUpdateModel(): boolean{
+    let is_extension_active = isExtensionActive();
     // The extension should be active and we must be making changes 
     // to the selected whamm file for us to update the model
-    return isExtensionActive()
-        && ExtensionContext.context.workspaceState.get
-            ('whamm-file') == vscode.window.activeTextEditor?.document.uri.fsPath;
+    if (is_extension_active){
+
+        // see if the contents of the whamm file has changed
+        // only need to update model is the whamm file has changed
+        let whamm_file_path : string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
+        let editor = vscode.window.activeTextEditor;
+
+        if (editor && editor?.document.uri.fsPath === whamm_file_path){
+            var file_contents = editor.document.getText();
+            if (file_contents === APIModel.whamm_cached_content) return false;
+
+            APIModel.whamm_cached_content = file_contents;
+            return true;
+        } 
+    }
+    return false;
 }
 
 // Is only called when we NEED to update the model
