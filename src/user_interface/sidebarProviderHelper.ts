@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
 import { WhammWebviewPanel } from './webviewPanel'; 
 import { APIModel } from '../model/model';
+import { ModelHelper } from '../model/utils/model_helper';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -50,6 +51,17 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_wasm_file(path: string | undefined){
+        if (path){
+            // Check if webview for this path already exists
+            // if it does, then just reveal and make that active
+            for (let webview of WhammWebviewPanel.webviews){
+                if (webview.fileName === path){
+                    webview.webviewPanel.reveal();
+                    return;
+                }
+            }
+        }
+
         let panel = new WhammWebviewPanel(path);
         await panel.init();
         panel.loadHTML();
