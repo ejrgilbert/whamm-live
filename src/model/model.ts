@@ -8,6 +8,7 @@ import { Cell } from "./utils/cell";
 import { Types } from "../whammServer";
 import { show_and_handle_error_response } from "../extensionListeners/documentChangesListener";
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
+import { SvelteModel } from "./svelte_model";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
@@ -15,6 +16,7 @@ export class APIModel{
     api_response_setup_completed: boolean = false;
     __api_response_out_of_date!: boolean;
 
+    static whamm_cached_content: string;
     // will be null if wizard option chosen
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
@@ -189,9 +191,7 @@ export class APIModel{
     // Updates the variables as well as notifies the svelte side by posting the messages
     set api_response_out_of_date(value: boolean){
         this.__api_response_out_of_date = value;
-        // nofify the sidebar side of the change
-        Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+        SvelteModel.update_svelte_model(this.webview);
     }
 
     // set all models's api out of date and notify the related svelte side(s) only once!
@@ -199,9 +199,7 @@ export class APIModel{
         for (let webview of WhammWebviewPanel.webviews){
             webview.model.__api_response_out_of_date = value;
         }
-        // send only one post message to the sidebar side to notify them of the changes
-        Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+        SvelteModel.update_svelte_models();
     }
 
     // file related helper static method(s)

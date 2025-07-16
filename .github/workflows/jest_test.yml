@@ -1,4 +1,4 @@
-name: Test FSM
+name: Jest testing
 on:
   push:
     branches: [ main ]
