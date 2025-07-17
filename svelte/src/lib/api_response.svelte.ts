@@ -1,9 +1,11 @@
-type dangling_injections={
+export type injection_circle = { color: string; body: string };
+
+export type dangling_injections={
 	color: string,
 	values: dangling_injection[]
 }
 
-type dangling_injection=[string, number];
+export type dangling_injection=[string, number];
 
 export type valid_model = {
 	injected_wat: string,

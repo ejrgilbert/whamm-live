@@ -6,10 +6,11 @@
     import { HighlightStyle, syntaxHighlighting} from "@codemirror/language";
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
-    import { keymap} from "@codemirror/view";
+    import { keymap, lineNumbers} from "@codemirror/view";
     import { api_response} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
-  import { lineBackgroundField } from './lib/code_mirror/code_mirror_setup';
+    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
+    import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
 
     let wizard_tab = $state(false);
 
@@ -56,8 +57,11 @@
                                                 EditorState.readOnly.of(true),
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
-                                                lineBackgroundField
-                                        ],
+                                                lineBackgroundField,
+                                                
+                                                // gutters
+                                                lineNumbers(),
+                                                injectionCircleGutter]
                                 })
                             }
                         }

@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { blur, fade } from "svelte/transition";
+  import { fade } from "svelte/transition";
   import { api_response } from "./api_response.svelte";
-  import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/code_mirror_setup";
+  import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
+  import { addDanglingCircleInjections, clearCirclesEffect, clearInjectedCircles, injectionCircleEffect} from "./code_mirror/gutter_view";
+  import { debug } from "console";
 
     // Code mirror view
     const { view } = $props();
@@ -11,26 +13,24 @@
 
     function update_codemirror(){
         api_response.codemirror_code_updated = true;
-        
+        let wat_content: string = (api_response.model) ? api_response.model.injected_wat : api_response.original_wat;
+
         // Update codemirror content
-        let wat_content: string;
-        if (api_response.model){
-            wat_content = api_response.model.injected_wat;
-        } else{
-            wat_content = api_response.original_wat;
-        }
         const transaction = view.state.update({
             changes: { from: 0, to: view.state.doc.length, insert: wat_content }
         });
         view.dispatch(transaction);
+        // clear all the previously injected circles and background colors
+        clearInjectedCircles(view);
+        clearBackgroundColors(view);
 
-        // Update line highlights
+        // Update line highlights and dangling circles injected
         if (api_response.model){
             setBackgroundColorForLines(view, api_response.model.lines_injected, "bg-injected")
-        } else {
-            clearBackgroundColors(view);
+            addDanglingCircleInjections(view, api_response.model);
         }
 
+        // update the extension side about the update
         post_message_to_extension();
     }
 
