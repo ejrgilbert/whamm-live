@@ -9,6 +9,7 @@
     import { keymap} from "@codemirror/view";
     import { api_response} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
+  import { lineBackgroundField } from './lib/code_mirror/code_mirror_setup';
 
     let wizard_tab = $state(false);
 
@@ -55,6 +56,7 @@
                                                 EditorState.readOnly.of(true),
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
+                                                lineBackgroundField
                                         ],
                                 })
                             }
@@ -95,5 +97,16 @@
 
 .tab button{
     padding: 1.5%;
+}
+
+:global(.cm-line.bg-injected) {
+background-color: rgba(90, 150, 255, 0.3);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.05) 1px,
+    transparent 1px,
+    transparent 6px
+  );
 }
 </style>

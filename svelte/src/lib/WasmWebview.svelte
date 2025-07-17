@@ -1,6 +1,7 @@
 <script lang="ts">
   import { blur, fade } from "svelte/transition";
   import { api_response } from "./api_response.svelte";
+  import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/code_mirror_setup";
 
     // Code mirror view
     const { view } = $props();
@@ -10,6 +11,26 @@
 
     function update_codemirror(){
         api_response.codemirror_code_updated = true;
+        
+        // Update codemirror content
+        let wat_content: string;
+        if (api_response.model){
+            wat_content = api_response.model.injected_wat;
+        } else{
+            wat_content = api_response.original_wat;
+        }
+        const transaction = view.state.update({
+            changes: { from: 0, to: view.state.doc.length, insert: wat_content }
+        });
+        view.dispatch(transaction);
+
+        // Update line highlights
+        if (api_response.model){
+            setBackgroundColorForLines(view, api_response.model.lines_injected, "bg-injected")
+        } else {
+            clearBackgroundColors(view);
+        }
+
         post_message_to_extension();
     }
 
@@ -25,7 +46,9 @@
 {#if !api_response.out_of_date}
    <div id="inject-code-button" transition:fade>
         <button onclick={update_codemirror}>Inject code</button>
-        {#if !api_response.codemirror_code_updated}<p transition:fade>⚠️ Old code. Update</p>{/if}
+        {#if !api_response.codemirror_code_updated}<p transition:fade>⚠️ Old code. Update</p>
+        {:else if !api_response.model}<p>🚫 Nothing injected </p>
+        {/if}
     </div>
 {/if}
 
