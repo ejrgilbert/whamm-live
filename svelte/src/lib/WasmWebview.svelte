@@ -47,7 +47,7 @@
    <div id="inject-code-button" transition:fade>
         <button onclick={update_codemirror}>Inject code</button>
         {#if !api_response.codemirror_code_updated}<p transition:fade>⚠️ Old code. Update</p>
-        {:else if !api_response.model}<p>🚫 Nothing injected </p>
+        {:else if !api_response.model}<p transition:fade>🚫 Nothing injected </p>
         {/if}
     </div>
 {/if}

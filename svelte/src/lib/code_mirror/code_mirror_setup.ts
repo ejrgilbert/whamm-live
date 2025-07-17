@@ -1,6 +1,10 @@
 import { StateEffect, StateField, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, EditorView, type DecorationSet } from "@codemirror/view";
 
+/**
+ * Credit: https://blog.pamelafox.org/2022/07/line-highlighting-extension-for-code.html
+ */
+
 const setLineBackgrounds = StateEffect.define<{ lines: number[], className: string }>();
 const clearLineBackgrounds = StateEffect.define();
 

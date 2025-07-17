@@ -40,7 +40,7 @@ export class SvelteModel{
         let injected_wat = webview.model.injected_wat_content;
         let lines_injected: number[] = [];
         for (let injection of webview.model.whamm_live_response.injecting_injections){
-            for (let start_line = injection.wat_range.l1; start_line <= injection.wat_range.l1; start_line++){
+            for (let start_line = injection.wat_range.l1; start_line <= injection.wat_range.l2; start_line++){
                 lines_injected.push(start_line);
             }
         }
