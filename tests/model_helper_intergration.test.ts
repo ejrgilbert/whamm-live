@@ -82,6 +82,7 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
     // 1st element is index for the injections to not be injected in wat
     let indexes: [number, number] = [0, 0];
     let lines_injected= 0;
+    let func_data_lines_injected= 0;
 
     // The idea is to compare every `whamm_api_injection` with its corresponding `whamm_live_injection` object
     // instance that is in the `response` variable
@@ -120,6 +121,7 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                           expect(whamm_live_instance.wat_range).toMatchObject({l1: l1,l2: l2});
 
                           lines_injected = lines_injected + func_lines_injected;
+                          func_data_lines_injected += func_lines_injected;
                           
                           // check for injected funcid_wat_map values
                           expect(response.injected_funcid_wat_map.get(func_record.id)).toMatchObject({
@@ -128,6 +130,10 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                             func: l1
                           })
                         }
+                          break;
+                        case Types.WhammDataType.activeDataType:
+                        case Types.WhammDataType.passiveDataType:
+                          func_data_lines_injected+=1
                           break;
                         case Types.WhammDataType.funcProbeType:
                         case Types.WhammDataType.localType:
@@ -140,8 +146,8 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                             // If the wat values are from the fsm, then that doesn't account for the newly injected lines
                             // so, we need to add that offset
                             if (!response.injected_funcid_wat_map.has(record.targetFid)){
-                              l1 = l1 + lines_injected;
-                              l2 = l2 + lines_injected;
+                              l1 = l1 + lines_injected - func_data_lines_injected;
+                              l2 = l2 + lines_injected - func_data_lines_injected;
                             }
                             expect(whamm_live_instance.wat_range).toMatchObject({
                                   l1: l1,

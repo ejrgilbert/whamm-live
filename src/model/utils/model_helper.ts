@@ -113,6 +113,7 @@ export class ModelHelper{
     static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): WhammLiveResponse{
         // all the other injections except `funcProbes`, `OpBodyProbes`, `Locals` should update the number_of_lines_injected since they are literally injecting new wat content
         var number_of_lines_injected = 0;
+        var number_of_func_lines_and_data_sections_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
         var whamm_live_injections_to_not_inject : WhammLiveInjection[]= [];
 
@@ -221,6 +222,7 @@ export class ModelHelper{
   .join("");
                                     whamm_live_instance.code.push(`\t(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
+                                    number_of_func_lines_and_data_sections_injected += 1;
                                 }
                                 break;
 
@@ -237,6 +239,7 @@ export class ModelHelper{
   .join("");
                                     whamm_live_instance.code.push(`\t(data "${byte_literal}")`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
+                                    number_of_func_lines_and_data_sections_injected += 1;
                                 }
                                 break;
 
@@ -284,6 +287,7 @@ export class ModelHelper{
                                     whamm_live_instance.code.push(')');
 
                                     number_of_lines_injected = number_of_lines_injected + whamm_live_instance.code.length;
+                                    number_of_func_lines_and_data_sections_injected += whamm_live_instance.code.length;
                                     whamm_live_instance.wat_range.l2 = start_wat_line + number_of_lines_injected -1;
 
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
@@ -355,7 +359,7 @@ export class ModelHelper{
                                     let wat_line!: number;
                                     try{
                                         [inj , wat_line] = ModelHelper.get_required_inject_data_and_wat_line(record, inject, fsm);
-                                        wat_line = wat_line + number_of_lines_injected;
+                                        wat_line = wat_line + number_of_lines_injected - number_of_func_lines_and_data_sections_injected;
                                     } catch (e){
                                         // error if fsm mapping not present
                                         if (e instanceof Error && e.message.includes('FSM error') && record)
