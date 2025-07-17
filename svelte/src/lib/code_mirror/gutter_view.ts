@@ -6,15 +6,11 @@
  */
 
 import {EditorView, GutterMarker, gutter, lineNumbers} from "@codemirror/view"
-import {type dangling_injections, type injection_circle, type valid_model} from "../api_response.svelte"
+import {type injection_circle, type valid_model} from "../api_response.svelte"
 import {StateField, StateEffect, RangeSet, RangeSetBuilder} from "@codemirror/state"
 
-const breakpointEffect = StateEffect.define<{pos: number, on: boolean}>({
-  map: (val, mapping) => ({pos: mapping.mapPos(val.pos), on: val.on})
-})
-
 // `injectionCircleEffect` contains all of my dangling injections
-export const injectionCircleEffect = StateEffect.define<dangling_injections[]>();
+export const injectionCircleEffect = StateEffect.define<Record<number, injection_circle[]>>();
 export const clearCirclesEffect = StateEffect.define();
 
 // State field which will be updated with the `injectionCircleEffect`
@@ -26,15 +22,13 @@ const injectionCircleState = StateField.define<Map<number, injection_circle[]>>(
       
     // Only care about injectionCircleEffect
       if (effect.is(injectionCircleEffect)) {
-        let newMap = new Map<number, injection_circle[]>();
-        for (let dangling_injections of effect.value){
-            for (let [html_content, line] of dangling_injections.values){
-                const existing = newMap.get(line) ?? [];
-			    existing.push({ color: dangling_injections.color, body: html_content })
-				newMap.set(line, existing)
-            }
+        const new_map = new Map<number, injection_circle[]>()
+        const record = effect.value
+        for (const key in record) {
+          const line_number = Number(key);
+          new_map.set(line_number, record[key])
         }
-        return newMap;
+        return new_map
 
       // Clear all the injection circles with this effect
       } else if (effect.is(clearCirclesEffect)){
@@ -102,6 +96,6 @@ export function clearInjectedCircles(view: EditorView){
 
 export function addDanglingCircleInjections(view: EditorView, model: valid_model){
     view.dispatch({
-        effects: injectionCircleEffect.of([model.func_probes, model.op_body_probes, model.locals])
+        effects: injectionCircleEffect.of(model.wat_to_injection_circle)
     })
 }

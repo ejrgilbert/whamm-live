@@ -1,18 +1,9 @@
 export type injection_circle = { color: string; body: string };
 
-export type dangling_injections={
-	color: string,
-	values: dangling_injection[]
-}
-
-export type dangling_injection=[string, number];
-
 export type valid_model = {
 	injected_wat: string,
 	lines_injected: number[],
-	func_probes: dangling_injections,
-	locals: dangling_injections,
-	op_body_probes: dangling_injections
+    wat_to_injection_circle: Record<number, injection_circle[]>
 }
 
 type APIResponse = {

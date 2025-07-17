@@ -3,7 +3,6 @@
   import { api_response } from "./api_response.svelte";
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
   import { addDanglingCircleInjections, clearCirclesEffect, clearInjectedCircles, injectionCircleEffect} from "./code_mirror/gutter_view";
-  import { debug } from "console";
 
     // Code mirror view
     const { view } = $props();
