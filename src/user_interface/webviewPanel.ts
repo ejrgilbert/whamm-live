@@ -118,6 +118,16 @@ export class WhammWebviewPanel{
                 wat_content: this.model.valid_wat_content,
                 file_name: this.fileName
         });
+
+        this.webviewPanel.webview.onDidReceiveMessage(
+            message => {
+                switch (message.command){
+                    case 'codemirror-code-updated':
+                        this.model.codemirror_code_updated = true;
+                        break;
+                }
+            }
+        )
     }
 
 }

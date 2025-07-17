@@ -8,13 +8,17 @@ import { Cell } from "./utils/cell";
 import { Types } from "../whammServer";
 import { show_and_handle_error_response } from "../extensionListeners/documentChangesListener";
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
+import { SvelteModel } from "./svelte_model";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIModel{
     static whamm_file_changing: boolean = false;
     api_response_setup_completed: boolean = false;
     __api_response_out_of_date!: boolean;
+    // svelte side code updated or not
+    codemirror_code_updated!: boolean;
 
+    static whamm_cached_content: string;
     // will be null if wizard option chosen
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
@@ -27,13 +31,9 @@ export class APIModel{
     jagged_array: (Cell|null)[][];
 
     webview: WhammWebviewPanel;
-    // Will always be the latest API response with no error or 'null'
     fsm_mappings: FSM | null;
-
-    /**
-     *  @todo: Upon orca funcID fix: Remove every `injected_fsm_mappings` usage in this and model_helper.ts file upon
-     * orca ( or wirm as they now say it) funcID fix
-     **/
+    // funcID's change if whamm injects functions/ func imports
+    // So, we need to a mapping to handle that 
     injected_fsm_mappings: FSM | null;
 
     constructor(webview: WhammWebviewPanel){
@@ -61,6 +61,8 @@ export class APIModel{
     // setup initial mappings and other necessary stuff
     async setup(): Promise<[boolean, string]>{
         this.api_response_out_of_date = true;
+        this.codemirror_code_updated = false;
+
         // loadWatAndWasm should have been called to load the content
         let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
         if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content && whamm_contents){
@@ -114,10 +116,6 @@ export class APIModel{
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){
                         
-                        /**
-                         *  @todo: Upon orca funcID fix: Remove once orca fixes the injected fsm mappings and pass in `this.fsm_mappings` instead of `this.injected_fsm_mappings`
-                         *          for the `ModelHelper.create_whamm_live_injection_instances` static method
-                         **/
                         this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
                         this.whamm_live_response = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 
@@ -189,19 +187,17 @@ export class APIModel{
     // Updates the variables as well as notifies the svelte side by posting the messages
     set api_response_out_of_date(value: boolean){
         this.__api_response_out_of_date = value;
-        // nofify the sidebar side of the change
-        Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+        this.codemirror_code_updated = false;
+        SvelteModel.update_svelte_model(this.webview);
     }
 
     // set all models's api out of date and notify the related svelte side(s) only once!
     static set_api_out_of_date(value: boolean){
         for (let webview of WhammWebviewPanel.webviews){
             webview.model.__api_response_out_of_date = value;
+            webview.model.codemirror_code_updated = false;
         }
-        // send only one post message to the sidebar side to notify them of the changes
-        Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+        SvelteModel.update_svelte_models();
     }
 
     // file related helper static method(s)

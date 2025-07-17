@@ -6,12 +6,13 @@
     import { HighlightStyle, syntaxHighlighting} from "@codemirror/language";
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
-    import { keymap} from "@codemirror/view";
-    import {probe_data} from './lib/probe_data.svelte';
+    import { keymap, lineNumbers} from "@codemirror/view";
+    import { api_response} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
+    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
+    import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
 
     let wizard_tab = $state(false);
-    let wat_content : undefined | string = $state(undefined);
 
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
@@ -33,7 +34,7 @@
                             if (message.show_wizard)
                                 wizard_tab = true;
                             else {
-                                wat_content = message.wat_content;
+                                api_response.original_wat = message.wat_content;
 
                                 const highlight_style =  syntaxHighlighting(HighlightStyle.define([
                                     { tag: t.keyword, color: '#317CD6' },
@@ -48,7 +49,7 @@
                                 //Create codemirror code block for the parsed wat content
                                 view = new EditorView({
                                     parent: document.getElementById("wasm-webview-code-editor") || document.body,
-                                    doc: wat_content,
+                                    doc: api_response.original_wat,
                                     extensions: [basicSetup, wast(), 
                                                 highlight_style,
                                                 EditorView.editable.of(false),
@@ -56,11 +57,21 @@
                                                 EditorState.readOnly.of(true),
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
-                                        ],
+                                                lineBackgroundField,
+                                                
+                                                // gutters
+                                                lineNumbers(),
+                                                injectionCircleGutter]
                                 })
                             }
                         }
                         }
+                    break;
+                case 'api-response-update':{
+                        api_response.out_of_date = message.response.out_of_date;
+                        api_response.codemirror_code_updated = false;
+                        api_response.model = message.response.model;
+                    }
                     break;
             }
     });
@@ -90,5 +101,16 @@
 
 .tab button{
     padding: 1.5%;
+}
+
+:global(.cm-line.bg-injected) {
+background-color: rgba(90, 150, 255, 0.3);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.05) 1px,
+    transparent 1px,
+    transparent 6px
+  );
 }
 </style>

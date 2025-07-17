@@ -4,7 +4,7 @@ import {ModelHelper} from '../src/model/utils/model_helper';
 import { Types } from '../src/whammServer';
 import { FSM } from '../src/model/fsm';
 import toml from 'toml';
-import { InjectionRecord, InjectionRecordDanglingType, InjectType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveInjections } from '../src/model/types';
+import { InjectionRecord, InjectionRecordDanglingType, InjectType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from '../src/model/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
@@ -36,14 +36,6 @@ describe('testing Model Helper\'s static `create_whamm_live_injection_instances`
             expect(injection.dataType).toBe(injection_mapping[0]);
           }
         }
-
-        
-        /**
-         * @todo: Upon Orca ID fix:
-         * Remove calling the `update_fsm_funcIDs` static method
-         * Remove the tests that follow the method call which tests whether the funcIDs were updated properly
-         * Use `fsm` instead of `injected_fsm` as arguments for `ModelHelper.create_whamm_live_injection_instances` method and the `validate_whamm_live_injection_instances` function
-        */
 
         /*
          Check for injected FSM funcID values
@@ -84,12 +76,13 @@ function load_whamm_api_response(app_name: string, script: string): Types.Inject
   return data;
 }
 
-function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveInjections){
+function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveResponse){
     // validate in section order
     // 0th element is index for the injections to be injected in wat
     // 1st element is index for the injections to not be injected in wat
     let indexes: [number, number] = [0, 0];
     let lines_injected= 0;
+    let func_data_lines_injected= 0;
 
     // The idea is to compare every `whamm_api_injection` with its corresponding `whamm_live_injection` object
     // instance that is in the `response` variable
@@ -128,6 +121,7 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                           expect(whamm_live_instance.wat_range).toMatchObject({l1: l1,l2: l2});
 
                           lines_injected = lines_injected + func_lines_injected;
+                          func_data_lines_injected += func_lines_injected;
                           
                           // check for injected funcid_wat_map values
                           expect(response.injected_funcid_wat_map.get(func_record.id)).toMatchObject({
@@ -136,6 +130,10 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                             func: l1
                           })
                         }
+                          break;
+                        case Types.WhammDataType.activeDataType:
+                        case Types.WhammDataType.passiveDataType:
+                          func_data_lines_injected+=1
                           break;
                         case Types.WhammDataType.funcProbeType:
                         case Types.WhammDataType.localType:
@@ -148,8 +146,8 @@ function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: M
                             // If the wat values are from the fsm, then that doesn't account for the newly injected lines
                             // so, we need to add that offset
                             if (!response.injected_funcid_wat_map.has(record.targetFid)){
-                              l1 = l1 + lines_injected;
-                              l2 = l2 + lines_injected;
+                              l1 = l1 + lines_injected - func_data_lines_injected;
+                              l2 = l2 + lines_injected - func_data_lines_injected;
                             }
                             expect(whamm_live_instance.wat_range).toMatchObject({
                                   l1: l1,
@@ -185,7 +183,7 @@ function validate_whamm_span(whamm_live_instance: WhammLiveInjection, injection_
 
 // Get the correct injection record and also the corresponding wat line number using the fsm
 // Also handles wat line values for locals, funcProbes and opBodyProbes which are inserted by whamm using the injected funcid to wat mapping if the funcID doesn't exist in the FSM
-function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM, response: WhammLiveInjections) : [InjectionRecord | undefined, undefined| number]{
+function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM, response: WhammLiveResponse) : [InjectionRecord | undefined, undefined| number]{
   switch (record.dataType) {
       case Types.WhammDataType.typeType:
         return [record.typeData, fsm.section_to_line_mapping.get(InjectType.Type)];
@@ -253,7 +251,7 @@ function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjecti
 
 // Get the correct whamm live injection object from `response` since it contains two arrays:
 // one for injections to inject in the wat file and one for injections to show as dangling pointers
-function get_whamm_live_instance(inject_type: Types.WhammDataType, response: WhammLiveInjections, indexes: [number, number]){
+function get_whamm_live_instance(inject_type: Types.WhammDataType, response: WhammLiveResponse, indexes: [number, number]){
   switch (inject_type){
     case Types.WhammDataType.opProbeType:
     case Types.WhammDataType.funcProbeType:

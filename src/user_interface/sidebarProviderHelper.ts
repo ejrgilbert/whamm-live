@@ -23,6 +23,7 @@ export class Helper_sidebar_provider{
         
         if (fileURI && fileURI[0]) {
             let filePath = vscode.Uri.file(fileURI[0].fsPath);
+            APIModel.whamm_cached_content = await APIModel.loadFileAsString(filePath.fsPath, ExtensionContext.context);
             return Helper_sidebar_provider.helper_show_whamm_file(filePath);
 
         } else 

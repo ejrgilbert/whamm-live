@@ -1,97 +1,55 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
-    import { probe_data} from "./probe_data.svelte";
+  import { fade } from "svelte/transition";
+  import { api_response } from "./api_response.svelte";
+  import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
+  import { addDanglingCircleInjections, clearCirclesEffect, clearInjectedCircles, injectionCircleEffect} from "./code_mirror/gutter_view";
 
-    var observer: MutationObserver;
-
-    // content here should be array of all the bytes for our wasm file
-    let { view } = $props();
+    // Code mirror view
+    const { view } = $props();
     const load_html = function(node: HTMLElement){
-        // Remove focus highlight
         if (view) document.getElementById("wasm-webview-code-editor")?.appendChild(view.dom);
-        observer = setup_mutation_observer();
     }
 
-    var probe_data_update_function: (event:MessageEvent) => void;
+    function update_codemirror(){
+        api_response.codemirror_code_updated = true;
+        let wat_content: string = (api_response.model) ? api_response.model.injected_wat : api_response.original_wat;
 
-    onMount(()=>{
-        probe_data_update_function = (event:MessageEvent) =>{
-            let message = event.data;
-            switch(message.command){
-                case 'highlight':
-                {
-                    // reset any existing highlights
-                    display_data(true);
-                    probe_data.data=message.data;
-                    display_data();
-                }
-                break;
-            }
-        };
-       window.addEventListener("message", probe_data_update_function);
-       display_data();
-    });
+        // Update codemirror content
+        const transaction = view.state.update({
+            changes: { from: 0, to: view.state.doc.length, insert: wat_content }
+        });
+        view.dispatch(transaction);
+        // clear all the previously injected circles and background colors
+        clearInjectedCircles(view);
+        clearBackgroundColors(view);
 
-    onDestroy(()=>{
-        window.removeEventListener("message", probe_data_update_function);
-        observer.disconnect();
-    });
-
-    // Function that displays the data
-    var display_data = (reset: boolean = false)=>{
-        if (probe_data.data){
-            // Show the highlight if probe data is not null
-            // @ts-ignore
-            for (let line of probe_data.data[1]){
-                let div = (document.querySelectorAll(".cm-line")[line] as HTMLElement);
-                div.style.background = (reset) ? '' : 'cadetblue';
-            }
+        // Update line highlights and dangling circles injected
+        if (api_response.model){
+            setBackgroundColorForLines(view, api_response.model.lines_injected, "bg-injected")
+            addDanglingCircleInjections(view, api_response.model);
         }
+
+        // update the extension side about the update
+        post_message_to_extension();
     }
 
-    function setup_mutation_observer(): MutationObserver{
-
-        let debounce = (callback: Function, delay: number)=>{
-            let timer : number;
-            return function() {
-                clearTimeout(timer);
-                // @ts-ignore
-                timer = setTimeout(() => {
-                    callback();
-                }, delay);
-            }
-        }
-
-        let target = document.querySelector("#wasm-webview-code-editor");
-        // Options for the observer (which mutations to observe)
-        const config = { attributes: true, subtree: true};
-
-        // Callback function to execute when mutations are observed
-        const callback_mutation_observer = () => {
-            // disconnect mutation observer to update data
-            observer.disconnect();
-            console.log('finally executing right');
-            display_data();
-            // reconnect
-            if (target) observer.observe(target, config);
-        };
-
-        
-        let actual_callback = debounce(callback_mutation_observer, 500);
-        const callback = (mutationList: MutationRecord[], observer: MutationObserver) => {
-            actual_callback();
-        };
-
-
-        // Create an observer instance linked to the callback function
-        const observer = new MutationObserver(callback);
-
-        // Start observing the target node for configured mutations
-        if (target) {observer.observe(target, config);}
-        return observer;
+    function post_message_to_extension(){
+        //@ts-ignore
+        vscode.postMessage({
+            command: "codemirror-code-updated"
+        });
     }
 
 </script>
+
+{#if !api_response.out_of_date}
+   <div id="inject-code-button" transition:fade>
+        <button onclick={update_codemirror}>Inject code</button>
+        {#if !api_response.codemirror_code_updated}<p transition:fade>⚠️ Old code. Update</p>
+        {:else if !api_response.model}<p transition:fade>🚫 Nothing injected </p>
+        {/if}
+    </div>
+{/if}
 
 <div use:load_html id="wasm-webview-code-editor"></div>
 <style>
@@ -99,4 +57,10 @@
         width: 90%;
         margin: auto;
     }
+
+    #inject-code-button{
+        width: 50%;
+        padding: 2%;
+    }
+    p {display: flex; justify-content: center;}
 </style>

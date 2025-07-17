@@ -1,4 +1,4 @@
-import { Types, whammServer } from "../whammServer";
+import { Types} from "../whammServer";
 // Different types and enums for API responses
 
 // Enums
@@ -51,11 +51,13 @@ export type ScriptLoc = {
 }
 
 // inclusive range
+// starts from 1
 export type WatLineRange = {
     l1: number;
     l2: number
 }
 
+// starts from 1
 export type line_col = {
     l: number;
     c: number
@@ -108,3 +110,12 @@ export type WhammLiveResponse = {
 
 export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
     Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]
+
+// Types to be used in the svelte side
+export type injection_circle = { color: string; body: string };
+
+export type valid_model = {
+	injected_wat: string,
+	lines_injected: number[],
+    wat_to_injection_circle: Record<number, injection_circle[]>
+}

@@ -68,9 +68,6 @@ export class ModelHelper{
     }
 
 
-    /**
-     * @todo: Upon orca funcID fix: Remove this static method
-     */
     // This function's job is to update the funcID values for the different mappings like
     // the local mappings and func mappings since the funcID value changes after an injection
     static update_fsm_funcIDs(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
@@ -116,6 +113,7 @@ export class ModelHelper{
     static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): WhammLiveResponse{
         // all the other injections except `funcProbes`, `OpBodyProbes`, `Locals` should update the number_of_lines_injected since they are literally injecting new wat content
         var number_of_lines_injected = 0;
+        var number_of_func_lines_and_data_sections_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
         var whamm_live_injections_to_not_inject : WhammLiveInjection[]= [];
 
@@ -160,7 +158,7 @@ export class ModelHelper{
 
                                     // add the new whamm live instance and add it's relevant code
                                     whamm_live_instance.code.push(
-                                            `(import "${import_injection.module}" "${import_injection.name}" (${import_injection.typeRef}))`
+                                            `\t(import "${import_injection.module}" "${import_injection.name}" (${import_injection.typeRef}))`
                                     )
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
@@ -176,7 +174,7 @@ export class ModelHelper{
                                         start_wat_line + (number_of_lines_injected++),
                                     )
                                     whamm_live_instance.code.push(
-                                        `(export "${export_injection.name}" (${export_injection.kind} ${export_injection.index}))`
+                                        `\t(export "${export_injection.name}" (${export_injection.kind} ${export_injection.index}))`
                                     )
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
@@ -191,7 +189,7 @@ export class ModelHelper{
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
                                     )
-                                    whamm_live_instance.code.push(`(type ${type_injection.ty})`);
+                                    whamm_live_instance.code.push(`\t(type ${type_injection.ty})`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -205,7 +203,7 @@ export class ModelHelper{
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
                                     )
-                                    whamm_live_instance.code.push(`(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`);
+                                    whamm_live_instance.code.push(`\t(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -222,8 +220,9 @@ export class ModelHelper{
                                     const offset = `(${activedata_injection.offsetExpr.join(" ")})`;
                                     const byte_literal: string =[...activedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
   .join("");
-                                    whamm_live_instance.code.push(`(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`);
+                                    whamm_live_instance.code.push(`\t(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
+                                    number_of_func_lines_and_data_sections_injected += 1;
                                 }
                                 break;
 
@@ -238,8 +237,9 @@ export class ModelHelper{
                                     )
                                     const byte_literal: string =[...passivedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
   .join("");
-                                    whamm_live_instance.code.push(`(data "${byte_literal}")`);
+                                    whamm_live_instance.code.push(`\t(data "${byte_literal}")`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
+                                    number_of_func_lines_and_data_sections_injected += 1;
                                 }
                                 break;
 
@@ -255,7 +255,7 @@ export class ModelHelper{
                                     
                                     let type_string = `(${global_injection.mutable ? "mut " : ""}${global_injection.ty})`
                                     whamm_live_instance.code.push(
-                                        `(global $global${global_injection.id}} ${type_string} (${global_injection.initExpr.join(" ")})`);
+                                        `\t(global $global${global_injection.id}} ${type_string} (${global_injection.initExpr.join(" ")})`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -276,16 +276,18 @@ export class ModelHelper{
                                     const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
                                     const result = func_injection.sig[1].length ? ` (result ${func_injection.sig[1].join(" ")})` : "";
 
-                                    whamm_live_instance.code.push(`(func ${name}${param}${result}`);
+                                    whamm_live_instance.code.push(`\t(func ${name}${param}${result}`);
                                     if (func_injection.locals.length >0){ 
-                                        whamm_live_instance.code.push(`(local ${func_injection.locals.join(" ")})`);
+                                        whamm_live_instance.code.push(`\t\t(local ${func_injection.locals.join(" ")})`);
                                         local_start_line++;
                                     }
 
-                                    whamm_live_instance.code.push(...func_injection.body);
+                                    for (let each_line of func_injection.body)
+                                        whamm_live_instance.code.push(`\t\t${each_line}`);
                                     whamm_live_instance.code.push(')');
 
                                     number_of_lines_injected = number_of_lines_injected + whamm_live_instance.code.length;
+                                    number_of_func_lines_and_data_sections_injected += whamm_live_instance.code.length;
                                     whamm_live_instance.wat_range.l2 = start_wat_line + number_of_lines_injected -1;
 
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
@@ -311,7 +313,7 @@ export class ModelHelper{
                                     )
                                     
                                     whamm_live_instance.code.push(
-                                        `(table )`);
+                                        `\t(table )`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -327,7 +329,7 @@ export class ModelHelper{
                                     )
                                     
                                     whamm_live_instance.code.push(
-                                        `(elem )`);
+                                        `\t(elem )`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -357,7 +359,7 @@ export class ModelHelper{
                                     let wat_line!: number;
                                     try{
                                         [inj , wat_line] = ModelHelper.get_required_inject_data_and_wat_line(record, inject, fsm);
-                                        wat_line = wat_line + number_of_lines_injected;
+                                        wat_line = wat_line + number_of_lines_injected - number_of_func_lines_and_data_sections_injected;
                                     } catch (e){
                                         // error if fsm mapping not present
                                         if (e instanceof Error && e.message.includes('FSM error') && record)
