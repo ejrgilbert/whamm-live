@@ -51,11 +51,13 @@ export type ScriptLoc = {
 }
 
 // inclusive range
+// starts from 1
 export type WatLineRange = {
     l1: number;
     l2: number
 }
 
+// starts from 1
 export type line_col = {
     l: number;
     c: number

@@ -11,7 +11,6 @@
     import { EditorState} from "@codemirror/state";
 
     let wizard_tab = $state(false);
-    let wat_content : undefined | string = $state(undefined);
 
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
@@ -33,7 +32,7 @@
                             if (message.show_wizard)
                                 wizard_tab = true;
                             else {
-                                wat_content = message.wat_content;
+                                api_response.original_wat = message.wat_content;
 
                                 const highlight_style =  syntaxHighlighting(HighlightStyle.define([
                                     { tag: t.keyword, color: '#317CD6' },
@@ -48,7 +47,7 @@
                                 //Create codemirror code block for the parsed wat content
                                 view = new EditorView({
                                     parent: document.getElementById("wasm-webview-code-editor") || document.body,
-                                    doc: wat_content,
+                                    doc: api_response.original_wat,
                                     extensions: [basicSetup, wast(), 
                                                 highlight_style,
                                                 EditorView.editable.of(false),
@@ -65,6 +64,7 @@
                 case 'api-response-update':{
                         api_response.out_of_date = message.response.out_of_date;
                         api_response.codemirror_code_updated = false;
+                        api_response.model = message.response.model;
                     }
                     break;
             }
