@@ -1,7 +1,7 @@
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
 import { WhammWebviewPanel } from "../user_interface/webviewPanel";
 import { Types } from "../whammServer";
-import { injection_circle, valid_model } from "./types";
+import { injection_circle, valid_model, WhammLiveInjection } from "./types";
 
 // Class that is related with the APIModel
 // APIModel handles the model from the whamm API
@@ -52,15 +52,15 @@ export class SvelteModel{
                 let injection_circle_array = wat_to_injection_circle[start_line] ?? [];
                 switch(injection.type){
                     case Types.WhammDataType.opProbeType:
-                        injection_circle_array.push({color: "red", body: injection.code.join('\n')});
+                        injection_circle_array.push({color: "red", body:create_html_content_for_op_body_probes(injection)});
                         break;
 
                     case Types.WhammDataType.localType:
-                        injection_circle_array.push({color: "blue", body: injection.code.join('\n')});
+                        injection_circle_array.push({color: "blue", body:create_html_content_for_locals(injection.code)});
                         break;
 
                     case Types.WhammDataType.funcProbeType:
-                        injection_circle_array.push({color: "green", body: injection.code.join('\n')});
+                        injection_circle_array.push({color: "green", body: create_html_content_for_func_probes(injection)});
                         break;
                 }
                 wat_to_injection_circle[start_line] = injection_circle_array;
@@ -72,4 +72,29 @@ export class SvelteModel{
             wat_to_injection_circle
         } as valid_model;
     }
+
+}
+
+// Helper functions to help create the html content to be displayed on the svelte side for dangling probes
+
+function create_html_content_for_locals(body: string[]): string{
+    let header_div = `<div style="${get_header_style()}"><b>Local Injection</b></div>`;
+    let injections = body.map(html => `<div>${html}</div>`).join("")
+    return header_div + injections;
+}
+
+function create_html_content_for_func_probes(injection: WhammLiveInjection): string{
+    let header_div = `<div style="${get_header_style()}"><span>Func Injection: on function <b><i>${injection.mode}</b></i></span></div>`;
+    let html_body = injection.code.map(html => `<div>${html}</div>`).join("")
+    return header_div + html_body;
+}
+
+function create_html_content_for_op_body_probes(injection: WhammLiveInjection): string{
+    let header_div = `<div style="${get_header_style()}"><span>opcode injection here: mode <b><i>${injection.mode}</b></i></span></div>`;
+    let html_body = injection.code.map(html => `<div>${html}</div>`).join("")
+    return header_div + html_body;
+}
+
+function get_header_style(): string{
+    return 'justify-content: center; display: flex; font-size: medium; margin-bottom: 2%;'
 }
