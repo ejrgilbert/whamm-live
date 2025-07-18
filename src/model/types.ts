@@ -57,12 +57,13 @@ export type WatLineRange = {
     l2: number
 }
 
-// starts from 1
+// line starts from 1
 export type line_col = {
     l: number;
     c: number
 }
 
+// l,c starts from 1
 // span starting line and column
 // and ending line(inclusive) and column(exclusive)
 export type span = {
