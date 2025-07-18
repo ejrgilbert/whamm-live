@@ -113,7 +113,9 @@ export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType
     Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]
 
 // Types to be used in the svelte side
+
 export type injection_circle = { color: string; body: string };
+export type highlights_info = Record<number, string>;
 
 export type valid_model = {
 	injected_wat: string,

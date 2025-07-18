@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { span } from "../model/types";
+import { type highlights_info, span } from "../model/types";
 import { ExtensionContext } from '../extensionContext';
+import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 
 export class LineHighlighterDecoration{
 
@@ -17,7 +18,7 @@ export class LineHighlighterDecoration{
             "rgba(0, 150, 136, 0.3)",     // teal-green
     ]
 
-    static highlight_whamm_file(whamm_span: span, color_index: number){
+    static highlight_whamm_file(whamm_span: span, color: string){
 
         const editor = vscode.window.activeTextEditor;
         if (!editor) return
@@ -28,11 +29,18 @@ export class LineHighlighterDecoration{
         const range = new vscode.Range(start, end);
 
         let decorationType = vscode.window.createTextEditorDecorationType({
-            backgroundColor: LineHighlighterDecoration.highlightColors[color_index],
+            backgroundColor: color,
             isWholeLine: false,
         })
         LineHighlighterDecoration.decorations.push(decorationType);
         editor.setDecorations(decorationType, [{range}]);
+    }
+
+    static highlight_wasm_webview(webview: WhammWebviewPanel, data: highlights_info){
+        webview.webviewPanel.webview.postMessage({
+            command: 'temp-line-highlight',
+            data: data
+        });
     }
     
     static clear_all_decorations(editor: vscode.TextEditor | undefined){

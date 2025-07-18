@@ -5,6 +5,8 @@ import { APIModel} from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './lineHighlighterDecoration';
+import { highlights_info, WhammLiveInjection } from '../model/types';
+import { Types } from '../whammServer';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -32,6 +34,7 @@ export function handleCursorChange(){
         let line = cursor.line;
         let column = cursor.character;
 
+        let webview_index = 0;
         for (let webview of WhammWebviewPanel.webviews){
 
             // No need to perform highlighting if api is out of date 
@@ -41,21 +44,57 @@ export function handleCursorChange(){
             // No need to perform highlighting if the jagged array doesn't have any contents for that location
             let injections = webview.model.jagged_array[line][column];
             if (!injections) continue;
+            console.log(injections);
 
             // Nodes are sorted from biggest span to least span
             let current_node : Node | null= injections.head;
             let color_index = 0;
+            let wasm_line_highlight_data: highlights_info = {};
             while (current_node != null){
 
                 let whamm_span = current_node.whamm_span;
                 if (whamm_span){
                     // highlight the span with color at `color_index`
-                    LineHighlighterDecoration.highlight_whamm_file(whamm_span, color_index);
+                    let color = LineHighlighterDecoration.highlightColors[color_index];
+
+                    // Temporary: Highlight whamm on the last go
+                    /**
+                     * @todo: Do best effort highlighting:
+                     */
+                    if (webview_index == WhammWebviewPanel.number_of_webviews -1) LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
+
+                    // Save wat line and color information for every value in the node
+                    store_line_highlight_data(wasm_line_highlight_data, current_node, color);
+                    color_index = (color_index+1) % LineHighlighterDecoration.highlightColors.length;
                 }
                 // Traverse to the next node
                 current_node = current_node.next;
-                color_index = (color_index+1) % LineHighlighterDecoration.highlightColors.length;
             }
+
+            console.log(wasm_line_highlight_data);
+            // send wasm side highlight information to the webview
+            LineHighlighterDecoration.highlight_wasm_webview(webview, wasm_line_highlight_data);
+            webview_index++;
+        }
+    }
+}
+
+//Create a **many-to-one mapping** from wat line number to color to show in the webview 
+// and store it in the record
+function store_line_highlight_data(record: highlights_info, node: Node, color: string){
+    for (let live_injection of node.values){
+        switch(live_injection.type){
+            case Types.WhammDataType.funcProbeType:
+            case Types.WhammDataType.localType:
+            case Types.WhammDataType.opProbeType:
+                // TODO
+                break;
+            default:
+                for (let wat_line=live_injection.wat_range.l1; wat_line <= live_injection.wat_range.l2; wat_line++){
+                    // Overwrite any previous value since we give priority to lower whamm spans
+                    record[wat_line] = color;
+                }
+            break;
         }
     }
 }
