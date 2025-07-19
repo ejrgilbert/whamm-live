@@ -5,7 +5,7 @@ import { APIModel} from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './lineHighlighterDecoration';
-import { highlights_info, WhammLiveInjection } from '../model/types';
+import { highlights_info } from '../model/types';
 import { Types } from '../whammServer';
 
 export function shouldUpdateView():boolean{
@@ -17,6 +17,9 @@ export function shouldUpdateView():boolean{
         let whamm_file_path : string | undefined = ExtensionContext.context.workspaceState.get('whamm-file');
         let editor = vscode.window.activeTextEditor;
         if (editor && editor?.document.uri.fsPath === whamm_file_path){
+			// clear out whamm highlights
+			LineHighlighterDecoration.clear_all_decorations(vscode.window.activeTextEditor);
+
             var file_contents = editor.document.getText();
             if (file_contents === APIModel.whamm_cached_content){
                 return true;
@@ -71,9 +74,8 @@ export function handleCursorChange(){
                 current_node = current_node.next;
             }
 
-            console.log(wasm_line_highlight_data);
             // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview(webview, wasm_line_highlight_data);
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data);
             webview_index++;
         }
     }

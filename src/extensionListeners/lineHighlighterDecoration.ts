@@ -36,7 +36,7 @@ export class LineHighlighterDecoration{
         editor.setDecorations(decorationType, [{range}]);
     }
 
-    static highlight_wasm_webview(webview: WhammWebviewPanel, data: highlights_info){
+    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data: highlights_info){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
             data: data
@@ -49,6 +49,14 @@ export class LineHighlighterDecoration{
                 editor.setDecorations(decorationType, []);
             }
             LineHighlighterDecoration.decorations = [];
+            
+            this.clear_wasm_line_decorations();
+        }
+    }
+
+    static clear_wasm_line_decorations(){
+        for (let webview of WhammWebviewPanel.webviews){
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {});
         }
     }
 }

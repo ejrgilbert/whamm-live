@@ -88,12 +88,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 		// debounce function will make sure the function `handleDocumentChanges`
 		// will only be triggered once per our selected .mm file change
-		let debounceFunction = debounce(
-			()=>{ 
-				// clear out whamm highlights
-				LineHighlighterDecoration.clear_all_decorations(vscode.window.activeTextEditor);
-				handleDocumentChanges();
-			}, 500);
+		let debounceFunction = debounce(handleDocumentChanges, 500);
 		vscode.workspace.onDidSaveTextDocument((event: vscode.TextDocument)=>{
 			if (shouldUpdateModel()) debounceFunction();
 		})
@@ -101,12 +96,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	// handleCursorChange will make sure the webview view gets updated 
 	// and this also uses the debounce technique to not update view frequently
 	{
-		let debounceFunction = debounce(
-			()=>{ 
-				// clear out whamm highlights
-				LineHighlighterDecoration.clear_all_decorations(vscode.window.activeTextEditor);
-				handleCursorChange();
-			},500);
+		let debounceFunction = debounce(handleCursorChange,500);
 		vscode.window.onDidChangeTextEditorSelection((event: vscode.TextEditorSelectionChangeEvent)=>{
 			if (shouldUpdateView()) debounceFunction();
 		})

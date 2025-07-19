@@ -11,6 +11,7 @@
     import { EditorState} from "@codemirror/state";
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
+    import { highlight_data } from './lib/highlight_data.svelte';
 
     let wizard_tab = $state(false);
 
@@ -71,8 +72,12 @@
                         api_response.out_of_date = message.response.out_of_date;
                         api_response.codemirror_code_updated = false;
                         api_response.model = message.response.model;
+                        highlight_data.lines = {};
                     }
                     break;
+                case 'temp-line-highlight':{
+                    highlight_data.lines = message.data;
+                }
             }
     });
 </script>
