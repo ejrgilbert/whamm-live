@@ -82,7 +82,7 @@
                 // Will be called to clear out the line highlights and circle highlights as well
                 case 'temp-line-highlight':{
                     update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
-                    if (view && api_response.model) {
+                    if (view && api_response.model && api_response.codemirror_code_updated) {
                         setTempBackgroundColorForLines(view, highlight_data.lines);
                         updateInjectionCircles(view, api_response.model, highlight_data.circles);
                     }

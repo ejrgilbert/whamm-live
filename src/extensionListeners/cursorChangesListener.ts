@@ -78,7 +78,7 @@ export function handleCursorChange(){
             }
 
             // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines);
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines.sort());
             webview_index++;
         }
     }
