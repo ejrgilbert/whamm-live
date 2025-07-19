@@ -9,6 +9,7 @@ import {EditorView, GutterMarker, gutter} from "@codemirror/view"
 import {type valid_model} from "../api_response.svelte"
 import {StateField, StateEffect, RangeSetBuilder} from "@codemirror/state"
 import type { inj_circle_highlights_info, injection_circle } from "../highlight_data.svelte";
+import { handle_circle_click } from "./code_click_plugin";
 
 // `injectionCircleEffect` contains all of my dangling injections
 export const injectionCircleEffect = StateEffect.define<Record<number, injection_circle[]>>();
@@ -61,11 +62,14 @@ class injectionCircleMarker extends GutterMarker {
 
           // add event listenet to show the hidden div on hover
             circle_element.addEventListener("mouseenter", ()=>{
-      hidden_body_element.style.display = "block";
+              hidden_body_element.style.display = "block";
           });
             circle_element.addEventListener("mouseleave", ()=>{
-      hidden_body_element.style.display = "none";
+              hidden_body_element.style.display = "none";
           });
+            circle_element.addEventListener("click", ()=>{
+              handle_circle_click(circle.injection_id);
+            })
       container.appendChild(circle_element);
         }
 
@@ -100,6 +104,7 @@ class injectionCircleMarker extends GutterMarker {
       hidden_body.style.border= "1px solid";
       hidden_body.style.width= "max-content";
       hidden_body.style.padding= "10%";
+      hidden_body.style.marginTop= "25%";
       hidden_body.innerHTML = body;
       return hidden_body
   }

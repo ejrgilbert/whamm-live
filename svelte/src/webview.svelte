@@ -7,14 +7,13 @@
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
-    import { api_response, type valid_model} from "./lib/api_response.svelte";
+    import { api_response } from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
-    import { clearBackgroundColors, lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
+    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
-    import { highlight_data
-
-  , reset_highlight_data, update_highlight_data, type inj_circle_highlights_info } from './lib/highlight_data.svelte';
+    import { highlight_data , reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
   import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
+  import { code_click_plugin } from './lib/code_mirror/code_click_plugin';
 
     let wizard_tab = $state(false);
 
@@ -63,6 +62,7 @@
                                                 keymap.of(searchKeymap),
                                                 lineBackgroundField,
                                                 tempLineBackgroundField,
+                                                code_click_plugin,
                                                 
                                                 // gutters
                                                 lineNumbers(),
