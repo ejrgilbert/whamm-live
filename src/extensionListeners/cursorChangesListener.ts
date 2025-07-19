@@ -49,11 +49,13 @@ export function handleCursorChange(){
             if (!injections) continue;
             console.log(injections);
 
-            // Nodes are sorted from biggest span to least span
-            let current_node : Node | null= injections.head;
             let color_index = 0;
             let wasm_line_highlight_data: highlights_info = {};
             let inj_circle_highlight_data: inj_circle_highlights_info = {};
+            let all_wat_lines: number[] = []
+
+            // Nodes are sorted from biggest span to least span
+            let current_node : Node | null= injections.head;
             while (current_node != null){
 
                 let whamm_span = current_node.whamm_span;
@@ -68,7 +70,7 @@ export function handleCursorChange(){
                     if (webview_index == WhammWebviewPanel.number_of_webviews -1) LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
 
                     // Save wat line and color information for every value in the node
-                    store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data,current_node, color_index);
+                    store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, current_node, color_index);
                     color_index = (color_index+1) % LineHighlighterDecoration.highlightColors.length;
                 }
                 // Traverse to the next node
@@ -76,7 +78,7 @@ export function handleCursorChange(){
             }
 
             // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data);
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines);
             webview_index++;
         }
     }
@@ -84,7 +86,7 @@ export function handleCursorChange(){
 
 //Create a **many-to-one mapping** from wat line number to color to show in the webview 
 // and store it in the record
-function store_line_highlight_data(line_record: highlights_info, inj_circle_record: inj_circle_highlights_info,node: Node, color_index: number){
+function store_line_highlight_data(line_record: highlights_info, inj_circle_record: inj_circle_highlights_info, all_wat_lines: number[], node: Node, color_index: number){
     for (let live_injection of node.values){
         switch(live_injection.type){
             case Types.WhammDataType.funcProbeType:
@@ -92,11 +94,16 @@ function store_line_highlight_data(line_record: highlights_info, inj_circle_reco
             case Types.WhammDataType.opProbeType:
                 // map from injection id to the color to highlight with
                 inj_circle_record[live_injection.id] = LineHighlighterDecoration.colors[color_index];
+                for (let wat_line=live_injection.wat_range.l1; wat_line <= live_injection.wat_range.l2; wat_line++){
+                    all_wat_lines.push(wat_line);
+                }
                 break;
+
             default:
                 for (let wat_line=live_injection.wat_range.l1; wat_line <= live_injection.wat_range.l2; wat_line++){
                     // Overwrite any previous value since we give priority to lower whamm spans
                     line_record[wat_line] = LineHighlighterDecoration.highlightColors[color_index];
+                    all_wat_lines.push(wat_line);
                 }
             break;
         }

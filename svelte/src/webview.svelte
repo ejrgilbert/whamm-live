@@ -13,7 +13,7 @@
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
     import { highlight_data
 
-  , type inj_circle_highlights_info } from './lib/highlight_data.svelte';
+  , reset_highlight_data, update_highlight_data, type inj_circle_highlights_info } from './lib/highlight_data.svelte';
   import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
 
     let wizard_tab = $state(false);
@@ -76,14 +76,12 @@
                         api_response.out_of_date = message.response.out_of_date;
                         api_response.codemirror_code_updated = false;
                         api_response.model = message.response.model;
-                        highlight_data.lines = {};
-                        highlight_data.circles = {};
+                        reset_highlight_data();
                     }
                     break;
                 // Will be called to clear out the line highlights and circle highlights as well
                 case 'temp-line-highlight':{
-                    highlight_data.lines = message.line_data;
-                    highlight_data.circles = message.circle_data;
+                    update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
                     if (view && api_response.model) {
                         setTempBackgroundColorForLines(view, highlight_data.lines);
                         updateInjectionCircles(view, api_response.model, highlight_data.circles);

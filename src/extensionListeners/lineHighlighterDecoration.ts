@@ -48,11 +48,12 @@ export class LineHighlighterDecoration{
         editor.setDecorations(decorationType, [{range}]);
     }
 
-    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info ){
+    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
             line_data: data1,
-            circle_data: data2
+            circle_data: data2,
+            all_wat_lines: all_wat_lines
         });
     }
     
@@ -69,7 +70,7 @@ export class LineHighlighterDecoration{
 
     static clear_wasm_line_decorations(){
         for (let webview of WhammWebviewPanel.webviews){
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {});
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
         }
     }
 }
