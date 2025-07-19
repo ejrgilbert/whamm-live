@@ -12,6 +12,7 @@
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
     import { highlight_data } from './lib/highlight_data.svelte';
+  import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
 
     let wizard_tab = $state(false);
 
@@ -59,6 +60,7 @@
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
                                                 lineBackgroundField,
+                                                tempLineBackgroundField,
                                                 
                                                 // gutters
                                                 lineNumbers(),
@@ -77,6 +79,7 @@
                     break;
                 case 'temp-line-highlight':{
                     highlight_data.lines = message.data;
+                    if (view) setTempBackgroundColorForLines(view, highlight_data.lines);
                 }
             }
     });
