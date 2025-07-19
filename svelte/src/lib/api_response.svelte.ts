@@ -1,4 +1,4 @@
-export type injection_circle = { color: string; body: string };
+import type { injection_circle } from "./highlight_data.svelte";
 
 export type valid_model = {
 	injected_wat: string,
