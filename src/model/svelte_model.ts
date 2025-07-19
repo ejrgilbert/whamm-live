@@ -54,21 +54,21 @@ export class SvelteModel{
                     case Types.WhammDataType.opProbeType:
                         {
                             let body = create_html_content_for_op_body_probes(injection);
-                            injection_circle_array.push(create_default_injection_circle(body, "red"));
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "red"));
                         }
                         break;
 
                     case Types.WhammDataType.localType:
                         {
                             let body = create_html_content_for_locals(injection.code);
-                            injection_circle_array.push(create_default_injection_circle(body, "blue"));
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "blue"));
                         }
                         break;
 
                     case Types.WhammDataType.funcProbeType:
                         {
                             let body = create_html_content_for_func_probes(injection);
-                            injection_circle_array.push(create_default_injection_circle(body, "green"));
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "green"));
                         }
                         break;
                 }
@@ -86,10 +86,11 @@ export class SvelteModel{
 
 // Helper functions
 
-function create_default_injection_circle(body: string, color: string){
+function create_default_injection_circle(injection: WhammLiveInjection, body: string, color: string){
     return {
         color: color,
         body: body,
+        injection_id: injection.id,
         highlighted: false,
         highlight_color: undefined
     } as injection_circle;

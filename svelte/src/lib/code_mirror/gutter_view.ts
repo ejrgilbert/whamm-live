@@ -6,8 +6,9 @@
  */
 
 import {EditorView, GutterMarker, gutter} from "@codemirror/view"
-import {type injection_circle, type valid_model} from "../api_response.svelte"
+import {type valid_model} from "../api_response.svelte"
 import {StateField, StateEffect, RangeSetBuilder} from "@codemirror/state"
+import type { inj_circle_highlights_info, injection_circle } from "../highlight_data.svelte";
 
 // `injectionCircleEffect` contains all of my dangling injections
 export const injectionCircleEffect = StateEffect.define<Record<number, injection_circle[]>>();
@@ -49,26 +50,26 @@ class injectionCircleMarker extends GutterMarker {
     };
 
   toDOM() {
-  // container to contain the entire div for the line
-	let container = this.load_container();
-	for (const { color, body } of this.circles) {
+    // container to contain the entire div for the line
+    let container = this.load_container();
+    for (const circle of this.circles) {
 
-	      // each div for each circle
-	      	let circle_element = this.load_circle_element(color);
-	       	let hidden_body_element = this.load_hidden_body_element(body);
-	      	circle_element.appendChild(hidden_body_element);
+          // each div for each circle
+            let circle_element = this.load_circle_element(circle);
+            let hidden_body_element = this.load_hidden_body_element(circle.body);
+            circle_element.appendChild(hidden_body_element);
 
-	      // add event listenet to show the hidden div on hover
-	      	circle_element.addEventListener("mouseenter", ()=>{
-		hidden_body_element.style.display = "block";
-	      });
-	      	circle_element.addEventListener("mouseleave", ()=>{
-		hidden_body_element.style.display = "none";
-	      });
-		container.appendChild(circle_element);
-			}
+          // add event listenet to show the hidden div on hover
+            circle_element.addEventListener("mouseenter", ()=>{
+      hidden_body_element.style.display = "block";
+          });
+            circle_element.addEventListener("mouseleave", ()=>{
+      hidden_body_element.style.display = "none";
+          });
+      container.appendChild(circle_element);
+        }
 
-		return container
+      return container
 	}
 
   private load_container(): HTMLDivElement{
@@ -77,12 +78,15 @@ class injectionCircleMarker extends GutterMarker {
 		container.style.gap = "2px"
     return container;
   }
-  private load_circle_element(color: string):HTMLDivElement{
+  private load_circle_element(injected_circle: injection_circle):HTMLDivElement{
 			const circle = document.createElement("div");
-			circle.style.width = "10px";
-			circle.style.height = "10px";
+			circle.style.width = (injected_circle.highlighted) ? "17px" : "10px";
+			circle.style.height = circle.style.width;
 			circle.style.borderRadius = "50%";
-			circle.style.backgroundColor = color;
+			circle.style.backgroundColor = injected_circle.color;
+      if (injected_circle.highlighted){
+        circle.style.border = `3px solid ${injected_circle.highlight_color}`
+      }
       return circle
   }
 
@@ -131,6 +135,30 @@ export function clearInjectedCircles(view: EditorView){
 }
 
 export function addDanglingCircleInjections(view: EditorView, model: valid_model){
+    view.dispatch({
+        effects: injectionCircleEffect.of(model.wat_to_injection_circle)
+    })
+}
+
+// Record contains the circle's injection IDs that need to be highlighted
+// So, if the id matches for the injection circles, we highlight them!!
+export function updateInjectionCircles(view: EditorView, model: valid_model, record: inj_circle_highlights_info){
+
+    for (let injection_circles of Object.values(model.wat_to_injection_circle)){
+      for (let injection_circle of injection_circles){
+
+        if (Object.keys(record).includes(`${injection_circle.injection_id}`)){
+          injection_circle.highlighted = true;
+          injection_circle.highlight_color = record[injection_circle.injection_id];
+
+        } else{
+          injection_circle.highlighted = false;
+          injection_circle.highlight_color = undefined;
+        }
+      }
+    }
+
+    // Dispatch the effect to update the gutter view
     view.dispatch({
         effects: injectionCircleEffect.of(model.wat_to_injection_circle)
     })

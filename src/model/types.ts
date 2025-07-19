@@ -123,6 +123,8 @@ export type injection_circle = {
 };
 
 export type highlights_info = Record<number, string>;
+// map from injection id to highlight color
+export type inj_circle_highlights_info = Record<number, string>;
 
 export type valid_model = {
 	injected_wat: string,

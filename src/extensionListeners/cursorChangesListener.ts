@@ -5,7 +5,7 @@ import { APIModel} from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './lineHighlighterDecoration';
-import { highlights_info } from '../model/types';
+import { highlights_info, inj_circle_highlights_info } from '../model/types';
 import { Types } from '../whammServer';
 
 export function shouldUpdateView():boolean{
@@ -42,7 +42,7 @@ export function handleCursorChange(){
 
             // No need to perform highlighting if api is out of date 
             // or the code mirror code isn't updated yet!
-            if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated)) continue;
+            if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
 
             // No need to perform highlighting if the jagged array doesn't have any contents for that location
             let injections = webview.model.jagged_array[line][column];
@@ -53,6 +53,7 @@ export function handleCursorChange(){
             let current_node : Node | null= injections.head;
             let color_index = 0;
             let wasm_line_highlight_data: highlights_info = {};
+            let inj_circle_highlight_data: inj_circle_highlights_info = {};
             while (current_node != null){
 
                 let whamm_span = current_node.whamm_span;
@@ -67,7 +68,7 @@ export function handleCursorChange(){
                     if (webview_index == WhammWebviewPanel.number_of_webviews -1) LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
 
                     // Save wat line and color information for every value in the node
-                    store_line_highlight_data(wasm_line_highlight_data, current_node, color);
+                    store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data,current_node, color_index);
                     color_index = (color_index+1) % LineHighlighterDecoration.highlightColors.length;
                 }
                 // Traverse to the next node
@@ -75,7 +76,7 @@ export function handleCursorChange(){
             }
 
             // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data);
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data);
             webview_index++;
         }
     }
@@ -83,18 +84,19 @@ export function handleCursorChange(){
 
 //Create a **many-to-one mapping** from wat line number to color to show in the webview 
 // and store it in the record
-function store_line_highlight_data(record: highlights_info, node: Node, color: string){
+function store_line_highlight_data(line_record: highlights_info, inj_circle_record: inj_circle_highlights_info,node: Node, color_index: number){
     for (let live_injection of node.values){
         switch(live_injection.type){
             case Types.WhammDataType.funcProbeType:
             case Types.WhammDataType.localType:
             case Types.WhammDataType.opProbeType:
-                // TODO
+                // map from injection id to the color to highlight with
+                inj_circle_record[live_injection.id] = LineHighlighterDecoration.colors[color_index];
                 break;
             default:
                 for (let wat_line=live_injection.wat_range.l1; wat_line <= live_injection.wat_range.l2; wat_line++){
                     // Overwrite any previous value since we give priority to lower whamm spans
-                    record[wat_line] = color;
+                    line_record[wat_line] = LineHighlighterDecoration.highlightColors[color_index];
                 }
             break;
         }

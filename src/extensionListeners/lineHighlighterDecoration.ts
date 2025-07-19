@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { type highlights_info, span } from "../model/types";
+import { type highlights_info, inj_circle_highlights_info, span } from "../model/types";
 import { ExtensionContext } from '../extensionContext';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 
@@ -48,10 +48,11 @@ export class LineHighlighterDecoration{
         editor.setDecorations(decorationType, [{range}]);
     }
 
-    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data: highlights_info){
+    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info ){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
-            data: data
+            line_data: data1,
+            circle_data: data2
         });
     }
     
@@ -68,7 +69,7 @@ export class LineHighlighterDecoration{
 
     static clear_wasm_line_decorations(){
         for (let webview of WhammWebviewPanel.webviews){
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {});
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {});
         }
     }
 }

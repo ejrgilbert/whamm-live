@@ -7,11 +7,13 @@
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
-    import { api_response} from "./lib/api_response.svelte";
+    import { api_response, type valid_model} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
-    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
-    import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
-    import { highlight_data } from './lib/highlight_data.svelte';
+    import { clearBackgroundColors, lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
+    import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
+    import { highlight_data
+
+  , type inj_circle_highlights_info } from './lib/highlight_data.svelte';
   import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
 
     let wizard_tab = $state(false);
@@ -75,14 +77,21 @@
                         api_response.codemirror_code_updated = false;
                         api_response.model = message.response.model;
                         highlight_data.lines = {};
+                        highlight_data.circles = {};
                     }
                     break;
+                // Will be called to clear out the line highlights and circle highlights as well
                 case 'temp-line-highlight':{
-                    highlight_data.lines = message.data;
-                    if (view) setTempBackgroundColorForLines(view, highlight_data.lines);
+                    highlight_data.lines = message.line_data;
+                    highlight_data.circles = message.circle_data;
+                    if (view && api_response.model) {
+                        setTempBackgroundColorForLines(view, highlight_data.lines);
+                        updateInjectionCircles(view, api_response.model, highlight_data.circles);
+                    }
                 }
             }
     });
+
 </script>
 
 <main>
