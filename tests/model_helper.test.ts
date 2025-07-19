@@ -29,7 +29,7 @@ describe('testing Model Helper `inject_wat` function', () => {
           code: injection["code"],
           mode: null,
           wat_range: {l1: injection.range[0], l2: injection.range[1]},
-          whamm_span: null
+          whamm_span: null,
         } as WhammLiveInjection
         whamm_injections.push(whamm_live_injection)
 
@@ -72,7 +72,7 @@ describe('testing Model Helper\'s static `__new_whamm_live_injection_instance` m
         let whamm_cause: Types.WhammCause = {"_tag": "userProbe", "_value": {"lc0": {"l": 1,"c": 1}, "lc1": { "l": 4, "c": 2}}}
         let func_record = {cause: whamm_cause, targetFid: 2, body:[], mode: Types.FuncInstrumentationMode.entry} as Types.FuncProbeRecord
 
-        let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(func_record, Types.WhammDataType.funcProbeType, 10);
+        let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(func_record, Types.WhammDataType.funcProbeType, 10, 49);
         expect(whamm_live_instance).toStrictEqual(
           {
             type: Types.WhammDataType.funcProbeType,
@@ -80,6 +80,7 @@ describe('testing Model Helper\'s static `__new_whamm_live_injection_instance` m
             code: [],
             wat_range: {l1: 10, l2: 10} as WatLineRange,
             whamm_span: {"lc0": {"l": 1,"c": 1}, "lc1": { "l": 4, "c": 2}} as span,
+            id: 49
           }
         )
       });

@@ -77,6 +77,7 @@ export type WhammLiveInjection = {
     code: string[];
     wat_range: WatLineRange;
     whamm_span: span | null;
+    id: number;
 }
 
 export type Metadata = {
@@ -113,8 +114,14 @@ export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType
     Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]
 
 // Types to be used in the svelte side
+export type injection_circle = {
+    color: string;
+    body: string;
+    injection_id: number;
+    highlighted: boolean;
+    highlight_color: undefined | string;
+};
 
-export type injection_circle = { color: string; body: string };
 export type highlights_info = Record<number, string>;
 
 export type valid_model = {

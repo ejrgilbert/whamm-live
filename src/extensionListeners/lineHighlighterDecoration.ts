@@ -6,6 +6,18 @@ import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 export class LineHighlighterDecoration{
 
     static decorations: vscode.TextEditorDecorationType[] = [];
+    static colors: string[] = [
+        "rgba(76, 175, 80, 1)",
+        "rgba(244, 67, 54, 1)",
+        "rgba(255, 235, 59, 1)",
+        "rgba(142, 36, 170, 1)",
+        "rgba(255, 152, 0, 1)",
+        "rgba(121, 85, 72, 1)",
+        "rgba(233, 30, 99, 1)",
+        "rgba(158, 158, 158, 1)",
+        "rgba(0, 150, 136, 1)",
+    ]
+
     static highlightColors: string []= [
             "rgba(76, 175, 80, 0.2)",    // soft green
             "rgba(244, 67, 54, 0.4)",    // soft red
