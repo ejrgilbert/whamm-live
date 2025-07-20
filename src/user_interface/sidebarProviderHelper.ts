@@ -70,7 +70,7 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
-            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editor()){
+            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
                 LineHighlighterDecoration.clear_all_decorations();
             }
             

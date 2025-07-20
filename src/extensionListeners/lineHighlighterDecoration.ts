@@ -37,15 +37,13 @@ export class LineHighlighterDecoration{
 
     static highlight_whamm_file(whamm_span: span, color: string, editor_should_be_active: boolean = true){
 
-        var editor;
+        var editors: vscode.TextEditor[];
         if (editor_should_be_active){
-            editor = vscode.window.activeTextEditor;
-            if (!editor) return;
-            if (editor.document.uri.fsPath !== ExtensionContext.context.workspaceState.get("whamm-file")) return;
-        } else{
-            editor = ExtensionContext.get_editor();
+            let editor = vscode.window.activeTextEditor;
             if (!editor) return;
         }
+        editors = ExtensionContext.get_editors();
+        if (editors.length < 1) return;
 
         const start = new vscode.Position(whamm_span.lc0.l - 1, whamm_span.lc0.c -1);
         const end = new vscode.Position(whamm_span.lc1.l - 1, whamm_span.lc1.c -1);
@@ -56,7 +54,9 @@ export class LineHighlighterDecoration{
             isWholeLine: false,
         })
         LineHighlighterDecoration.decorations.push(decorationType);
-        editor.setDecorations(decorationType, [{range}]);
+        for (let editor of editors){
+            editor.setDecorations(decorationType, [{range}]);
+        }
     }
 
     static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
@@ -83,7 +83,8 @@ export class LineHighlighterDecoration{
         else
             original_injection= original_webview.model.wat_to_whamm_mapping.get(number_value);
 
-        if (original_injection && isExtensionActive() && (ExtensionContext.get_editor()?.document.getText() === APIModel.whamm_cached_content)){
+        let all_editors = ExtensionContext.get_editors();
+        if (all_editors.length > 0 && original_injection && isExtensionActive() && (all_editors[0].document.getText() === APIModel.whamm_cached_content)){
             LineHighlighterDecoration.clear_all_decorations();
 
             if (original_injection.whamm_span !== null){
@@ -169,13 +170,13 @@ export class LineHighlighterDecoration{
     }
 
     static clear_whamm_decorations(){
-        const editor = ExtensionContext.get_editor();
-        if (editor){
+        const editors = ExtensionContext.get_editors();
+        for (let editor of editors){
             for (let decorationType of LineHighlighterDecoration.decorations){
                 editor.setDecorations(decorationType, []);
             }
-            LineHighlighterDecoration.decorations = [];
         }
+        LineHighlighterDecoration.decorations = [];
     }
 
     static clear_whamm_and_webview_decorations(webview: WhammWebviewPanel){
