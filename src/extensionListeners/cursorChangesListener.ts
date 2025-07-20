@@ -32,8 +32,9 @@ export function shouldUpdateView():boolean{
 export function handleCursorChange(){
     if (APIModel.whamm_file_changing) return;
     // Get the line number from the active text editor which will be our currently selected whamm file
-    let cursor = vscode.window.activeTextEditor?.selection.active
-    if (cursor){
+    let editor = vscode.window.activeTextEditor;
+    if (editor){
+        let cursor = editor.selection.active
         let line = cursor.line;
         let column = cursor.character;
 
@@ -63,11 +64,11 @@ export function handleCursorChange(){
                     // highlight the span with color at `color_index`
                     let color = LineHighlighterDecoration.highlightColors[color_index];
 
-                    // Temporary: Highlight whamm on the last go
                     /**
                      * @todo: Do best effort highlighting:
                      */
-                    if (webview_index == WhammWebviewPanel.number_of_webviews -1) LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
+                    LineHighlighterDecoration.clear_whamm_decorations(editor);
+                    LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
 
                     // Save wat line and color information for every value in the node
                     store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, current_node, color_index);

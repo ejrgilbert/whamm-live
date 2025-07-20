@@ -94,7 +94,6 @@ export class Helper_sidebar_provider{
             vscode.workspace.onDidCloseTextDocument((textDocument)=>{
                 if (textDocument.uri.fsPath === filePath.fsPath === ExtensionContext.context.workspaceState.get('whamm-file')){
                     Helper_sidebar_provider.helper_update_whamm_workspace_state(undefined);
-                    ExtensionContext.whamm_editor = null;
                 }
             })
 

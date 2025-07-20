@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { type highlights_info, inj_circle_highlights_info, span, WhammLiveInjection } from "../model/types";
 import { ExtensionContext } from '../extensionContext';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { isExtensionActive } from './listenerHelper';
 
 export class LineHighlighterDecoration{
 
@@ -78,8 +79,9 @@ export class LineHighlighterDecoration{
         else
             injection = webview.model.wat_to_whamm_mapping.get(number_value);
 
-        if (injection){
-                LineHighlighterDecoration.clear_whamm_and_webview_decorations(webview);
+        if (injection && isExtensionActive()){
+            LineHighlighterDecoration.clear_all_decorations(ExtensionContext.whamm_editor);
+
             if (injection.whamm_span !== null){
                 // highlight the whamm file
                 LineHighlighterDecoration.highlight_whamm_file(injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);

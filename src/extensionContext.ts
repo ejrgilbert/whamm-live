@@ -4,5 +4,5 @@ import { whammServer } from './whammServer';
 export class ExtensionContext{
 	static context: vscode.ExtensionContext; 
 	static api: whammServer.Exports;
-	static whamm_editor: vscode.TextEditor | null;
+	static whamm_editor: vscode.TextEditor;
 }

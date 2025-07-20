@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
 import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
+import { SvelteModel } from '../model/svelte_model';
 
 export class WhammWebviewPanel{
 
@@ -44,6 +45,14 @@ export class WhammWebviewPanel{
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
                 if (this.fileName) ExtensionContext.api.end(this.fileName);
+                // update the sidebar
+                SvelteModel.update_sidebar_model();
+
+                // remove highlights if no webviews open
+                if (ExtensionContext.whamm_editor && WhammWebviewPanel.number_of_webviews == 0){
+                    // remove decorations if any
+                    LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+                }
         })
 
         let success = await this.model.loadWatAndWasm();

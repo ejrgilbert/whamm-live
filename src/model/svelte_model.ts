@@ -19,7 +19,7 @@ export class SvelteModel{
             SvelteModel.update_wasm_webview_model(webview);
     }
 
-    private static update_sidebar_model(){
+    static update_sidebar_model(){
         // nofify the sidebar side of the change
         Helper_sidebar_provider.post_message('whamm-api-models-update',
                 WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
