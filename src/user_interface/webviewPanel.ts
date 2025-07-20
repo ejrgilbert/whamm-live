@@ -49,9 +49,9 @@ export class WhammWebviewPanel{
                 SvelteModel.update_sidebar_model();
 
                 // remove highlights if no webviews open
-                if (ExtensionContext.whamm_editor && WhammWebviewPanel.number_of_webviews == 0){
+                if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WhammWebviewPanel.number_of_webviews == 0){
                     // remove decorations if any
-                    LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+                    LineHighlighterDecoration.clear_whamm_decorations();
                 }
         })
 

@@ -21,7 +21,7 @@ export function shouldUpdateModel(): boolean{
 
         if (editor && editor?.document.uri.fsPath === whamm_file_path){
 			// clear out whamm highlights
-			LineHighlighterDecoration.clear_all_decorations(vscode.window.activeTextEditor);
+			LineHighlighterDecoration.clear_all_decorations();
 
             var file_contents = editor.document.getText();
             if (file_contents === APIModel.whamm_cached_content) return false;

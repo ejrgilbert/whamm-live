@@ -6,7 +6,6 @@ import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './lineHighlighterDecoration';
 import { highlights_info, inj_circle_highlights_info } from '../model/types';
-import { Types } from '../whammServer';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -18,7 +17,7 @@ export function shouldUpdateView():boolean{
         let editor = vscode.window.activeTextEditor;
         if (editor && editor?.document.uri.fsPath === whamm_file_path){
 			// clear out whamm highlights
-			LineHighlighterDecoration.clear_all_decorations(vscode.window.activeTextEditor);
+			LineHighlighterDecoration.clear_all_decorations();
 
             var file_contents = editor.document.getText();
             if (file_contents === APIModel.whamm_cached_content){
@@ -57,6 +56,10 @@ export function handleCursorChange(){
 
             // Nodes are sorted from biggest span to least span
             let current_node : Node | null= injections.head;
+            /**
+             * @todo: Do best effort highlighting:
+             */
+            LineHighlighterDecoration.clear_whamm_decorations();
             while (current_node != null){
 
                 let whamm_span = current_node.whamm_span;
@@ -67,7 +70,6 @@ export function handleCursorChange(){
                     /**
                      * @todo: Do best effort highlighting:
                      */
-                    LineHighlighterDecoration.clear_whamm_decorations(editor);
                     LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
 
                     // Save wat line and color information for every value in the node

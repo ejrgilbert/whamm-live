@@ -6,6 +6,7 @@ import { isExtensionActive } from './listenerHelper';
 import { ModelHelper } from '../model/utils/model_helper';
 import { Node } from '../model/utils/cell';
 import { Types } from '../whammServer';
+import { APIModel } from '../model/model';
 
 export class LineHighlighterDecoration{
 
@@ -42,7 +43,7 @@ export class LineHighlighterDecoration{
             if (!editor) return;
             if (editor.document.uri.fsPath !== ExtensionContext.context.workspaceState.get("whamm-file")) return;
         } else{
-            editor = ExtensionContext.whamm_editor;
+            editor = ExtensionContext.get_editor();
             if (!editor) return;
         }
 
@@ -82,8 +83,8 @@ export class LineHighlighterDecoration{
         else
             original_injection= original_webview.model.wat_to_whamm_mapping.get(number_value);
 
-        if (original_injection && isExtensionActive()){
-            LineHighlighterDecoration.clear_all_decorations(ExtensionContext.whamm_editor);
+        if (original_injection && isExtensionActive() && (ExtensionContext.get_editor()?.document.getText() === APIModel.whamm_cached_content)){
+            LineHighlighterDecoration.clear_all_decorations();
 
             if (original_injection.whamm_span !== null){
                 // highlight the whamm file
@@ -92,6 +93,8 @@ export class LineHighlighterDecoration{
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too
                 for (let webview of WhammWebviewPanel.webviews){
+                    if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
+
                     let injections: WhammLiveInjection[] = [];
                     if (webview === original_webview){
                         injections.push(original_injection);
@@ -123,11 +126,9 @@ export class LineHighlighterDecoration{
         } as highlightCompleteData;
     }
 
-    static clear_all_decorations(editor: vscode.TextEditor | undefined){
-        if (editor){
-            LineHighlighterDecoration.clear_whamm_decorations(editor);
-            this.clear_wasm_line_decorations();
-        }
+    static clear_all_decorations(){
+        LineHighlighterDecoration.clear_whamm_decorations();
+        this.clear_wasm_line_decorations();
     }
 
     //Create a **many-to-one mapping** from wat line number to color to show in the webview 
@@ -167,16 +168,19 @@ export class LineHighlighterDecoration{
         LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
     }
 
-    static clear_whamm_decorations(editor: vscode.TextEditor){
-        for (let decorationType of LineHighlighterDecoration.decorations){
-            editor.setDecorations(decorationType, []);
+    static clear_whamm_decorations(){
+        const editor = ExtensionContext.get_editor();
+        if (editor){
+            for (let decorationType of LineHighlighterDecoration.decorations){
+                editor.setDecorations(decorationType, []);
+            }
+            LineHighlighterDecoration.decorations = [];
         }
-        LineHighlighterDecoration.decorations = [];
     }
 
     static clear_whamm_and_webview_decorations(webview: WhammWebviewPanel){
         // clear the whamm line highlights
-        if (ExtensionContext.whamm_editor) LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+        LineHighlighterDecoration.clear_whamm_decorations();
         // clear the svelte webview side highlights
         LineHighlighterDecoration.clear_wasm_line_decoration(webview);
     }

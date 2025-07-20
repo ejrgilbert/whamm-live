@@ -70,14 +70,14 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
-            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.whamm_editor){
-                LineHighlighterDecoration.clear_all_decorations(ExtensionContext.whamm_editor);
+            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editor()){
+                LineHighlighterDecoration.clear_all_decorations();
             }
             
             APIModel.whamm_cached_content = await APIModel.loadFileAsString(filePath.fsPath, ExtensionContext.context);
             // Open and show the text document
             let document = await vscode.workspace.openTextDocument(filePath)
-            ExtensionContext.whamm_editor = await vscode.window.showTextDocument(document, {
+            await vscode.window.showTextDocument(document, {
                                     preview: false,         // open a new tab
                                     preserveFocus: false,   // bring the new tab into focus
                                 });
