@@ -123,8 +123,10 @@ export type injection_circle = {
     highlight_color: undefined | string;
 };
 
+// map from wat line to highlight color[ used for **actually** injected injections]
 export type highlights_info = Record<number, string>;
 // map from injection id to highlight color
+// [ used for opBodyProbes, locals and funcProbes that are represented via dangling circles ]
 export type inj_circle_highlights_info = Record<number, string>;
 
 export type valid_model = {

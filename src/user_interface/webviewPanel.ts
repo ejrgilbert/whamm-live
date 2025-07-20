@@ -130,7 +130,7 @@ export class WhammWebviewPanel{
                         LineHighlighterDecoration.highlight_whamm_live_injection(this, message.line);
                         break;
                     case 'wat-circle-highlight':
-                        /** @todo */
+                        LineHighlighterDecoration.highlight_whamm_live_injection(this, message.id, true);
                         break;
                 }
             }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, span } from "../model/types";
+import { type highlights_info, inj_circle_highlights_info, span, WhammLiveInjection } from "../model/types";
 import { ExtensionContext } from '../extensionContext';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 
@@ -62,23 +62,40 @@ export class LineHighlighterDecoration{
         });
     }
 
-    static highlight_whamm_live_injection(webview: WhammWebviewPanel, wat_line: number){
+    /**
+     * 
+     * @param webview 
+     * @param number_value : is either the injection id or the wat line number
+     * @param is_id 
+     */
+    static highlight_whamm_live_injection(webview: WhammWebviewPanel, number_value: number, is_id: boolean=false){
         // If this is called because of the svelte communication, 
         // it is guaranteed to be a valid injection
-        let injection = webview.model.wat_to_whamm_mapping.get(wat_line);
-        if (injection){
-                // clear the whamm line highlights
-                LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
-                // clear the svelte webview side highlights
-                LineHighlighterDecoration.clear_wasm_line_decoration(webview);
+        var injection: WhammLiveInjection | undefined;
+        if (is_id)
+            injection = webview.model.whamm_live_response.id_to_injection.get(number_value);
+        else
+            injection = webview.model.wat_to_whamm_mapping.get(number_value);
 
+        if (injection){
+                LineHighlighterDecoration.clear_whamm_and_webview_decorations(webview);
             if (injection.whamm_span !== null){
                 // highlight the whamm file
                 LineHighlighterDecoration.highlight_whamm_file(injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);
+                let highlight_info: highlights_info | inj_circle_highlights_info = {};
+
                 // highlight the line on the svelte side
-                let highlight_info: highlights_info= {};
-                highlight_info[wat_line] = LineHighlighterDecoration.highlightColors[0];
-                LineHighlighterDecoration.highlight_wasm_webview_lines(webview, highlight_info, {}, [wat_line]);
+                if (is_id){
+                    highlight_info[number_value] = LineHighlighterDecoration.colors[0];
+                    let all_wat_lines = [];
+                    for (let start_line=injection.wat_range.l1; start_line <= injection.wat_range.l2; start_line++){
+                        all_wat_lines.push(start_line);
+                    }
+                    LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, highlight_info, all_wat_lines.sort());
+                } else{
+                    highlight_info[number_value] = LineHighlighterDecoration.highlightColors[0];
+                    LineHighlighterDecoration.highlight_wasm_webview_lines(webview, highlight_info, {}, [number_value]);
+                }
             }
         }
     }
@@ -105,5 +122,12 @@ export class LineHighlighterDecoration{
             editor.setDecorations(decorationType, []);
         }
         LineHighlighterDecoration.decorations = [];
+    }
+
+    static clear_whamm_and_webview_decorations(webview: WhammWebviewPanel){
+        // clear the whamm line highlights
+        LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+        // clear the svelte webview side highlights
+        LineHighlighterDecoration.clear_wasm_line_decoration(webview);
     }
 }
