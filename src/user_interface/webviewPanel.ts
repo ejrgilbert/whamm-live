@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
+import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
+import { SvelteModel } from '../model/svelte_model';
 
 export class WhammWebviewPanel{
 
@@ -43,6 +45,14 @@ export class WhammWebviewPanel{
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
                 if (this.fileName) ExtensionContext.api.end(this.fileName);
+                // update the sidebar
+                SvelteModel.update_sidebar_model();
+
+                // remove highlights if no webviews open
+                if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WhammWebviewPanel.number_of_webviews == 0){
+                    // remove decorations if any
+                    LineHighlighterDecoration.clear_whamm_decorations();
+                }
         })
 
         let success = await this.model.loadWatAndWasm();
@@ -124,6 +134,12 @@ export class WhammWebviewPanel{
                 switch (message.command){
                     case 'codemirror-code-updated':
                         this.model.codemirror_code_updated = true;
+                        break;
+                    case 'wat-line-highlight':
+                        LineHighlighterDecoration.highlight_whamm_live_injection(this, message.line);
+                        break;
+                    case 'wat-circle-highlight':
+                        LineHighlighterDecoration.highlight_whamm_live_injection(this, message.id, true);
                         break;
                 }
             }

@@ -4,6 +4,8 @@ import { ExtensionContext } from '../extensionContext';
 import { WhammWebviewPanel } from './webviewPanel'; 
 import { APIModel } from '../model/model';
 import { ModelHelper } from '../model/utils/model_helper';
+import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
+import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -23,7 +25,6 @@ export class Helper_sidebar_provider{
         
         if (fileURI && fileURI[0]) {
             let filePath = vscode.Uri.file(fileURI[0].fsPath);
-            APIModel.whamm_cached_content = await APIModel.loadFileAsString(filePath.fsPath, ExtensionContext.context);
             return Helper_sidebar_provider.helper_show_whamm_file(filePath);
 
         } else 
@@ -69,18 +70,27 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
+            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
+                LineHighlighterDecoration.clear_all_decorations();
+            }
             
+            APIModel.whamm_cached_content = await APIModel.loadFileAsString(filePath.fsPath, ExtensionContext.context);
             // Open and show the text document
             let document = await vscode.workspace.openTextDocument(filePath)
-            vscode.window.showTextDocument(document, {
+            await vscode.window.showTextDocument(document, {
                                     preview: false,         // open a new tab
                                     preserveFocus: false,   // bring the new tab into focus
                                 });
             
             // Update workspace state
             Helper_sidebar_provider.helper_update_whamm_workspace_state(filePath.fsPath);
-            
-            // When text document is no longer is memory
+
+            // Update the webview model data if there are any open
+            if (WhammWebviewPanel.number_of_webviews > 0){
+                await handleDocumentChanges();
+            }
+
+            // When text document is no longer in memory
             vscode.workspace.onDidCloseTextDocument((textDocument)=>{
                 if (textDocument.uri.fsPath === filePath.fsPath === ExtensionContext.context.workspaceState.get('whamm-file')){
                     Helper_sidebar_provider.helper_update_whamm_workspace_state(undefined);

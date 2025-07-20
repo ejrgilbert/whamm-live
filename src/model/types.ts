@@ -57,12 +57,13 @@ export type WatLineRange = {
     l2: number
 }
 
-// starts from 1
+// line starts from 1
 export type line_col = {
     l: number;
     c: number
 }
 
+// l,c starts from 1
 // span starting line and column
 // and ending line(inclusive) and column(exclusive)
 export type span = {
@@ -76,6 +77,7 @@ export type WhammLiveInjection = {
     code: string[];
     wat_range: WatLineRange;
     whamm_span: span | null;
+    id: number;
 }
 
 export type Metadata = {
@@ -104,6 +106,7 @@ export type WhammLiveResponse = {
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
+    id_to_injection: Map<number, WhammLiveInjection>;
     whamm_errors: Types.WhammApiError[],
     is_err: boolean
 }
@@ -112,7 +115,19 @@ export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType
     Types.WhammDataType.elementType, Types.WhammDataType.functionType, Types.WhammDataType.activeDataType, Types.WhammDataType.passiveDataType, Types.WhammDataType.opProbeType, Types.WhammDataType.localType, Types.WhammDataType.funcProbeType]
 
 // Types to be used in the svelte side
-export type injection_circle = { color: string; body: string };
+export type injection_circle = {
+    color: string;
+    body: string;
+    injection_id: number;
+    highlighted: boolean;
+    highlight_color: undefined | string;
+};
+
+// map from wat line to highlight color[ used for **actually** injected injections]
+export type highlights_info = Record<number, string>;
+// map from injection id to highlight color
+// [ used for opBodyProbes, locals and funcProbes that are represented via dangling circles ]
+export type inj_circle_highlights_info = Record<number, string>;
 
 export type valid_model = {
 	injected_wat: string,

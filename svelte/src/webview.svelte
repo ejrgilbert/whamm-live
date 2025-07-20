@@ -7,10 +7,13 @@
     import { tags as t } from "@lezer/highlight";
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
-    import { api_response} from "./lib/api_response.svelte";
+    import { api_response } from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
-    import { injectionCircleGutter } from './lib/code_mirror/gutter_view';
+    import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
+    import { highlight_data , reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
+  import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
+  import  { code_click_handler } from './lib/code_mirror/code_click_handler';
 
     let wizard_tab = $state(false);
 
@@ -58,6 +61,8 @@
                                                 search({top: false}),
                                                 keymap.of(searchKeymap),
                                                 lineBackgroundField,
+                                                tempLineBackgroundField,
+                                                code_click_handler,
                                                 
                                                 // gutters
                                                 lineNumbers(),
@@ -71,10 +76,20 @@
                         api_response.out_of_date = message.response.out_of_date;
                         api_response.codemirror_code_updated = false;
                         api_response.model = message.response.model;
+                        reset_highlight_data();
                     }
                     break;
+                // Will be called to clear out the line highlights and circle highlights as well
+                case 'temp-line-highlight':{
+                    update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
+                    if (view && api_response.model && api_response.codemirror_code_updated) {
+                        setTempBackgroundColorForLines(view, highlight_data.lines);
+                        updateInjectionCircles(view, api_response.model, highlight_data.circles);
+                    }
+                }
             }
     });
+
 </script>
 
 <main>

@@ -19,7 +19,7 @@ export class SvelteModel{
             SvelteModel.update_wasm_webview_model(webview);
     }
 
-    private static update_sidebar_model(){
+    static update_sidebar_model(){
         // nofify the sidebar side of the change
         Helper_sidebar_provider.post_message('whamm-api-models-update',
                 WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
@@ -52,15 +52,24 @@ export class SvelteModel{
                 let injection_circle_array = wat_to_injection_circle[start_line] ?? [];
                 switch(injection.type){
                     case Types.WhammDataType.opProbeType:
-                        injection_circle_array.push({color: "red", body:create_html_content_for_op_body_probes(injection)});
+                        {
+                            let body = create_html_content_for_op_body_probes(injection);
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "red"));
+                        }
                         break;
 
                     case Types.WhammDataType.localType:
-                        injection_circle_array.push({color: "blue", body:create_html_content_for_locals(injection.code)});
+                        {
+                            let body = create_html_content_for_locals(injection.code);
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "blue"));
+                        }
                         break;
 
                     case Types.WhammDataType.funcProbeType:
-                        injection_circle_array.push({color: "green", body: create_html_content_for_func_probes(injection)});
+                        {
+                            let body = create_html_content_for_func_probes(injection);
+                            injection_circle_array.push(create_default_injection_circle(injection, body, "green"));
+                        }
                         break;
                 }
                 wat_to_injection_circle[start_line] = injection_circle_array;
@@ -73,6 +82,18 @@ export class SvelteModel{
         } as valid_model;
     }
 
+}
+
+// Helper functions
+
+function create_default_injection_circle(injection: WhammLiveInjection, body: string, color: string){
+    return {
+        color: color,
+        body: body,
+        injection_id: injection.id,
+        highlighted: false,
+        highlight_color: undefined
+    } as injection_circle;
 }
 
 // Helper functions to help create the html content to be displayed on the svelte side for dangling probes

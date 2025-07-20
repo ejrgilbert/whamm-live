@@ -6,6 +6,7 @@ import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Types } from '../whammServer';
 import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
+import { LineHighlighterDecoration } from './lineHighlighterDecoration';
 
 export function shouldUpdateModel(): boolean{
     let is_extension_active = isExtensionActive();
@@ -19,6 +20,9 @@ export function shouldUpdateModel(): boolean{
         let editor = vscode.window.activeTextEditor;
 
         if (editor && editor?.document.uri.fsPath === whamm_file_path){
+			// clear out whamm highlights
+			LineHighlighterDecoration.clear_all_decorations();
+
             var file_contents = editor.document.getText();
             if (file_contents === APIModel.whamm_cached_content) return false;
 
