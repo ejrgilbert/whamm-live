@@ -9,7 +9,7 @@ import {EditorView, GutterMarker, gutter} from "@codemirror/view"
 import {type valid_model} from "../api_response.svelte"
 import {StateField, StateEffect, RangeSetBuilder} from "@codemirror/state"
 import type { inj_circle_highlights_info, injection_circle } from "../highlight_data.svelte";
-import { handle_circle_click } from "./code_click_plugin";
+import { handle_circle_click } from "./code_click_handler";
 
 // `injectionCircleEffect` contains all of my dangling injections
 export const injectionCircleEffect = StateEffect.define<Record<number, injection_circle[]>>();

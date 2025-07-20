@@ -35,10 +35,11 @@ export class LineHighlighterDecoration{
         var editor;
         if (editor_should_be_active){
             editor = vscode.window.activeTextEditor;
-            if (!editor) return
+            if (!editor) return;
             if (editor.document.uri.fsPath !== ExtensionContext.context.workspaceState.get("whamm-file")) return;
         } else{
             editor = ExtensionContext.whamm_editor;
+            if (!editor) return;
         }
 
         const start = new vscode.Position(whamm_span.lc0.l - 1, whamm_span.lc0.c -1);
@@ -126,7 +127,7 @@ export class LineHighlighterDecoration{
 
     static clear_whamm_and_webview_decorations(webview: WhammWebviewPanel){
         // clear the whamm line highlights
-        LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+        if (ExtensionContext.whamm_editor) LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
         // clear the svelte webview side highlights
         LineHighlighterDecoration.clear_wasm_line_decoration(webview);
     }
