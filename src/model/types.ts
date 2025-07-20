@@ -106,6 +106,7 @@ export type WhammLiveResponse = {
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
+    id_to_injection: Map<number, WhammLiveInjection>;
     whamm_errors: Types.WhammApiError[],
     is_err: boolean
 }

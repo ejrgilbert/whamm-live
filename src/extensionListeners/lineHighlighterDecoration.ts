@@ -30,11 +30,16 @@ export class LineHighlighterDecoration{
             "rgba(0, 150, 136, 0.3)",     // teal-green
     ]
 
-    static highlight_whamm_file(whamm_span: span, color: string){
+    static highlight_whamm_file(whamm_span: span, color: string, editor_should_be_active: boolean = true){
 
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) return
-        if (editor.document.uri.fsPath !== ExtensionContext.context.workspaceState.get("whamm-file")) return;
+        var editor;
+        if (editor_should_be_active){
+            editor = vscode.window.activeTextEditor;
+            if (!editor) return
+            if (editor.document.uri.fsPath !== ExtensionContext.context.workspaceState.get("whamm-file")) return;
+        } else{
+            editor = ExtensionContext.whamm_editor;
+        }
 
         const start = new vscode.Position(whamm_span.lc0.l - 1, whamm_span.lc0.c -1);
         const end = new vscode.Position(whamm_span.lc1.l - 1, whamm_span.lc1.c -1);
@@ -56,21 +61,49 @@ export class LineHighlighterDecoration{
             all_wat_lines: all_wat_lines
         });
     }
-    
+
+    static highlight_whamm_live_injection(webview: WhammWebviewPanel, wat_line: number){
+        // If this is called because of the svelte communication, 
+        // it is guaranteed to be a valid injection
+        let injection = webview.model.wat_to_whamm_mapping.get(wat_line);
+        if (injection){
+                // clear the whamm line highlights
+                LineHighlighterDecoration.clear_whamm_decorations(ExtensionContext.whamm_editor);
+                // clear the svelte webview side highlights
+                LineHighlighterDecoration.clear_wasm_line_decoration(webview);
+
+            if (injection.whamm_span !== null){
+                // highlight the whamm file
+                LineHighlighterDecoration.highlight_whamm_file(injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);
+                // highlight the line on the svelte side
+                let highlight_info: highlights_info= {};
+                highlight_info[wat_line] = LineHighlighterDecoration.highlightColors[0];
+                LineHighlighterDecoration.highlight_wasm_webview_lines(webview, highlight_info, {}, [wat_line]);
+            }
+        }
+    }
+
     static clear_all_decorations(editor: vscode.TextEditor | undefined){
         if (editor){
-            for (let decorationType of LineHighlighterDecoration.decorations){
-                editor.setDecorations(decorationType, []);
-            }
-            LineHighlighterDecoration.decorations = [];
-            
+            LineHighlighterDecoration.clear_whamm_decorations(editor);
             this.clear_wasm_line_decorations();
         }
     }
 
     static clear_wasm_line_decorations(){
         for (let webview of WhammWebviewPanel.webviews){
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
+            LineHighlighterDecoration.clear_wasm_line_decoration(webview);
         }
+    }
+
+    static clear_wasm_line_decoration(webview: WhammWebviewPanel){
+        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
+    }
+
+    static clear_whamm_decorations(editor: vscode.TextEditor){
+        for (let decorationType of LineHighlighterDecoration.decorations){
+            editor.setDecorations(decorationType, []);
+        }
+        LineHighlighterDecoration.decorations = [];
     }
 }

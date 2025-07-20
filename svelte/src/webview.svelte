@@ -13,7 +13,7 @@
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
     import { highlight_data , reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
   import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
-  import { code_click_plugin } from './lib/code_mirror/code_click_plugin';
+  import  { code_click_handler } from './lib/code_mirror/code_click_handler';
 
     let wizard_tab = $state(false);
 
@@ -62,7 +62,7 @@
                                                 keymap.of(searchKeymap),
                                                 lineBackgroundField,
                                                 tempLineBackgroundField,
-                                                code_click_plugin,
+                                                code_click_handler,
                                                 
                                                 // gutters
                                                 lineNumbers(),

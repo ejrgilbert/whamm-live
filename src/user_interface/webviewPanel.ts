@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
+import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
 
 export class WhammWebviewPanel{
 
@@ -124,6 +125,12 @@ export class WhammWebviewPanel{
                 switch (message.command){
                     case 'codemirror-code-updated':
                         this.model.codemirror_code_updated = true;
+                        break;
+                    case 'wat-line-highlight':
+                        LineHighlighterDecoration.highlight_whamm_live_injection(this, message.line);
+                        break;
+                    case 'wat-circle-highlight':
+                        /** @todo */
                         break;
                 }
             }

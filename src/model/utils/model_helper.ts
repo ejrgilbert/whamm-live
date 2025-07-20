@@ -117,6 +117,7 @@ export class ModelHelper{
         var number_of_func_lines_and_data_sections_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
         var whamm_live_injections_to_not_inject : WhammLiveInjection[]= [];
+        var id_to_injection_mapping : Map<number, WhammLiveInjection>= new Map();
 
         // Keep track of the injected functions to wat mapping because some opBodyProbes and funcProbes **can** target these injected functions
         // this would look something like
@@ -155,7 +156,8 @@ export class ModelHelper{
                                         // new line would be where it was initially supposed to be injected + the new offset because
                                         // of other injected lines prior
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
 
                                     // add the new whamm live instance and add it's relevant code
@@ -174,7 +176,8 @@ export class ModelHelper{
                                         export_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     whamm_live_instance.code.push(
                                         `\t(export "${export_injection.name}" (${export_injection.kind} ${export_injection.index}))`
@@ -192,6 +195,7 @@ export class ModelHelper{
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
                                         injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     whamm_live_instance.code.push(`\t(type ${type_injection.ty})`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
@@ -207,6 +211,7 @@ export class ModelHelper{
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
                                         injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     whamm_live_instance.code.push(`\t(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
@@ -221,7 +226,8 @@ export class ModelHelper{
                                         activedata_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     const offset = `(${activedata_injection.offsetExpr.join(" ")})`;
                                     const byte_literal: string =[...activedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
@@ -240,7 +246,8 @@ export class ModelHelper{
                                         passivedata_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     const byte_literal: string =[...passivedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
   .join("");
@@ -258,7 +265,8 @@ export class ModelHelper{
                                         global_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     
                                     let type_string = `(${global_injection.mutable ? "mut " : ""}${global_injection.ty})`
@@ -276,7 +284,8 @@ export class ModelHelper{
                                         func_injection,
                                         inject_type,
                                         start_wat_line + number_of_lines_injected,
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     let local_start_line = start_wat_line + number_of_lines_injected;
 
@@ -319,7 +328,8 @@ export class ModelHelper{
                                         table_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     
                                     whamm_live_instance.code.push(
@@ -336,7 +346,8 @@ export class ModelHelper{
                                         elem_injection,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     )
                                     
                                     whamm_live_instance.code.push(
@@ -391,7 +402,8 @@ export class ModelHelper{
                                         inject_type,
                                         // no change in # of lines injected
                                         wat_line,
-                                        injection_id++
+                                        injection_id++,
+                                        id_to_injection_mapping
                                     );
                                     switch (inject_type) {
                                         case Types.WhammDataType.localType:
@@ -428,7 +440,8 @@ export class ModelHelper{
             other_injections: whamm_live_injections_to_not_inject,
             injected_funcid_wat_map: injected_func_id_to_wat_mapping,
             is_err: false,
-            whamm_errors: []
+            whamm_errors: [],
+            id_to_injection: id_to_injection_mapping
         } as WhammLiveResponse;
     }
 
@@ -584,10 +597,10 @@ export class ModelHelper{
 
     // not made private for test reasons
     // but think of it as `protected`
-    static __new_whamm_live_injection_instance(record: InjectionRecord, inject_type: Types.WhammDataType, new_wat_line: number, injection_id: number){
+    static __new_whamm_live_injection_instance(record: InjectionRecord, inject_type: Types.WhammDataType, new_wat_line: number, injection_id: number, id_to_injection_mapping: Map<number,WhammLiveInjection>){
         // create the whamm live instance for one line injections
         let [wat_range, whamm_span] = ModelHelper.create_wat_range_and_whamm_span(record, new_wat_line);
-        return {
+        let injection = {
             type: inject_type,
             mode: null,
             code: [],
@@ -595,6 +608,8 @@ export class ModelHelper{
             whamm_span: whamm_span,
             id: injection_id
         } as WhammLiveInjection;
+        id_to_injection_mapping.set(injection.id, injection);
+        return injection;
     }
 
     // error handlers
@@ -604,6 +619,7 @@ export class ModelHelper{
             injecting_injections:[],
             other_injections: [],
             injected_funcid_wat_map: new Map(),
+            id_to_injection: new Map(),
             is_err: true,
             whamm_errors: errors} as WhammLiveResponse;
 

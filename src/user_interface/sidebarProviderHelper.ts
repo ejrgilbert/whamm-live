@@ -72,7 +72,7 @@ export class Helper_sidebar_provider{
             APIModel.whamm_cached_content = await APIModel.loadFileAsString(filePath.fsPath, ExtensionContext.context);
             // Open and show the text document
             let document = await vscode.workspace.openTextDocument(filePath)
-            vscode.window.showTextDocument(document, {
+            ExtensionContext.whamm_editor = await vscode.window.showTextDocument(document, {
                                     preview: false,         // open a new tab
                                     preserveFocus: false,   // bring the new tab into focus
                                 });
