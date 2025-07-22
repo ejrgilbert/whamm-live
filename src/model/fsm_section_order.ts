@@ -22,9 +22,12 @@ export class FSMSectionReorder{
     // state related variables
     current_index: number;
     wat_string: string;
+    new_wat: string | undefined;
+
     private current_state: State;
     private wat_sections: Record<string, string[]>;
     private section_stack: stack_value[] = [];
+    private module_name: string | undefined;
 
     static state_to_method_mapping: Record<State, (arg0: FSMSectionReorder) => void > = {
         [State.module_state]: FSMSectionReorder.module_state_method,
@@ -52,6 +55,18 @@ export class FSMSectionReorder{
             // call the function for the required state
             FSMSectionReorder.state_to_method_mapping[this.current_state](this);
        }
+        this.build_new_wat();
+    }
+
+    private build_new_wat(){
+        let new_wat = [(this.module_name) ? `(module $${this.module_name}` : "(module"]
+        for (let section of FSMSectionReorder.section_names){
+            for (let each of this.wat_sections[section]){
+                new_wat.push(`  ${each}`);
+            }
+        }
+        new_wat.push(")");
+        this.new_wat = new_wat.join('\n');
     }
 
     // Every state has its own method
@@ -66,8 +81,10 @@ export class FSMSectionReorder{
                     let start_index = instance.current_index;
                     let inject_type : string = FSMHelper.get_word(instance);
                     if (inject_type === "module"){
+                        instance.module_name = FSMHelper.get_module_name(instance);
                         instance.section_stack.push(
                             {section_name: inject_type, start_index: start_index});
+
                         // transition to `main_state`
                         instance.current_state = State.main_state;
                         break;

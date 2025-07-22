@@ -41,7 +41,7 @@ export const stringToInjectType: Record<string, InjectType> = {
     'module': InjectType.Module,
 }
 
-export enum sectionNamesInOrder {type = "type", import = "import", table = "table", memory = "memory", tag = "tag", global  = "global ",
+export enum sectionNamesInOrder {type = "type", import = "import", table = "table", memory = "memory", tag = "tag", global  = "global",
                                     export = "export", start = "start", elem = "elem", func = "func", data = "data", custom = "custom"}
 
 // Types

@@ -196,9 +196,10 @@ export class FSMHelper{
         }
     }
 
-    static consume_func_name(instance: FSM){
+    static consume_func_or_module_name(instance: FSMType): string {
         // consume `$`
         FSMHelper.consume_char(instance);
+        let start_index = instance.current_index;
         if (!FSMHelper.end_of_file(instance)){
             switch (FSMHelper.get_char(instance)){
                 case '"':
@@ -215,6 +216,19 @@ export class FSMHelper{
                     break;
             }
         }
+        return instance.wat_string.slice(start_index, instance.current_index);
+    }
+
+    static get_module_name(instance: FSMSectionReorder): string | undefined{
+        FSMHelper.consume_empty_spaces(instance);
+        // check for potential names
+        if (FSMHelper.get_char(instance) == '$'){
+            // consume until whitespace or ')' 
+            let name = FSMHelper.consume_func_or_module_name(instance);
+            FSMHelper.consume_empty_spaces(instance);
+            return name;
+        }
+        return undefined;
     }
 
     static consume_until_whitespace_or(instance:FSMType, char: string){
