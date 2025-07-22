@@ -1,5 +1,8 @@
 import {FSM} from '../fsm';
+import { FSMSectionReorder } from '../fsm_section_order';
 import { InjectType, stringToInjectType } from '../types';
+
+type FSMType = FSM | FSMSectionReorder;
 
 export class FSMHelper{
     // helper static methods for updating data(mapping) purposes
@@ -36,34 +39,34 @@ export class FSMHelper{
 
     // helper static methods for character consuming purposes
 
-    static end_of_file(instance: FSM):boolean{
+    static end_of_file(instance: FSMType):boolean{
         return instance.current_index >= instance.wat_string.length;
     }
 
-    static consume_empty_spaces(instance: FSM) {
+    static consume_empty_spaces(instance: FSMType) {
         let space_regex = /\s/;
         while (instance.current_index < instance.wat_string.length &&
              space_regex.test(FSMHelper.get_char(instance))){
-                if (FSMHelper.consume_char(instance) === '\n') {
+                if (FSMHelper.consume_char(instance) === '\n' && "current_line_number" in instance) {
                     instance.current_line_number++;
                 }
         }
     }
 
-    static get_char(instance: FSM): string{
+    static get_char(instance: FSMType): string{
         if (!FSMHelper.end_of_file(instance)){
             return instance.wat_string[instance.current_index];
         } else return '\0'
     }
 
-    static consume_char(instance: FSM): string{
+    static consume_char(instance: FSMType): string{
         let char = FSMHelper.get_char(instance);
         instance.current_index++;
         return char;
     }
 
     // gets the next word and skips over empty spaces in the meantime
-    static get_word(instance: FSM): string{
+    static get_word(instance: FSMType): string{
         FSMHelper.consume_empty_spaces(instance);
         let word_regex = /[a-zA-Z]/;
         let chars : string[] = [];
@@ -89,7 +92,7 @@ export class FSMHelper{
         }
     }
 
-    static consume_until_parenthesis(instance:FSM){
+    static consume_until_parenthesis(instance:FSMType){
         while (!FSMHelper.end_of_file(instance)){
             switch(FSMHelper.get_char(instance)){
 
@@ -110,7 +113,7 @@ export class FSMHelper{
                 
                 // fall through
                 case '\n':
-                    instance.current_line_number++;
+                    if ("current_line_number" in instance) instance.current_line_number++;
                 default:
                     instance.current_index++;
                     break;
@@ -119,7 +122,7 @@ export class FSMHelper{
 
     }
     // consumes UPTO the closing parenthesis but not the closing parenthesis itself
-    static consume_until_closing_parenthesis(instance: FSM, string_handling: boolean = true){
+    static consume_until_closing_parenthesis(instance: FSMType, string_handling: boolean = true){
         let closing_parentheses_found = false;
         let number_of_parentheses = 1;
 
@@ -150,7 +153,7 @@ export class FSMHelper{
                 
                 // fall through
                 case '\n':
-                    instance.current_line_number++;
+                    if ("current_line_number" in instance) instance.current_line_number++;
                 default:
                     instance.current_index++;
                     break;
@@ -159,14 +162,14 @@ export class FSMHelper{
 
     }
 
-    static consume_until(char: string[], instance: FSM){
+    static consume_until(char: string[], instance: FSMType){
         while (!FSMHelper.end_of_file(instance) &&
                 !char.includes(FSMHelper.get_char(instance))){
                     instance.current_index++;
         }
     }
 
-    static consume_until_string_ends(char: string, instance: FSM){
+    static consume_until_string_ends(char: string, instance: FSMType){
         let closing_char_found = false;
         while (!FSMHelper.end_of_file(instance) && !closing_char_found){
             switch(FSMHelper.get_char(instance)){
@@ -214,7 +217,7 @@ export class FSMHelper{
         }
     }
 
-    static consume_until_whitespace_or(instance:FSM, char: string){
+    static consume_until_whitespace_or(instance:FSMType, char: string){
         let space_regex = /\s/;
         while (!FSMHelper.end_of_file(instance) &&
              !space_regex.test(FSMHelper.get_char(instance)) &&
@@ -223,7 +226,7 @@ export class FSMHelper{
         }
     }
 
-    static consume_until_whitespace(instance:FSM){
+    static consume_until_whitespace(instance:FSMType){
         let space_regex = /\s/;
         while (!FSMHelper.end_of_file(instance) &&
              !space_regex.test(FSMHelper.get_char(instance))){
