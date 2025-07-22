@@ -193,6 +193,27 @@ export class FSMHelper{
         }
     }
 
+    static consume_func_name(instance: FSM){
+        // consume `$`
+        FSMHelper.consume_char(instance);
+        if (!FSMHelper.end_of_file(instance)){
+            switch (FSMHelper.get_char(instance)){
+                case '"':
+                    {
+                        // consume `"`
+                        instance.current_index++;
+                        FSMHelper.consume_until_string_ends('"', instance);
+                        // consume ending `"`
+                        instance.current_index++;
+                    }
+                    break;
+                default:
+                    FSMHelper.consume_until_whitespace_or(instance,")");
+                    break;
+            }
+        }
+    }
+
     static consume_until_whitespace_or(instance:FSM, char: string){
         let space_regex = /\s/;
         while (!FSMHelper.end_of_file(instance) &&

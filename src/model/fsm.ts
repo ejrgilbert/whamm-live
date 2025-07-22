@@ -200,7 +200,7 @@ export class FSM{
         // check for potential names
         if (FSMHelper.get_char(instance) == '$'){
             // consume until whitespace or ')' 
-            let word = FSMHelper.consume_until_whitespace_or(instance, ")");
+            FSMHelper.consume_func_name(instance);
             FSMHelper.consume_empty_spaces(instance);
         }
 
