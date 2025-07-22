@@ -97,11 +97,7 @@ export class LineHighlighterDecoration{
                     if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
 
                     let injections: WhammLiveInjection[] = [];
-                    if (webview === original_webview){
-                        injections.push(original_injection);
-                    } else{
-                        injections = get_injections_from_whamm_span(webview.model.whamm_live_response, original_injection.whamm_span);
-                    }
+                    injections = get_injections_from_whamm_span(webview.model.whamm_live_response, original_injection.whamm_span);
 
                     if (injections.length > 0){
                         let highlight_data: highlightCompleteData = LineHighlighterDecoration.get_highlight_data(injections);
