@@ -3,6 +3,7 @@
     // We assume that the wat content doesn't fold expressions
 ///
 
+import { FSMSectionReorder } from "./fsm_section_order";
 import { InjectType, stringToInjectType } from "./types";
 import { FSMHelper, stack_value } from "./utils/fsm_helper";
 
@@ -55,7 +56,10 @@ export class FSM{
      }
 
     constructor(wat: string){
-        this.wat_string = wat;
+        let section_reorder = new FSMSectionReorder(wat);
+        section_reorder.run();
+        this.wat_string = section_reorder.new_wat;
+
         this.current_index = this.func_id = 0;
         this.current_line_number = 1;
         this.stack = [];

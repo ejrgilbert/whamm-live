@@ -22,7 +22,7 @@ export class FSMSectionReorder{
     // state related variables
     current_index: number;
     wat_string: string;
-    new_wat: string | undefined;
+    new_wat!: string;
 
     private current_state: State;
     private wat_sections: Record<string, string[]>;

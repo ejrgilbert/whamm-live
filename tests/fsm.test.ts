@@ -46,8 +46,7 @@ describe('testing FSM errors', () => {
   for (let key of Object.keys(config)) {
       if (config[key]["error"])
         test('test for error', () => {
-            let instance = load_instance(key, config);
-            expect(()=>{instance.run()}).toThrow(Error);
+            expect(() =>{load_instance(key, config)}).toThrow(Error);
         });
 }
 });
