@@ -82,7 +82,7 @@ export class ModelHelper{
             // no change in fsm funcID values since no import functions injected
             if (number_of_imported_functions === 0) return fsm;
 
-            let injected_fsm = new FSM (fsm.wat_string);
+            let injected_fsm = new FSM (fsm.wat_string, false);
             injected_fsm.section_to_line_mapping = fsm.section_to_line_mapping;
 
             injected_fsm.probe_mapping = new Map();

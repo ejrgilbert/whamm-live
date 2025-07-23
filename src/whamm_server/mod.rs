@@ -72,56 +72,59 @@ pub fn run(
     app_name: String,
     script_path: String,
 ) -> Result<Vec<InjectionPair>, ErrorWrapper> {
-    return APP_TO_BYTES.with(|app_to_bytes| {
+    // get the wasm bytes
+    let bytes = APP_TO_BYTES.with(|app_to_bytes| {
         let app_to_bytes = app_to_bytes.borrow_mut();
         let bytes = app_to_bytes.get(&app_name).unwrap();
         let bytes = &*bytes.borrow();
+        bytes.clone()
+    });
 
-        return APP_TO_SCRIPT.with(|app_to_script| {
+    // update the whamm script
+    APP_TO_SCRIPT.with(|app_to_script| {
             let mut app_to_script = app_to_script.borrow_mut();
             app_to_script.insert(app_name, new_script.clone());
-                
-                // Call the WHAMM api
-                let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
-                    (*bytes).clone(),
-                    script_path,
-                    new_script,
-                    Vec::new(),
-                );
-                // let response:  Result<HashMap<InjectType, Vec<Injection>>, Vec<WhammError>> = Ok(HashMap::new());
-
-                match response{
-                    // handle valid response
-                    Ok(ok_response) => {
-
-                        let mut api_response :Vec<InjectionPair>= Vec::new();
-                        // Go through all the different inject types
-                        // and convert their vec of injections to the wit supported type
-                        for (key, values) in ok_response{
-                            let mut injection_pair = InjectionPair{
-                                injection_type: key.to_string(),
-                                injection_value: Vec::new()
-                            };
-                            for value in values{
-                                injection_pair.injection_value.push(WhammInjection::from(value));
-                            }
-                            api_response.push(injection_pair);
-                        }
-                        Result::Ok(api_response)
-
-                    },
-
-                    // handle error response
-                    Err(whamm_errors) =>{
-                        let mut api_response = Vec::new();
-                        for whamm_error in whamm_errors{
-                            api_response.push(WhammApiError::from(whamm_error));
-                        }
-                        Result::Err(ErrorWrapper::ApiError(api_response))
-                    }
-                }
-        });
     });
+                
+    // Call the WHAMM api
+    let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
+        bytes,
+        script_path,
+        new_script,
+        Vec::new(),
+    );
+    // let response:  Result<HashMap<InjectType, Vec<Injection>>, Vec<WhammError>> = Ok(HashMap::new());
+
+    match response{
+        // handle valid response
+        Ok(ok_response) => {
+
+            let mut api_response :Vec<InjectionPair>= Vec::new();
+            // Go through all the different inject types
+            // and convert their vec of injections to the wit supported type
+            for (key, values) in ok_response{
+                let mut injection_pair = InjectionPair{
+                    injection_type: key.to_string(),
+                    injection_value: Vec::new()
+                };
+                for value in values{
+                    injection_pair.injection_value.push(WhammInjection::from(value));
+                }
+                api_response.push(injection_pair);
+            }
+            Result::Ok(api_response)
+
+        },
+
+        // handle error response
+        Err(whamm_errors) =>{
+            let mut api_response = Vec::new();
+            for whamm_error in whamm_errors{
+                api_response.push(WhammApiError::from(whamm_error));
+            }
+            Result::Err(ErrorWrapper::ApiError(api_response))
+        }
+    }
 }
 
 impl From<wat::Error> for ErrorCode {

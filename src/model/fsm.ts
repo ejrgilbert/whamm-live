@@ -55,10 +55,14 @@ export class FSM{
         [State.null_state]: ()=>{},
      }
 
-    constructor(wat: string){
-        let section_reorder = new FSMSectionReorder(wat);
-        section_reorder.run();
-        this.wat_string = section_reorder.new_wat;
+    constructor(wat: string, reorder: boolean=true){
+        if (reorder){
+            let section_reorder = new FSMSectionReorder(wat);
+            section_reorder.run();
+            this.wat_string = section_reorder.new_wat;
+        } else
+            this.wat_string = wat;
+
 
         this.current_index = this.func_id = 0;
         this.current_line_number = 1;
