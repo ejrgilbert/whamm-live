@@ -1,9 +1,10 @@
 import {FSM } from '../src/model/fsm';
 import {FSMHelper} from '../src/model/utils/fsm_helper';
 
+const original_wat = '\t\r \n(module\n\t(memory 1)\n\t(func $f1 (param $p1 i32))\n\t(data (i32.const 0) "hello" )\n)'
 // DO NOT CHANGE THE CONTENTS OF THE STRING UNLESS YOU KNOW WHAT YOU ARE DOING
 function create_fsm_instance(){
-  return new FSM('\t\r \n(module\n\t(memory 1)\n\t(func $f1 (param $p1 i32))\n\t(data (i32.const 0) "hello" )\n)')
+  return new FSM(original_wat);
 }
 
 describe('test FSMHelper char consumption methods', () => {
@@ -19,20 +20,20 @@ describe('test FSMHelper char consumption methods', () => {
   test('consume_empty_spaces test', () => {
     instance = create_fsm_instance();
     FSMHelper.consume_empty_spaces(instance);
-    expect(instance).toMatchObject({current_index : 4, current_line_number: 2});
+    expect(instance).toMatchObject({current_index : 0, current_line_number: 1});
   });
 
   test('get_char test', () => {
     instance = create_fsm_instance();
-    expect(FSMHelper.get_char(instance)).toEqual('\t');
+    expect(FSMHelper.get_char(instance)).toEqual('(');
     instance.current_index++;
-    expect(FSMHelper.get_char(instance)).toEqual('\r');
+    expect(FSMHelper.get_char(instance)).toEqual('m');
   });
 
   test('consume_char test', () => {
     instance = create_fsm_instance();
     let char = FSMHelper.consume_char(instance);
-    expect(char).toEqual('\t');
+    expect(char).toEqual('(');
     expect(instance).toMatchObject({current_index : 1});
   });
 
@@ -44,23 +45,25 @@ describe('test FSMHelper char consumption methods', () => {
 
   test('consume_until_string_ends test', () => {
     instance = create_fsm_instance();
-    instance.current_index = 74;
+    instance.current_index = instance.wat_string.indexOf('"');
+    let start_index = instance.current_index;
+
     FSMHelper.consume_until_string_ends('"', instance);
-    expect(instance.current_index).toBe(79);
+    expect(instance.current_index).toBe(instance.wat_string.indexOf('"', start_index));
   });
 
   test('consume_until_closing_parenthesis test', () => {
     instance = create_fsm_instance();
-    instance.current_index = 54;
+    instance.current_index = instance.wat_string.indexOf('(');
     FSMHelper.consume_until_closing_parenthesis(instance);
-    expect(instance.current_index).toBe(81);
+    expect(instance.current_index).toBe(instance.wat_string.length);
   });
 
   test('consume_until_whitespace test', () => {
     instance = create_fsm_instance();
-    instance.current_index = 4;
+    instance.current_index = 0;
     FSMHelper.consume_until_whitespace(instance);
-    expect(instance).toMatchObject({current_line_number: 1, current_index: 11})
+    expect(instance).toMatchObject({current_line_number: 1, current_index: 7})
   });
 
 });

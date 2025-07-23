@@ -28,9 +28,6 @@ export enum InjectType{
 }
 
 export const stringToInjectType: Record<string, InjectType> = {
-    // Lined up in order in terms of sections as well 
-    // until the last 2(Local and Probe)
-    //  which would depend on their function IDs
     'type': InjectType.Type,
     'import': InjectType.Import,
     'table': InjectType.Table,
@@ -43,6 +40,9 @@ export const stringToInjectType: Record<string, InjectType> = {
     'data': InjectType.Data,
     'module': InjectType.Module,
 }
+
+export enum sectionNamesInOrder {type = "type", import = "import", table = "table", memory = "memory", tag = "tag", global  = "global",
+                                    export = "export", start = "start", elem = "elem", func = "func", data = "data", custom = "custom"}
 
 // Types
 export type ScriptLoc = {

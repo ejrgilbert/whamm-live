@@ -1,0 +1,10 @@
+[config]
+# paths are relative to the 
+ordered_wat_dir="wat"
+unordered_wat_dir="unordered_wat"
+
+[compare_files]
+files=[
+    "add.wat", "app.wat", "escaped_string.wat", "everything.wat", "fold_expression.wat",
+    "functions.wat", "hello.wat", "imports.wat", "producers.wat", "something.wat", "start.wat"
+]
