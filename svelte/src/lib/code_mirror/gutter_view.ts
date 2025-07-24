@@ -5,11 +5,14 @@
  * Followed this guide: https://codemirror.net/examples/gutter/
  */
 
-import {EditorView, GutterMarker, gutter} from "@codemirror/view"
+import {EditorView, GutterMarker, gutter, keymap} from "@codemirror/view"
 import {type valid_model} from "../api_response.svelte"
-import {StateField, StateEffect, RangeSetBuilder} from "@codemirror/state"
-import type { inj_circle_highlights_info, injection_circle } from "../highlight_data.svelte";
+import {StateField, StateEffect, RangeSetBuilder, EditorState} from "@codemirror/state"
+import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../highlight_data.svelte";
 import { handle_circle_click } from "./code_click_handler";
+import { basicSetup } from "codemirror";
+import { wast } from "@codemirror/lang-wast";
+import { search, searchKeymap } from "@codemirror/search";
 
 // `injectionCircleEffect` contains all of my dangling injections
 export const injectionCircleEffect = StateEffect.define<Record<number, injection_circle[]>>();
@@ -54,24 +57,20 @@ class injectionCircleMarker extends GutterMarker {
     // container to contain the entire div for the line
     let container = this.load_container();
     for (const circle of this.circles) {
+      // each div for each circle
+        let circle_element = this.load_circle_element(circle);
+        let hidden_body_element = this.load_hidden_body_element(circle.body);
+        container.appendChild(hidden_body_element);
 
-          // each div for each circle
-            let circle_element = this.load_circle_element(circle);
-            let hidden_body_element = this.load_hidden_body_element(circle.body);
-            circle_element.appendChild(hidden_body_element);
-
-          // add event listenet to show the hidden div on hover
-            circle_element.addEventListener("mouseenter", ()=>{
-              hidden_body_element.style.display = "block";
-          });
-            circle_element.addEventListener("mouseleave", ()=>{
-              hidden_body_element.style.display = "none";
-          });
-            circle_element.addEventListener("click", ()=>{
-              handle_circle_click(circle.injection_id);
-            })
-      container.appendChild(circle_element);
-        }
+      // add event listenet to show the hidden div on hover
+        circle_element.addEventListener("mouseenter", ()=>{
+          hidden_body_element.style.display = "block";
+      });
+        circle_element.addEventListener("click", ()=>{
+          handle_circle_click(circle.injection_id);
+        })
+        container.appendChild(circle_element);
+      }
 
       return container
 	}
@@ -97,15 +96,36 @@ class injectionCircleMarker extends GutterMarker {
   private load_hidden_body_element(body: string): HTMLDivElement{
       // div to show on hover which contains the body of the injection
 			const hidden_body = document.createElement("div");
+
+      // Close button div
+      let close_button = document.createElement("div");
+      close_button.innerHTML = "❌"
+      close_button.style.cursor = "pointer";
+      close_button.style.display = "inline-block";
+      close_button.addEventListener("click", ()=>{hidden_body.style.display="none"});
+      hidden_body.appendChild(close_button);
+
       hidden_body.style.display = "none";
       hidden_body.style.position = "absolute";
       hidden_body.style.background = "beige";
-      hidden_body.style.fontSize = "smaller";
       hidden_body.style.border= "1px solid";
       hidden_body.style.width= "max-content";
       hidden_body.style.padding= "10%";
-      hidden_body.style.marginTop= "25%";
-      hidden_body.innerHTML = body;
+      hidden_body.style.marginTop= "20%";
+
+      // editor view 
+      new EditorView({
+          parent: hidden_body,
+          doc: body,
+          extensions: [basicSetup, wast(), 
+                      highlight_style,
+                      EditorView.editable.of(false),
+                      EditorView.contentAttributes.of({tabindex: "0"}),
+                      EditorState.readOnly.of(true),
+                      search({top: false}),
+                      keymap.of(searchKeymap),
+          ]
+      })
       return hidden_body
   }
 
