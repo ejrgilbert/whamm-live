@@ -50,28 +50,20 @@ export class SvelteModel{
         for (let injection of webview.model.whamm_live_response.other_injections){
             for (let start_line=injection.wat_range.l1; start_line <= injection.wat_range.l2; start_line++){
                 let injection_circle_array = wat_to_injection_circle[start_line] ?? [];
+                let color: string = "orange";
                 switch(injection.type){
                     case Types.WhammDataType.opProbeType:
-                        {
-                            let body = create_html_content_for_op_body_probes(injection);
-                            injection_circle_array.push(create_default_injection_circle(injection, body, "red"));
-                        }
+                        color="red";
                         break;
-
                     case Types.WhammDataType.localType:
-                        {
-                            let body = create_html_content_for_locals(injection.code);
-                            injection_circle_array.push(create_default_injection_circle(injection, body, "blue"));
-                        }
+                        color="blue";
                         break;
-
                     case Types.WhammDataType.funcProbeType:
-                        {
-                            let body = create_html_content_for_func_probes(injection);
-                            injection_circle_array.push(create_default_injection_circle(injection, body, "green"));
-                        }
+                        color = "green";
                         break;
                 }
+                let body = create_html_content(injection);
+                injection_circle_array.push(create_default_injection_circle(injection, body, color));
                 wat_to_injection_circle[start_line] = injection_circle_array;
         }
         }
@@ -98,24 +90,21 @@ function create_default_injection_circle(injection: WhammLiveInjection, body: st
 
 // Helper functions to help create the html content to be displayed on the svelte side for dangling probes
 
-function create_html_content_for_locals(body: string[]): string{
-    let header_div = `<div style="${get_header_style()}"><b>Local Injection</b></div>`;
-    let injections = body.map(html => `<div>${html}</div>`).join("")
-    return header_div + injections;
-}
-
-function create_html_content_for_func_probes(injection: WhammLiveInjection): string{
-    let header_div = `<div style="${get_header_style()}"><span>Func Injection: on function <b><i>${injection.mode}</b></i></span></div>`;
-    let html_body = injection.code.map(html => `<div>${html}</div>`).join("")
-    return header_div + html_body;
-}
-
-function create_html_content_for_op_body_probes(injection: WhammLiveInjection): string{
-    let header_div = `<div style="${get_header_style()}"><span>opcode injection here: mode <b><i>${injection.mode}</b></i></span></div>`;
-    let html_body = injection.code.map(html => `<div>${html}</div>`).join("")
-    return header_div + html_body;
-}
-
-function get_header_style(): string{
-    return 'justify-content: center; display: flex; font-size: medium; margin-bottom: 2%;'
+function create_html_content(injection: WhammLiveInjection): string{
+    let header_div: string;
+    switch(injection.type){
+        case Types.WhammDataType.localType:
+            header_div = `;; Local Injection\n;; Source: Line ${injection.wat_range.l1}-${injection.wat_range.l2}\n(\n`;
+            break;
+        case Types.WhammDataType.opProbeType:
+            header_div = `;; opcode injection\n;; mode ${injection.mode}\n;; Source: Line ${injection.wat_range.l1}-${injection.wat_range.l2}\n(\n`;
+            break;
+        case Types.WhammDataType.funcProbeType:
+            header_div = `;; Func Injection\n;; mode: function ${injection.mode}\n;; Source: Line ${injection.wat_range.l1}-${injection.wat_range.l2}\n(\n`;
+            break;
+        default:
+            throw Error("Unsupported injection type");
+    }
+    let injections = injection.code.join("");
+    return header_div + injections + ")";
 }

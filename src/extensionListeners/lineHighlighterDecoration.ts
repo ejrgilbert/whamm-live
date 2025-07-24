@@ -13,9 +13,9 @@ export class LineHighlighterDecoration{
     static decorations: vscode.TextEditorDecorationType[] = [];
     static colors: string[] = [
         "rgba(76, 175, 80, 1)",
+        "rgba(142, 36, 170, 1)",
         "rgba(244, 67, 54, 1)",
         "rgba(255, 235, 59, 1)",
-        "rgba(142, 36, 170, 1)",
         "rgba(255, 152, 0, 1)",
         "rgba(121, 85, 72, 1)",
         "rgba(233, 30, 99, 1)",
@@ -25,9 +25,9 @@ export class LineHighlighterDecoration{
 
     static highlightColors: string []= [
             "rgba(76, 175, 80, 0.2)",    // soft green
+            "rgba(142, 36, 170, 0.3)", // soft violet
             "rgba(244, 67, 54, 0.4)",    // soft red
             "rgba(255, 235, 59, 0.2)",   // soft yellow
-            "rgba(142, 36, 170, 0.3)", // soft violet
             "rgba(255, 152, 0, 0.3)",    // soft orange
             "rgba(121, 85, 72, 0.4)",     // soft brown
             "rgba(233, 30, 99, 0.3)",     // rose pink

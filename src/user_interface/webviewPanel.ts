@@ -141,9 +141,11 @@ export class WhammWebviewPanel{
                     case 'wat-circle-highlight':
                         LineHighlighterDecoration.highlight_whamm_live_injection(this, message.id, true);
                         break;
+                    case 'open-text-document':
+                        ExtensionContext.openWatInNewColumn(message.contents);
+                        break;
                 }
             }
         )
     }
-
 }

@@ -11,7 +11,7 @@
     import { EditorState} from "@codemirror/state";
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
-    import { highlight_data , reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
+    import { highlight_data , highlight_style, reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
   import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
   import  { code_click_handler } from './lib/code_mirror/code_click_handler';
 
@@ -39,16 +39,6 @@
                             else {
                                 api_response.original_wat = message.wat_content;
 
-                                const highlight_style =  syntaxHighlighting(HighlightStyle.define([
-                                    { tag: t.keyword, color: '#317CD6' },
-                                    { tag: t.typeName, color: '#317CD6' },
-                                    { tag: t.number, color: '#B5CE9B' },
-                                    { tag: t.string, color: '#CE834D' },
-                                    { tag: t.variableName, color: '#53B9FE' },
-                                    { tag: t.lineComment, color: '#549955' },
-                                    { tag: t.blockComment, color: '#549955' },
-                                    { tag: t.paren, color: '#DA70CB' },
-                                ]))                       
                                 //Create codemirror code block for the parsed wat content
                                 view = new EditorView({
                                     parent: document.getElementById("wasm-webview-code-editor") || document.body,

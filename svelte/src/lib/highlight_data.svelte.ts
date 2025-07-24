@@ -1,3 +1,6 @@
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { tags as t } from "@lezer/highlight";
+
 // Wat line to color to highlight with
 export type line_highlights_info = Record<number, string>;
 // Injection ID to color to highlight with
@@ -35,3 +38,14 @@ export function update_highlight_data(line_data: line_highlights_info, circle_da
     highlight_data.circles = circle_data;
     highlight_data.all_wat_lines = all_wat_lines;
 }
+
+export const highlight_style =  syntaxHighlighting(HighlightStyle.define([
+    { tag: t.keyword, color: '#317CD6' },
+    { tag: t.typeName, color: '#317CD6' },
+    { tag: t.number, color: '#B5CE9B' },
+    { tag: t.string, color: '#CE834D' },
+    { tag: t.variableName, color: '#53B9FE' },
+    { tag: t.lineComment, color: '#549955' },
+    { tag: t.blockComment, color: '#549955' },
+    { tag: t.paren, color: '#DA70CB' },
+]))                       
