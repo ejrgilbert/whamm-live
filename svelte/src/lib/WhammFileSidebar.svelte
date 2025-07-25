@@ -1,6 +1,7 @@
 <script lang="ts">
     import {fade} from 'svelte/transition';
     import WasmFileButton from './WasmFileButton.svelte'
+  import RestartExtension from './RestartExtension.svelte';
 
     // Reactive variables
     let whamm_file = $state(null);
@@ -24,6 +25,7 @@
 
 </script>
 
+<RestartExtension />
 <button type='button' onclick={openWhammFile}>Open Whamm file</button>
 
 {#if whamm_file }
@@ -31,4 +33,3 @@
 
 <WasmFileButton />
 {/if}
-

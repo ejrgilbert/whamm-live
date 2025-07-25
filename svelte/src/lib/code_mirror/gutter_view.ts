@@ -112,7 +112,7 @@ class injectionCircleMarker extends GutterMarker {
       hidden_body.appendChild(close_button);
 
       set_element_style(hidden_body, {display : "none", position : "absolute", background : "beige", border: "1px solid",
-                                        width: "max-content", padding: "10%", "margin-top": "20%"});
+                                        width: "max-content", padding: "10%", "margin-top": "30%"});
 
       // editor view 
       new EditorView({

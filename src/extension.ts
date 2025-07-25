@@ -21,10 +21,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	// handle UI for webview with "live-whamm-webview" id
 	SidebarProvider.createAndRegisterWebViewProvider(context, "live-whamm-webview");
 
-	// The channel for printing the result.
-	const channel = vscode.window.createOutputChannel('WhammClient');
-	context.subscriptions.push(channel);
-
 	// The channel for printing the log.
 	const log = vscode.window.createOutputChannel('WhammServer - Log', { log: true });
 	context.subscriptions.push(log);

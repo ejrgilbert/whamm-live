@@ -153,4 +153,30 @@ export class Helper_sidebar_provider{
                 values: values
         });
     }
+
+    static async restart_extension(){
+        let soft_reset_message = "Soft reset: Restart the extension";
+        let hard_reset_message = "Hard reset: Restart the window";
+        const choice = await vscode.window.showWarningMessage(
+            "Restart the extension?",
+            { modal: true },
+            soft_reset_message, hard_reset_message
+        );
+
+        if (choice){
+            switch (choice){
+                case soft_reset_message:
+                    {
+                        for (let webview of WhammWebviewPanel.webviews){
+                            webview.webviewPanel.dispose();
+                            Helper_sidebar_provider.helper_reset_sidebar_webview_state();
+                        }
+                    }
+                    break;
+                case hard_reset_message:
+                    vscode.commands.executeCommand("workbench.action.reloadWindow");
+                    break;
+            }
+        }
+    }
 }
