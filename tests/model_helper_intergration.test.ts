@@ -40,7 +40,7 @@ describe('testing Model Helper\'s static `create_whamm_live_injection_instances`
         /*
          Check for injected FSM funcID values
         */
-        let injected_fsm = ModelHelper.update_fsm_funcIDs(fsm, injection_mappings);
+        let injected_fsm = ModelHelper.update_injected_fsm(fsm, injection_mappings);
         let import_functions_injected = config[key]["number_of_import_functions_injected"];
         type FSMKey = keyof FSM;
 

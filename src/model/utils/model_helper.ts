@@ -70,7 +70,7 @@ export class ModelHelper{
 
     // This function's job is to update the funcID values for the different mappings like
     // the local mappings and func mappings since the funcID value changes after an injection
-    static update_fsm_funcIDs(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
+    static update_injected_fsm(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): FSM{
         let import_injections = whamm_live_mappings.get(Types.WhammDataType[Types.WhammDataType.importType]);
 
         if (import_injections){
@@ -88,6 +88,7 @@ export class ModelHelper{
             injected_fsm.probe_mapping = new Map();
             injected_fsm.local_mapping = new Map();
             injected_fsm.func_mapping = new Map();
+            injected_fsm.number_of_func_imports = fsm.number_of_func_imports;
 
             for (let old_funcID of fsm.func_mapping.keys()){
                 let new_funcID = old_funcID + number_of_imported_functions;
@@ -113,6 +114,7 @@ export class ModelHelper{
     static create_whamm_live_injection_instances(fsm: FSM, whamm_live_mappings: Map<string, Types.WhammInjection[]>): WhammLiveResponse{
         // all the other injections except `funcProbes`, `OpBodyProbes`, `Locals` should update the number_of_lines_injected since they are literally injecting new wat content
         var number_of_lines_injected = 0;
+        var number_of_func_imports_injected = 0;
         var injection_id = 0;
         var number_of_func_lines_and_data_sections_injected = 0;
         var whamm_live_injections_to_inject : WhammLiveInjection[]= [];
@@ -160,10 +162,13 @@ export class ModelHelper{
                                         id_to_injection_mapping
                                     )
 
+                                    // add the funcID value if the import is a function
+                                    let id = (/^func/i.test(import_injection.typeRef)) ?
+                                            `(;${fsm.number_of_func_imports + (number_of_func_imports_injected++)};)` : "";
+
                                     // add the new whamm live instance and add it's relevant code
-                                    whamm_live_instance.code.push(
-                                            `\t(import "${import_injection.module}" "${import_injection.name}" (${import_injection.typeRef}))`
-                                    )
+                                    let wat_code = `\t(import "${import_injection.module}" "${import_injection.name}" (${import_injection.typeRef.toLowerCase()}${id}))`;
+                                    whamm_live_instance.code.push(wat_code);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
@@ -291,10 +296,11 @@ export class ModelHelper{
 
                                     // construct the function body and update the # of lines injected and it's wat range accordingly
                                     const name = func_injection.fname ? `$${func_injection.fname}`: `$func${func_injection.id}`;
+                                    const id = ` (;${func_injection.id};)`;
                                     const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
                                     const result = func_injection.sig[1].length ? ` (result ${func_injection.sig[1].join(" ")})` : "";
 
-                                    whamm_live_instance.code.push(`\t(func ${name}${param}${result}`);
+                                    whamm_live_instance.code.push(`\t(func ${name}${id}${param}${result}`);
                                     if (func_injection.locals.length >0){ 
                                         whamm_live_instance.code.push(`\t\t(local ${func_injection.locals.join(" ")})`);
                                         local_start_line++;
