@@ -1,7 +1,7 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
 import { APIModel } from "../model";
-import { InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from "../types";
+import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from "../types";
 import { Cell } from "./cell";
 
 export class ModelHelper{
@@ -441,7 +441,7 @@ export class ModelHelper{
         // We need to follow the section ordering because if we do
         // then the injected wat line range is fixed and won't need to be updated until the next API call
         return {
-            lines_injected: number_of_lines_injected,
+            lines_injected: { total_lines_injected: number_of_lines_injected, number_of_func_lines_and_data_sections_injected: number_of_func_lines_and_data_sections_injected},
             injecting_injections: whamm_live_injections_to_inject,
             other_injections: whamm_live_injections_to_not_inject,
             injected_funcid_wat_map: injected_func_id_to_wat_mapping,
@@ -620,8 +620,9 @@ export class ModelHelper{
 
     // error handlers
     static handle_error_response(instance: APIModel, errors: Types.WhammApiError[]){
+        let lines_injected: injected_lines_info = {total_lines_injected:0, number_of_func_lines_and_data_sections_injected: 0};
         instance.whamm_live_response = {
-            lines_injected:0,
+            lines_injected: lines_injected,
             injecting_injections:[],
             other_injections: [],
             injected_funcid_wat_map: new Map(),
@@ -632,6 +633,23 @@ export class ModelHelper{
         instance.wat_to_whamm_mapping.clear();
         instance.injected_wat_content = instance.valid_wat_content;
         instance.jagged_array = [];
+    }
+
+    // Replaces the old funcID values with the new ones in the injected wat
+    static update_original_func_id_values(injected_wat: string[], fsm: FSM, injected_lines_info: injected_lines_info){
+        let func_regex = /^\s*\(\s*func.*(\(;(\d+);\))?/;
+        let id_regex = /\(;(\d+);\)/;
+
+        for (const [funcID, wat_line] of fsm.func_mapping.entries()){
+            let actual_wat_line_index = wat_line+injected_lines_info.total_lines_injected-injected_lines_info.number_of_func_lines_and_data_sections_injected -1;
+            if (func_regex.test(injected_wat[actual_wat_line_index])){
+
+                let matches = injected_wat[actual_wat_line_index].match(func_regex);
+                if (matches == null) throw new Error("Inject Wat error: A func body should have been present here");
+                let id = parseInt(matches[2]);
+                injected_wat[actual_wat_line_index] = injected_wat[actual_wat_line_index].replace(id_regex, `(;${funcID};)`);
+            }
+        }
     }
 
 }

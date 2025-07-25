@@ -121,7 +121,8 @@ export class APIModel{
 
                         // update the injected wat content
                         {
-                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_response.injecting_injections, this.whamm_live_response.lines_injected);
+                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_response.injecting_injections, this.whamm_live_response.lines_injected.total_lines_injected);
+                            ModelHelper.update_original_func_id_values(injected_wat_content, this.injected_fsm_mappings, this.whamm_live_response.lines_injected);
                             this.injected_wat_content = injected_wat_content.join('\n');
                             this.wat_to_whamm_mapping = wat_to_whamm_mapping;
                         }

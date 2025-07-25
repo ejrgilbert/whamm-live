@@ -100,15 +100,19 @@ export type InjectionFuncValue = {
     probe:[number, number]
     func: number
 }
+export type injected_lines_info={
+    total_lines_injected: number,
+    number_of_func_lines_and_data_sections_injected: number
+}
 
 export type WhammLiveResponse = {
-    lines_injected: number;
+    lines_injected: injected_lines_info;
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
     id_to_injection: Map<number, WhammLiveInjection>;
     whamm_errors: Types.WhammApiError[],
-    is_err: boolean
+    is_err: boolean,
 }
 
 export const WhammDataTypes = [Types.WhammDataType.typeType, Types.WhammDataType.importType, Types.WhammDataType.tableType, Types.WhammDataType.memoryType, Types.WhammDataType.globalType, Types.WhammDataType.exportType,
