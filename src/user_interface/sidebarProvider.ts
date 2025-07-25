@@ -106,23 +106,26 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
 
         // Setup listeners
         webviewView.webview.onDidReceiveMessage(
-        (message) =>{
-             switch (message.command) {
-            case 'open-whamm-file':
-                
-                // Will open the file dialog, if user selects a file, opens the file
-                // and saves the file info in workspace state with the key 'whamm-file'
-                // returns true if user selects a whamm file, false otherwise
-                // does nothing otherwise
-                const success = Helper_sidebar_provider.helper_open_whamm_file();
-                if (!success) vscode.window.showErrorMessage("Could not open .mm file");
-                return;
-            case 'open-wat/wasm-file':{
-                const success = Helper_sidebar_provider.helper_open_webview(message.wasm_wizard_engine);
-                if (!success) vscode.window.showErrorMessage("Could not open webview");
-            }
-                return;
-          }},
+        async (message) =>{
+            switch (message.command) {
+                case 'open-whamm-file':
+                    
+                    // Will open the file dialog, if user selects a file, opens the file
+                    // and saves the file info in workspace state with the key 'whamm-file'
+                    // returns true if user selects a whamm file, false otherwise
+                    // does nothing otherwise
+                    const success = Helper_sidebar_provider.helper_open_whamm_file();
+                    if (!success) vscode.window.showErrorMessage("Could not open .mm file");
+                    return;
+                case 'open-wat/wasm-file':{
+                    const success = Helper_sidebar_provider.helper_open_webview(message.wasm_wizard_engine);
+                    if (!success) vscode.window.showErrorMessage("Could not open webview");
+                    }
+                    return;
+                case "restart-live-whamm":
+                    await Helper_sidebar_provider.restart_extension();
+                    return;
+            }},
           undefined,
           this.context.subscriptions,
         );
