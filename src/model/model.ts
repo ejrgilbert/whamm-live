@@ -116,12 +116,13 @@ export class APIModel{
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){
                         
-                        this.injected_fsm_mappings = ModelHelper.update_fsm_funcIDs(this.fsm_mappings, whamm_live_mappings);
+                        this.injected_fsm_mappings = ModelHelper.update_injected_fsm(this.fsm_mappings, whamm_live_mappings);
                         this.whamm_live_response = ModelHelper.create_whamm_live_injection_instances(this.injected_fsm_mappings, whamm_live_mappings)
 
                         // update the injected wat content
                         {
-                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_response.injecting_injections, this.whamm_live_response.lines_injected);
+                            let [injected_wat_content, wat_to_whamm_mapping] = ModelHelper.inject_wat(this.valid_wat_content, this.whamm_live_response.injecting_injections, this.whamm_live_response.lines_injected.total_lines_injected);
+                            ModelHelper.update_original_func_id_values(injected_wat_content, this.injected_fsm_mappings, this.whamm_live_response.lines_injected);
                             this.injected_wat_content = injected_wat_content.join('\n');
                             this.wat_to_whamm_mapping = wat_to_whamm_mapping;
                         }

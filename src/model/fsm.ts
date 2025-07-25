@@ -29,6 +29,7 @@ export class FSM{
     current_index: number;
     wat_string: string;
     func_id : number;
+    number_of_func_imports: number;
     current_line_number : number;
 
     // different types of mappings
@@ -64,7 +65,7 @@ export class FSM{
             this.wat_string = wat;
 
 
-        this.current_index = this.func_id = 0;
+        this.number_of_func_imports = this.current_index = this.func_id = 0;
         this.current_line_number = 1;
         this.stack = [];
         this.popped_value = undefined;
@@ -189,6 +190,7 @@ export class FSM{
             switch (FSMHelper.get_word(instance)){
                 case 'func':
                     instance.func_id++;
+                    instance.number_of_func_imports++;
                 // fall through
                 default:
                     {
