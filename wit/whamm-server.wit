@@ -193,6 +193,7 @@ interface types {
 world whamm-server {
 	use types.{ options, error-code, injection-pair, error-wrapper};
 	import log: func(msg: string);
+	import store-time: func();
 
 	export setup: func(app-name: string, app-bytes: list<u8>, script: string, opts: options) -> result<string, error-code>;
 	export end: func(app-name: string);

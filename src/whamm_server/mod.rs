@@ -1,4 +1,4 @@
-use crate::log;
+use crate::{log, store_time};
 use crate::vscode::example::types::{ErrorCode, InjectionPair, Options, WhammInjection, WhammApiError, ErrorWrapper};
 use std::{cell::RefCell, collections::HashMap};
 
@@ -86,6 +86,7 @@ pub fn run(
             app_to_script.insert(app_name, new_script.clone());
     });
                 
+    store_time();
     // Call the WHAMM api
     let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
         bytes,
@@ -93,12 +94,12 @@ pub fn run(
         new_script,
         Vec::new(),
     );
+    store_time();
     // let response:  Result<HashMap<InjectType, Vec<Injection>>, Vec<WhammError>> = Ok(HashMap::new());
 
     match response{
         // handle valid response
         Ok(ok_response) => {
-
             let mut api_response :Vec<InjectionPair>= Vec::new();
             // Go through all the different inject types
             // and convert their vec of injections to the wit supported type

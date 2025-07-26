@@ -30,10 +30,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	const bits = await vscode.workspace.fs.readFile(filename);
 	const module = await WebAssembly.compile(bits);
 
+	let times: number[]= [];
 	// The implementation of the log function that is called from WASM
 	const service: whammServer.Imports = {
 		log: (msg: string) => {
 			log.info(msg);
+		},
+		storeTime() {
+			times.push(Date.now());
+			if (times.length == 1){
+				console.log(`Whamm api called at: ${new Date(times[0])}`);
+			} else{
+				console.log(`Whamm api call finished at: ${new Date(times[1])}`);
+				times = [];
+			}
 		}
 	};
 

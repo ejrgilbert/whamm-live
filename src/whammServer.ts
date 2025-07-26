@@ -360,6 +360,7 @@ export namespace whammServer {
 	export const ErrorWrapper = Types.ErrorWrapper;
 	export type Imports = {
 		log: (msg: string) => void;
+		storeTime: () => void;
 	};
 	export namespace Imports {
 		export type Promisified = $wcm.$imports.Promisify<Imports>;
@@ -564,6 +565,7 @@ export namespace whammServer.$ {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
 		], undefined);
+		export const storeTime = new $wcm.FunctionType<whammServer.Imports['storeTime']>('store-time', [], undefined);
 	}
 	export namespace exports {
 		export const setup = new $wcm.FunctionType<whammServer.Exports['setup']>('setup',[
@@ -601,10 +603,12 @@ export namespace whammServer._ {
 	export const witName = 'whamm-server' as const;
 	export type $Root = {
 		'log': (msg_ptr: i32, msg_len: i32) => void;
+		'store-time': () => void;
 	};
 	export namespace imports {
 		export const functions: Map<string, $wcm.FunctionType> = new Map([
-			['log', $.imports.log]
+			['log', $.imports.log],
+			['storeTime', $.imports.storeTime]
 		]);
 		export const interfaces: Map<string, $wcm.InterfaceType> = new Map<string, $wcm.InterfaceType>([
 			['Types', Types._]
