@@ -12,6 +12,7 @@ const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
 describe('testing Best effort highlighting class', () => {
 
   for (let key of Object.keys(config)) {
+
     if (config[key]["test"] === "unionize_whamm_spans"){
       test('test the `unionize_whamm_spans`', () => {
         let spans: span[] = config[key].spans;
@@ -19,6 +20,18 @@ describe('testing Best effort highlighting class', () => {
         expect(JSON.stringify(span)).toBe(
           JSON.stringify(config[key]["expected"])
         );
+      });
+
+    } else if (config[key]["test"] === "unionize_whamm_spans_error"){
+      test('test the `unionize_whamm_spans_error`', () => {
+        let spans: span[] = config[key].spans;
+        try {
+          // expect to throw an error
+            BestEffortHighlight.unionize_whamm_spans(spans, ModelHelper.create_jagged_array(config[key]["jagged_array"]));
+            expect(true).toBe(false);
+        } catch (e){
+            expect(e.message.startsWith("Whamm unionize error")).toBe(true);
+        }
       });
     }
   }
