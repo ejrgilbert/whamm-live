@@ -1,0 +1,9 @@
+[error_run_1]
+test="run_error"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+message="Expected whamm span value"
+
+[error_run_2]
+test="run_error"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+message="Expected sorted whamm live injections"

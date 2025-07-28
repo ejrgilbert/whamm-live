@@ -9,6 +9,81 @@ type BestEffortHighlightData = {
 
 export class BestEffortHighlight{
 
+    /**
+     * Perform best effort highlighting
+     * @param sorted_live_injections : Sorted from biggest span size to least span size
+     * @returns {BestEffortHighlightData} The data necessary to highlight the whamm file as well as the wat side
+     */
+    static run(sorted_live_injections: WhammLiveInjection[], jagged_array: jagged_array): BestEffortHighlightData{
+
+        // spansize to color index: Will be necessary for wat side highlighting as every injection in the jagged array cell will have some spansize
+        const span_to_color_index: Record<number,number>= {};
+        // color to whamm_span values for whamm file highlighting
+        const color_index_to_whamm_spans: Record<number,span[]>= {};
+        var color_index = 0;
+
+        let previous_pointer: null | WhammLiveInjection = null;
+        let current_index = 0;
+        while (current_index < sorted_live_injections.length){
+            let current_pointer = sorted_live_injections[current_index];
+            // We expect a value since this injection is in the jagged array
+            if (!current_pointer.whamm_span) throw new Error("Expected whamm span value. Found null");
+
+            let current_span_size = ModelHelper.calculate_span_size(current_pointer.whamm_span, jagged_array)
+            // If this is the first value!
+            if (previous_pointer === null){
+                span_to_color_index[current_span_size] = color_index;
+                let array = color_index_to_whamm_spans[color_index] ?? [];
+                array.push(current_pointer.whamm_span);
+
+            } else{
+                if (!previous_pointer.whamm_span) throw new Error("Expected whamm span value. Found null");
+
+                // exactly same span
+                if (ModelHelper.compare_live_whamm_spans(current_pointer.whamm_span, previous_pointer.whamm_span)){
+                    /**
+                     * @ignore : skip to the next one since we have already handled this span value in the previous iteration
+                     */
+                } else {
+                    let previous_span_size = ModelHelper.calculate_span_size(previous_pointer.whamm_span, jagged_array);
+
+                    // same spansize but not the same span
+                    // in this case, we **extend** the two spans to be part of one big span and do color highlighting based on that
+                    if (current_span_size === previous_span_size){
+                        let array = color_index_to_whamm_spans[color_index] ?? [];
+                        array.push(current_pointer.whamm_span);
+
+                    // Note: Code isn't refactored so that the code is easy to follow
+                    // in this case, we use a new color now since the span is completely inside the previous one which gets higher priority
+                    } else if (current_span_size < previous_span_size){
+                        span_to_color_index[current_span_size] = ++color_index;
+                        let array = color_index_to_whamm_spans[color_index] ?? [];
+                        array.push(current_pointer.whamm_span);
+
+                    } else {
+                        // error! the injections aren't sorted in terms of span size
+                        throw new Error("Expected sorted whamm live injections from biggest span size to least span size");
+                    }
+                }
+            }
+            // Traverse to the next element
+            previous_pointer = current_pointer;
+            current_index++;
+        }
+
+        // unionize the whamm spans
+        const color_index_to_whamm_span: Record<number, span> = {};
+        for (let i=0; i <= color_index; i++){
+            let spans = color_index_to_whamm_spans[i];
+            if (spans?.length > 0){
+                let unionized_span = BestEffortHighlight.unionize_whamm_spans(spans, jagged_array);
+                color_index_to_whamm_span[i] = unionized_span;
+            }
+        }
+
+        return {span_to_color_index: span_to_color_index, color_index_to_span: color_index_to_whamm_span} as BestEffortHighlightData;
+    }
+
     // Record's key is the color index[which is the priority index] and the value is the list of spans to color
     // returns the union of the spans for each color index
     static unionize_whamm_spans(spans: span[], jagged_array: jagged_array): span{
