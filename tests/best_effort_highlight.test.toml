@@ -1,0 +1,36 @@
+[union_1]
+test="unionize_whamm_spans"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=5}},
+    {lc0={l=2, c=1}, lc1={l=3, c=2}}
+]
+expected = {lc0={l=1, c=1}, lc1={l=3, c=2}}
+
+[union_2]
+test="unionize_whamm_spans"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=5}},
+    {lc0={l=2, c=5}, lc1={l=2, c=6}}
+]
+expected = {lc0={l=1, c=1}, lc1={l=2, c=6}}
+
+[union_3]
+test="unionize_whamm_spans"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=1, c=2}},
+    {lc0={l=1, c=1}, lc1={l=1, c=2}}
+]
+expected = {lc0={l=1, c=1}, lc1={l=1, c=2}}
+
+[union_4]
+test="unionize_whamm_spans"
+jagged_array="123\n5\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=3}, lc1={l=2, c=2}},
+    {lc0={l=3, c=1}, lc1={l=3, c=5}},
+    {lc0={l=3, c=5}, lc1={l=4, c=5}},
+]
+expected = {lc0={l=1, c=3}, lc1={l=4, c=5}}

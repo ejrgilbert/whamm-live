@@ -1,8 +1,7 @@
 import { Types } from "../../whammServer";
 import { FSM } from "../fsm";
 import { APIModel } from "../model";
-import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from "../types";
-import { Cell } from "./cell";
+import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, jagged_array, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from "../types";
 
 export class ModelHelper{
 
@@ -57,9 +56,9 @@ export class ModelHelper{
 
     // Build a jagged array [ matrix ] based on the input provided
     // every new line becomes a new row and every character in the line gets its own cell
-    static create_jagged_array(string_contents: string): null[][]{
+    static create_jagged_array(string_contents: string): jagged_array{
         let string_contents_array = string_contents.split('\n');
-        let jagged_array: null[][]= new Array(string_contents_array.length);
+        let jagged_array: jagged_array = new Array(string_contents_array.length);
         for (let i=0; i < jagged_array.length; i++){
             let new_array: null[] = new Array(string_contents_array[i].length).fill(null);
             jagged_array[i] = new_array;
@@ -456,7 +455,7 @@ export class ModelHelper{
             (a.lc1.c == b.lc1.c && a.lc1.l == b.lc1.l)
     }
 
-    static get_line_col_values(whamm_span: span | null, jagged_array: (Cell|null)[][]): [number, number][]{
+    static get_line_col_values(whamm_span: span | null, jagged_array: jagged_array): [number, number][]{
         if (whamm_span == null) return [];
         let line_col_values : [number, number][]= [];
 
@@ -487,7 +486,7 @@ export class ModelHelper{
     }
     // Calculate the whamm span size in columns
     // returns -1 if no whamm span
-    static calculate_span_size(whamm_span: span | null, jagged_array: (Cell|null)[][]) : number{
+    static calculate_span_size(whamm_span: span | null, jagged_array: jagged_array) : number{
         if (whamm_span === null) return -1;
         let line_col_values = ModelHelper.get_line_col_values(whamm_span, jagged_array)
         return line_col_values.length;

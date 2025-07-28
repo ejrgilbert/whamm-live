@@ -3,10 +3,10 @@ import { isExtensionActive } from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel} from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
-import { Node } from '../model/utils/cell';
+import { Cell, Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
-import { highlights_info, inj_circle_highlights_info } from '../model/types';
-import { BestEffortHighlight } from './utils/bestEffortHighlight';
+import { highlights_info, inj_circle_highlights_info, jagged_array, WhammLiveInjection } from '../model/types';
+import { ModelHelper } from '../model/utils/model_helper';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -86,4 +86,26 @@ export function handleCursorChange(){
             webview_index++;
         }
     }
+}
+
+// sort all the whamm live injections based on their whamm span value based on the line, col value
+// sorts from biggest span size to smallest span size
+function sort_all_whamm_live_injections(line: number, col: number): [WhammLiveInjection, jagged_array][] {
+    let sorted_injections: [WhammLiveInjection, (Cell|null)[][]][]= [];
+
+    for (let webview of WhammWebviewPanel.webviews){
+        let cell = webview.model.jagged_array[line][col];
+        if (!cell) continue;
+
+        let current_node : Node | null = cell.head;
+        while (current_node != null){
+            for (let value of current_node.values){
+                sorted_injections.push([value, webview.model.jagged_array]);
+            }
+            current_node = current_node.next;
+        }
+    }
+    return sorted_injections.sort(
+        (b,a)=>ModelHelper.calculate_span_size(a[0].whamm_span, a[1])
+            - ModelHelper.calculate_span_size(b[0].whamm_span, b[1]));
 }
