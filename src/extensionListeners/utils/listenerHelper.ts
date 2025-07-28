@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { WhammWebviewPanel } from '../user_interface/webviewPanel';
-import { ExtensionContext } from '../extensionContext';
+import { WhammWebviewPanel } from '../../user_interface/webviewPanel';
+import { ExtensionContext } from '../../extensionContext';
 
 export function debounce(callback: Function, delay: number){
   let timer: number;

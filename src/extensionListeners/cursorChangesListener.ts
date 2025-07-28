@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { isExtensionActive } from './listenerHelper';
+import { isExtensionActive } from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel} from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Node } from '../model/utils/cell';
-import { LineHighlighterDecoration } from './lineHighlighterDecoration';
+import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
 import { highlights_info, inj_circle_highlights_info } from '../model/types';
+import { BestEffortHighlight } from './utils/bestEffortHighlight';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -70,7 +71,7 @@ export function handleCursorChange(){
                     /**
                      * @todo: Do best effort highlighting:
                      */
-                    LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
+                    if (webview_index === WhammWebviewPanel.number_of_webviews -1) LineHighlighterDecoration.highlight_whamm_file(whamm_span, color);
 
                     // Save wat line and color information for every value in the node
                     LineHighlighterDecoration.store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, current_node.values, color_index);

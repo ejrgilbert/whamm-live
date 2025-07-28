@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import { isExtensionActive, DiagnosticCollection} from './listenerHelper';
+import { isExtensionActive, DiagnosticCollection} from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
 import { WhammWebviewPanel } from '../user_interface/webviewPanel';
 import { Types } from '../whammServer';
 import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
-import { LineHighlighterDecoration } from './lineHighlighterDecoration';
+import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
 
 export function shouldUpdateModel(): boolean{
     let is_extension_active = isExtensionActive();

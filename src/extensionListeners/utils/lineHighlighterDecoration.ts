@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, span, WhammLiveInjection, WhammLiveResponse } from "../model/types";
-import { ExtensionContext } from '../extensionContext';
-import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { type highlights_info, inj_circle_highlights_info, span, WhammLiveInjection, WhammLiveResponse } from "../../model/types";
+import { ExtensionContext } from '../../extensionContext';
+import { WhammWebviewPanel } from '../../user_interface/webviewPanel';
 import { isExtensionActive } from './listenerHelper';
-import { ModelHelper } from '../model/utils/model_helper';
-import { Node } from '../model/utils/cell';
-import { Types } from '../whammServer';
-import { APIModel } from '../model/model';
+import { ModelHelper } from '../../model/utils/model_helper';
+import { Types } from '../../whammServer';
+import { APIModel } from '../../model/model';
 
 export class LineHighlighterDecoration{
 
