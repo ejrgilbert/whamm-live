@@ -122,6 +122,9 @@ describe('testing whamm span', () => {
             expect(recieved_line_col_values).toMatchObject(expected_line_col_values);
             expect(recieved_line_col_values.length).toBe(config[key]["span_size"]);
         });
+      } else if (config[key]["test"] === "can_fit_span"){
+          expect(ModelHelper.can_fit_span(config[key]["parent"], config[key]["child"]))
+            .toBe(config[key]["can_fit"]);
       }
     }
 });

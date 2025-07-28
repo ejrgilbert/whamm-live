@@ -455,6 +455,14 @@ export class ModelHelper{
             (a.lc1.c == b.lc1.c && a.lc1.l == b.lc1.l)
     }
 
+    // check whether the `child` can fit inside of the `parent` span
+    // Note that if parent === child, then this will return true since it can fit!
+    static can_fit_span(parent: span, child: span): boolean{
+        let in_line_bounds = (parent.lc0.l <= child.lc0.l) && (parent.lc1.l >= child.lc1.l)
+        let in_column_bounds = (parent.lc0.c <= child.lc0.c) && (parent.lc1.c >= child.lc1.c)
+        return in_line_bounds && in_column_bounds;
+    }
+
     static get_line_col_values(whamm_span: span | null, jagged_array: jagged_array): [number, number][]{
         if (whamm_span == null) return [];
         let line_col_values : [number, number][]= [];
