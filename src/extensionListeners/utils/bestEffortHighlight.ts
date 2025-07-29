@@ -4,7 +4,7 @@ import { ModelHelper } from "../../model/utils/model_helper";
 type BestEffortHighlightData = {
     // Span size to color mapping
     span_to_color_index: Record<number, number>;
-    color_index_to_span: Record<number, span>;
+    color_index_to_span: Record<number, [span, number]>;
 }
 
 export class BestEffortHighlight{
@@ -80,12 +80,12 @@ export class BestEffortHighlight{
         }
 
         // unionize the whamm spans
-        const color_index_to_whamm_span: Record<number, span> = {};
+        const color_index_to_whamm_span: Record<number, [span, number]> = {};
         for (let i=0; i <= color_index; i++){
             let spans = color_index_to_whamm_spans[i];
             if (spans?.length > 0){
                 let unionized_span = BestEffortHighlight.unionize_whamm_spans(spans, jagged_array);
-                color_index_to_whamm_span[i] = unionized_span;
+                color_index_to_whamm_span[i] = [unionized_span, ModelHelper.calculate_span_size(unionized_span, jagged_array)];
             }
         }
         return {span_to_color_index: span_to_color_index, color_index_to_span: color_index_to_whamm_span} as BestEffortHighlightData;

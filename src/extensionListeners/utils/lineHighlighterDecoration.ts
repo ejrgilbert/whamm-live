@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, span, WhammLiveInjection, WhammLiveResponse } from "../../model/types";
+import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponse } from "../../model/types";
 import { ExtensionContext } from '../../extensionContext';
 import { WhammWebviewPanel } from '../../user_interface/webviewPanel';
 import { isExtensionActive } from './listenerHelper';
@@ -34,7 +34,24 @@ export class LineHighlighterDecoration{
             "rgba(0, 150, 136, 0.3)",     // teal-green
     ]
 
-    static highlight_whamm_file(whamm_span: span, color: string, editor_should_be_active: boolean = true){
+    /**
+     * 
+     * @param highlight_data : record from color index to whamm span
+     * @param jagged_array : null filled jagged array representing the structure of the whamm file
+     * @returns 
+     */
+    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, jagged_array: jagged_array){
+
+        // We need to apply the highlights from biggest span to the lowest span
+        let sorted_spans_color = Object.entries(highlight_data).sort((b,a)=>{return a[1][1] - b[1][1]});
+
+        for (let [color_index, span] of sorted_spans_color){
+            LineHighlighterDecoration.highlight_whamm_file_span(span[0],
+                LineHighlighterDecoration.highlightColors[parseInt(color_index)])
+        }
+    }
+
+    static highlight_whamm_file_span(whamm_span: span, color: string, editor_should_be_active: boolean = true){
 
         var editors: vscode.TextEditor[];
         if (editor_should_be_active){
@@ -88,7 +105,7 @@ export class LineHighlighterDecoration{
 
             if (original_injection.whamm_span !== null){
                 // highlight the whamm file
-                LineHighlighterDecoration.highlight_whamm_file(original_injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);
+                LineHighlighterDecoration.highlight_whamm_file_span(original_injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);
 
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too

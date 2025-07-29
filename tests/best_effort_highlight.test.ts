@@ -76,8 +76,11 @@ describe('testing Best effort highlighting class `run` method', () => {
         expect(values.span_to_color_index).toMatchObject(config[key]["expected_span_to_color_idx"]);
 
         let color_data = config[key]["expected_color_idx_to_span"];
+        let new_span_size_data = config[key]["expected_spansizes"];
         for (let index=0; index<color_data.length; index++){
-          expect(values.color_index_to_span[index]).toMatchObject(color_data[index]);
+          let span_data = values.color_index_to_span[index];
+          expect(span_data[0]).toMatchObject(color_data[index]);
+          expect(span_data[1]).toBe(new_span_size_data[index]);
         }
       });
     }
