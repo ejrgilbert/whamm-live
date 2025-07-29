@@ -38,7 +38,7 @@ describe('testing Best effort highlighting class `unionize_whamm_spans` method',
   }
 });
 
-describe('testing Best effort highlighting class `run` method', () => {
+describe('testing Best effort highlighting class `run` method error cases', () => {
 
   for (let key of Object.keys(config)) {
 
@@ -57,7 +57,34 @@ describe('testing Best effort highlighting class `run` method', () => {
       });
     }
   }
+
 });
+
+describe('testing Best effort highlighting class `run` method', () => {
+
+  for (let key of Object.keys(config)) {
+
+    if (config[key]["test"] === "run"){
+      test('test the `run` method', () => {
+        let injections: WhammLiveInjection[]= [];
+        let spans: span[] = config[key]["spans"];
+        for (let span of spans){
+          injections.push(create_dummy_whamm_live_injection(span))
+        }
+
+        let values = BestEffortHighlight.run(injections, ModelHelper.create_jagged_array(config[key]["jagged_array"]));
+        expect(values.span_to_color_index).toMatchObject(config[key]["expected_span_to_color_idx"]);
+
+        let color_data = config[key]["expected_color_idx_to_span"];
+        for (let index=0; index<color_data.length; index++){
+          expect(values.color_index_to_span[index]).toMatchObject(color_data[index]);
+        }
+      });
+    }
+  }
+
+});
+/* Helper functions */
 
 function create_dummy_whamm_live_injection(whamm_span: null | span = null): WhammLiveInjection{
   return { type: Types.WhammDataType.importType, mode: null, code: [], id: 0,

@@ -22,6 +22,13 @@ export class BestEffortHighlight{
         const color_index_to_whamm_spans: Record<number,span[]>= {};
         var color_index = 0;
 
+        var update_color_index_to_whamm_span = (color_index: number, current_pointer: WhammLiveInjection) =>{
+                let array = color_index_to_whamm_spans[color_index] ?? [];
+                if (!current_pointer.whamm_span) throw new Error("Whamm live injection doesn't have a span");
+                array.push(current_pointer.whamm_span);
+                color_index_to_whamm_spans[color_index] = array;
+        }
+
         let previous_pointer: null | WhammLiveInjection = null;
         let current_index = 0;
         while (current_index < sorted_live_injections.length){
@@ -33,8 +40,7 @@ export class BestEffortHighlight{
             // If this is the first value!
             if (previous_pointer === null){
                 span_to_color_index[current_span_size] = color_index;
-                let array = color_index_to_whamm_spans[color_index] ?? [];
-                array.push(current_pointer.whamm_span);
+                update_color_index_to_whamm_span(color_index, current_pointer);
 
             } else{
                 if (!previous_pointer.whamm_span) throw new Error("Expected whamm span value. Found null");
@@ -50,15 +56,17 @@ export class BestEffortHighlight{
                     // same spansize but not the same span
                     // in this case, we **extend** the two spans to be part of one big span and do color highlighting based on that
                     if (current_span_size === previous_span_size){
-                        let array = color_index_to_whamm_spans[color_index] ?? [];
-                        array.push(current_pointer.whamm_span);
+                        update_color_index_to_whamm_span(color_index, current_pointer);
 
                     // Note: Code isn't refactored so that the code is easy to follow
-                    // in this case, we use a new color now since the span is completely inside the previous one which gets higher priority
                     } else if (current_span_size < previous_span_size){
-                        span_to_color_index[current_span_size] = ++color_index;
-                        let array = color_index_to_whamm_spans[color_index] ?? [];
-                        array.push(current_pointer.whamm_span);
+                        // in this case, we use a new color now since the span is completely inside the previous one which gets higher priority
+                        // if not, since they don't completely overlap we do like we did with same spansize but not the same span
+                        if (ModelHelper.can_fit_span(previous_pointer.whamm_span, current_pointer.whamm_span))
+                            color_index++;
+
+                        span_to_color_index[current_span_size] = color_index;
+                        update_color_index_to_whamm_span(color_index, current_pointer);
 
                     } else {
                         // error! the injections aren't sorted in terms of span size
@@ -80,7 +88,6 @@ export class BestEffortHighlight{
                 color_index_to_whamm_span[i] = unionized_span;
             }
         }
-
         return {span_to_color_index: span_to_color_index, color_index_to_span: color_index_to_whamm_span} as BestEffortHighlightData;
     }
 
@@ -110,6 +117,9 @@ export class BestEffortHighlight{
 
         let [start_line, start_col] = unique_line_col_pairs[0];
         let [end_line, end_col] = unique_line_col_pairs[unique_line_col_pairs.length -1];
+        if (end_col >= jagged_array[end_line-1].length) {end_col = 1, end_line++}
+        else {end_col++}
+
         let whamm_span : span = {
             lc0: {
                 l: start_line,
@@ -117,7 +127,7 @@ export class BestEffortHighlight{
             },
             lc1: {
                 l: end_line,
-                c: end_col+1
+                c: end_col
             }
         };
         // make sure the line,col pairs are continous
