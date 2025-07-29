@@ -196,6 +196,24 @@ parent={lc0={l=1, c=3}, lc1={l=3, c=2}}
 child={lc0={l=1, c=3}, lc1={l=2, c=2}}
 can_fit=true
 
+[can_fit_span_6]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=2, c=30}, lc1={l=3, c=2}}
+can_fit=true
+
+[can_fit_span_7]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=1, c=4}, lc1={l=4, c=2}}
+can_fit=true
+
+[can_fit_span_8]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=1, c=4}, lc1={l=3, c=20}}
+can_fit=true
+
 [cannot_fit_span_1]
 test="can_fit_span"
 parent={lc0={l=1, c=3}, lc1={l=1, c=10}}
