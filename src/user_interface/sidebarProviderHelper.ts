@@ -5,7 +5,7 @@ import { WhammWebviewPanel } from './webviewPanel';
 import { APIModel } from '../model/model';
 import { ModelHelper } from '../model/utils/model_helper';
 import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
-import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
+import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise

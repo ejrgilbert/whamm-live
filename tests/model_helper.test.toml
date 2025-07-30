@@ -165,3 +165,69 @@ lc1={l=1, c=1}
 string_contents="abcd\ndef"
 span_size=0
 line_col_values={}
+
+[can_fit_span_1]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=1, c=10}}
+child={lc0={l=1, c=5}, lc1={l=1, c=8}}
+can_fit=true
+
+[can_fit_span_2]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=3, c=10}}
+child={lc0={l=1, c=5}, lc1={l=2, c=8}}
+can_fit=true
+
+[can_fit_span_3]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=2, c=2}}
+child={lc0={l=1, c=3}, lc1={l=2, c=2}}
+can_fit=true
+
+[can_fit_span_4]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=2, c=2}}
+child={lc0={l=1, c=5}, lc1={l=2, c=2}}
+can_fit=true
+
+[can_fit_span_5]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=3, c=2}}
+child={lc0={l=1, c=3}, lc1={l=2, c=2}}
+can_fit=true
+
+[can_fit_span_6]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=2, c=30}, lc1={l=3, c=2}}
+can_fit=true
+
+[can_fit_span_7]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=1, c=4}, lc1={l=4, c=2}}
+can_fit=true
+
+[can_fit_span_8]
+test="can_fit_span"
+parent={lc0={l=1, c=4}, lc1={l=4, c=2}}
+child={lc0={l=1, c=4}, lc1={l=3, c=20}}
+can_fit=true
+
+[cannot_fit_span_1]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=1, c=10}}
+child={lc0={l=1, c=2}, lc1={l=1, c=8}}
+can_fit=false
+
+[cannot_fit_span_2]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=3, c=10}}
+child={lc0={l=1, c=3}, lc1={l=3, c=11}}
+can_fit=false
+
+[cannot_fit_span_3]
+test="can_fit_span"
+parent={lc0={l=1, c=3}, lc1={l=2, c=2}}
+child={lc0={l=1, c=2}, lc1={l=2, c=2}}
+can_fit=false

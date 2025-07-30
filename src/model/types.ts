@@ -1,4 +1,5 @@
 import { Types} from "../whammServer";
+import { Cell } from "./utils/cell";
 // Different types and enums for API responses
 
 // Enums
@@ -71,6 +72,7 @@ export type span = {
     lc1: line_col
 }
 
+
 export type WhammLiveInjection = {
     type: Types.WhammDataType;
     mode: string | null;
@@ -79,6 +81,8 @@ export type WhammLiveInjection = {
     whamm_span: span | null;
     id: number;
 }
+
+export type jagged_array = (Cell|null)[][];
 
 export type Metadata = {
     script_start: ScriptLoc;

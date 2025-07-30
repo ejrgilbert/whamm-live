@@ -1,0 +1,201 @@
+[error_run_1]
+test="run_error"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+message="Expected whamm span value"
+
+[error_run_2]
+test="run_error"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+message="Expected sorted whamm live injections"
+
+[run_one]
+test="run"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=3}},
+]
+expected_span_to_color_idx={7=0}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=2, c=3}}
+]
+# ordered based on the `expected_color_idx_to_span` elements
+expected_spansizes=[7]
+
+[run_none]
+test="run"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = []
+expected_span_to_color_idx={}
+expected_color_idx_to_span=[]
+expected_spansizes=[]
+
+[run_two]
+test="run"
+jagged_array="12345\n12345\n12345\n12345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=3}},
+    {lc0={l=1, c=3}, lc1={l=2, c=1}},
+]
+expected_span_to_color_idx={7=0, 3=1}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=2, c=3}},
+    {lc0={l=1, c=3}, lc1={l=2, c=1}},
+]
+expected_spansizes=[7, 3]
+
+[run_three]
+test="run"
+jagged_array="12345\n123\n15\n1345\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=3}},
+    {lc0={l=1, c=4}, lc1={l=4, c=1}},
+]
+expected_span_to_color_idx={7=0}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=4, c=1}},
+]
+expected_spansizes=[10]
+
+[run_four]
+test="run"
+jagged_array="12345\n\n5\n15\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=4, c=1}},
+    {lc0={l=3, c=1}, lc1={l=5, c=1}},
+]
+expected_span_to_color_idx={6=0, 3=0}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=5, c=1}},
+]
+expected_spansizes=[8]
+
+[run_five]
+test="run"
+jagged_array="12345\n1234567\n1234\n123\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=5}, lc1={l=5, c=1}},
+    {lc0={l=2, c=3}, lc1={l=5, c=1}},
+    {lc0={l=3, c=1}, lc1={l=3, c=4}},
+    {lc0={l=3, c=1}, lc1={l=3, c=3}},
+]
+expected_span_to_color_idx={20=0, 15=1, 12=2, 3=3, 2=4}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=5}, lc1={l=5, c=1}},
+    {lc0={l=2, c=3}, lc1={l=5, c=1}},
+    {lc0={l=3, c=1}, lc1={l=3, c=4}},
+    {lc0={l=3, c=1}, lc1={l=3, c=3}},
+]
+expected_spansizes=[20,15,12,3,2]
+
+[run_six]
+test="run"
+jagged_array="12345\n1234567\n1234\n123\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=5}, lc1={l=5, c=1}},
+    {lc0={l=1, c=5}, lc1={l=5, c=1}},
+    {lc0={l=2, c=3}, lc1={l=5, c=1}},
+    {lc0={l=2, c=3}, lc1={l=5, c=1}},
+    {lc0={l=3, c=1}, lc1={l=3, c=4}},
+    {lc0={l=3, c=1}, lc1={l=3, c=3}},
+    {lc0={l=3, c=1}, lc1={l=3, c=3}},
+]
+expected_span_to_color_idx={20=0, 15=1, 12=2, 3=3, 2=4}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=1, c=5}, lc1={l=5, c=1}},
+    {lc0={l=2, c=3}, lc1={l=5, c=1}},
+    {lc0={l=3, c=1}, lc1={l=3, c=4}},
+    {lc0={l=3, c=1}, lc1={l=3, c=3}},
+]
+expected_spansizes=[20,15,12,3,2]
+
+[run_seven]
+test="run"
+jagged_array="12345\n1234567\n1234\n123\n12345"
+spans = [
+    {lc0={l=1, c=1}, lc1={l=2, c=7}},
+    {lc0={l=1, c=2}, lc1={l=3, c=1}},
+    {lc0={l=2, c=5}, lc1={l=5, c=2}},
+    {lc0={l=2, c=7}, lc1={l=5, c=1}},
+    {lc0={l=2, c=7}, lc1={l=5, c=1}},
+    {lc0={l=2, c=4}, lc1={l=4, c=1}},
+]
+expected_span_to_color_idx={11=0, 8=1}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=5, c=2}},
+    {lc0={l=2, c=4}, lc1={l=5, c=1}},
+]
+expected_spansizes=[20,11]
+
+[run_eight]
+test="run"
+jagged_array="123456789\n123456789\n12345\n01234567\n012345"
+spans = [
+    # Spansize 22
+    {lc0={l=1, c=1}, lc1={l=3, c=5}},
+    {lc0={l=1, c=1}, lc1={l=3, c=5}},
+    {lc0={l=1, c=3}, lc1={l=4, c=2}},
+
+    # Spansize 14
+    {lc0={l=2, c=1}, lc1={l=4, c=1}},
+    {lc0={l=1, c=8}, lc1={l=3, c=4}},
+
+    # Spansize 9
+    {lc0={l=2, c=1}, lc1={l=3, c=1}},
+    {lc0={l=2, c=5}, lc1={l=3, c=5}},
+    {lc0={l=3, c=4}, lc1={l=4, c=8}},
+]
+expected_span_to_color_idx={22=0, 14=1, 9=2}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=4, c=2}},
+    {lc0={l=1, c=8}, lc1={l=4, c=1}},
+    {lc0={l=2, c=1}, lc1={l=4, c=8}},
+]
+expected_spansizes=[24,16,21]
+
+[run_nine]
+test="run"
+jagged_array="123456789\n123456789\n12345\n01234567\n012345"
+spans = [
+    # Spansize 22
+    {lc0={l=1, c=1}, lc1={l=3, c=5}},
+    {lc0={l=1, c=1}, lc1={l=3, c=5}},
+    {lc0={l=1, c=3}, lc1={l=4, c=2}},
+
+    # Spansize 17
+    {lc0={l=2, c=1}, lc1={l=4, c=4}},
+    {lc0={l=1, c=8}, lc1={l=4, c=2}},
+
+    # Spansize 9
+    {lc0={l=2, c=1}, lc1={l=3, c=1}},
+    {lc0={l=2, c=5}, lc1={l=3, c=5}},
+]
+expected_span_to_color_idx={22=0, 17=0, 9=1}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=4, c=4}},
+    {lc0={l=2, c=1}, lc1={l=3, c=5}},
+]
+expected_spansizes=[26,13]
+
+[run_ten]
+test="run"
+jagged_array="abcdefghij\nabcdefghij"
+spans = [
+    # Spansize 10
+    {lc0={l=1, c=1}, lc1={l=2, c=1}},
+    # spansize 8
+    {lc0={l=1, c=1}, lc1={l=1, c=9}},
+    {lc0={l=1, c=5}, lc1={l=2, c=3}},
+]
+expected_span_to_color_idx={10=0, 8=1}
+expected_color_idx_to_span=[
+    {lc0={l=1, c=1}, lc1={l=2, c=1}},
+    {lc0={l=1, c=1}, lc1={l=2, c=3}},
+]
+expected_spansizes=[10, 12]

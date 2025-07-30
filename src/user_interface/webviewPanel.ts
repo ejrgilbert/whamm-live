@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
-import { LineHighlighterDecoration } from '../extensionListeners/lineHighlighterDecoration';
+import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { SvelteModel } from '../model/svelte_model';
 
 export class WhammWebviewPanel{
