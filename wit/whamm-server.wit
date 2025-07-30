@@ -2,14 +2,17 @@
 package vscode:example;
 
 interface types {
-	record options {
-		as-monitor-module: bool
-	}
 
 	variant error-code {
 		invalid(string),
 		unexpected(string),
 		no-change(string)
+	}
+
+	variant target{
+		wizard,
+		// filename
+		wasm(string)
 	}
 
 	// injected related tyoes
@@ -191,15 +194,18 @@ interface types {
 }
 
 world whamm-server {
-	use types.{ options, error-code, injection-pair, error-wrapper};
+	use types.{ error-code, injection-pair, error-wrapper, target};
 	import log: func(msg: string);
 
-	export setup: func(app-name: string, app-bytes: list<u8>, script: string, opts: options) -> result<string, error-code>;
-	export end: func(app-name: string);
+	export setup: func(app-name: string, app-bytes: list<u8>, script: string) -> result<string, error-code>;
+	export setup-wizard: func(script: string) -> result<string, error-code>;
+
+	export end: func(target: target);
 	// No hash map support in wit. So, we usea list of key-value pairs
-	export run: func(script: string, app-name: string, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string, app-name: string) -> bool;
-	export update-whamm: func(new-script: string, app-name: string);
+	export run: func(script: string, target: target, script-path: string) -> result<list<injection-pair>, error-wrapper>;
+	export no-change: func(new-script: string, target: target) -> bool;
+	export update-whamm: func(new-script: string, target: target);
+
 	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
 	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;
 }

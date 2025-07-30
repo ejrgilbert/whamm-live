@@ -6,13 +6,9 @@ import { SvelteModel } from '../model/svelte_model';
 
 export class WhammWebviewPanel{
 
-    fileName: string | undefined;
+    fileName: string;
     webviewPanel!: vscode.WebviewPanel;
     is_wasm: boolean;
-    
-    // Mapping from whamm script line number to
-    // a tuple of injected content and lines in webview where it is injected
-    line_to_probe_mapping: Map<number, [string, number[]]>
     
     // model which contains all the necessary information for APImodel data
     model: APIModel;
@@ -20,10 +16,9 @@ export class WhammWebviewPanel{
     static number_of_webviews: number = 0;
     static webviews: WhammWebviewPanel[] = [];
 
-    constructor(fileName: string | undefined){
+    constructor(fileName: string){
         this.fileName = fileName;
-        this.is_wasm = this.fileName?.endsWith(".wasm") || false;
-        this.line_to_probe_mapping = new Map();
+        this.is_wasm = this.fileName.endsWith(".wasm") || false;
         this.model = new APIModel(this);
     }
 
@@ -44,7 +39,7 @@ export class WhammWebviewPanel{
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
-                if (this.fileName) ExtensionContext.api.end(this.fileName);
+                ExtensionContext.api.end(this.fileName);
                 // update the sidebar
                 SvelteModel.update_sidebar_model();
 

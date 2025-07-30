@@ -88,10 +88,11 @@ pub fn run(
                 
     // Call the WHAMM api
     let response = whamm::api::instrument::instrument_as_dry_run_with_bytes(
-        bytes,
+        Some(bytes),
         script_path,
         new_script,
         Vec::new(),
+        false
     );
     // let response:  Result<HashMap<InjectType, Vec<Injection>>, Vec<WhammError>> = Ok(HashMap::new());
 
