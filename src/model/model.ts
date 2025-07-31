@@ -1,5 +1,5 @@
 import { ExtensionContext } from "../extensionContext";
-import { WhammWebviewPanel } from "../user_interface/webviewPanel";
+import { WasmWebviewPanel } from "../user_interface/wasmWebviewPanel";
 import { FSM } from "../model/fsm";
 import * as vscode from 'vscode';
 import { ModelHelper } from "./utils/model_helper";
@@ -30,13 +30,13 @@ export class APIModel{
     injected_wat_content!: string;
     jagged_array: (Cell|null)[][];
 
-    webview: WhammWebviewPanel;
+    webview: WasmWebviewPanel;
     fsm_mappings: FSM | null;
     // funcID's change if whamm injects functions/ func imports
     // So, we need to a mapping to handle that 
     injected_fsm_mappings: FSM | null;
 
-    constructor(webview: WhammWebviewPanel){
+    constructor(webview: WasmWebviewPanel){
         this.webview = webview;
         this.fsm_mappings = this.injected_fsm_mappings = null;
         this.jagged_array = [];
@@ -194,7 +194,7 @@ export class APIModel{
 
     // set all models's api out of date and notify the related svelte side(s) only once!
     static set_api_out_of_date(value: boolean){
-        for (let webview of WhammWebviewPanel.webviews){
+        for (let webview of WasmWebviewPanel.webviews){
             webview.model.__api_response_out_of_date = value;
             webview.model.codemirror_code_updated = false;
         }

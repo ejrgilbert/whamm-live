@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { isExtensionActive, DiagnosticCollection} from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
-import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { WasmWebviewPanel } from '../user_interface/wasmWebviewPanel';
 import { Types } from '../whammServer';
 import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
@@ -42,7 +42,7 @@ export async function handleDocumentChanges(){
     // It won't be null if this function is called
     let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
     if (!whamm_contents) throw new Error("This function cannot be called without a whamm file");
-    for (let webview of WhammWebviewPanel.webviews){
+    for (let webview of WasmWebviewPanel.webviews){
         if (!webview.model.api_response_setup_completed) continue;
 
         let success = await webview.model.update();
@@ -104,7 +104,7 @@ export function show_and_handle_error_response(file_contents: string, whamm_erro
     // by displaying the red swiggly lines in the appropriate source code
     if (whamm_errors.length > 0){
         // Store the new error response for all the webviews
-        for (let webview of WhammWebviewPanel.webviews){
+        for (let webview of WasmWebviewPanel.webviews){
             ModelHelper.handle_error_response(webview.model, whamm_errors);
             if (webview.fileName) ExtensionContext.api.updateWhamm(file_contents, Types.WhammTarget.Wasm(webview.fileName));
         }

@@ -1,5 +1,5 @@
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
-import { WhammWebviewPanel } from "../user_interface/webviewPanel";
+import { WasmWebviewPanel } from "../user_interface/wasmWebviewPanel";
 import { Types } from "../whammServer";
 import { injection_circle, valid_model, WhammLiveInjection } from "./types";
 
@@ -8,24 +8,24 @@ import { injection_circle, valid_model, WhammLiveInjection } from "./types";
 // This class handles communicating those changes with the svelte webviews side
 export class SvelteModel{
 
-    static update_svelte_model(webview: WhammWebviewPanel){
+    static update_svelte_model(webview: WasmWebviewPanel){
         SvelteModel.update_sidebar_model();
         SvelteModel.update_wasm_webview_model(webview);
     }
 
     static update_svelte_models(){
         SvelteModel.update_sidebar_model();
-        for (let webview of WhammWebviewPanel.webviews)
+        for (let webview of WasmWebviewPanel.webviews)
             SvelteModel.update_wasm_webview_model(webview);
     }
 
     static update_sidebar_model(){
         // nofify the sidebar side of the change
         Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+                WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
-    private static update_wasm_webview_model(webview: WhammWebviewPanel){
+    private static update_wasm_webview_model(webview: WasmWebviewPanel){
         webview.webviewPanel.webview.postMessage({
             command: 'api-response-update',
             response: {out_of_date: webview.model.__api_response_out_of_date,
@@ -36,7 +36,7 @@ export class SvelteModel{
 
     // Create model to be used in the svelte side by the webview
     // Check svelte/src/lib/api_response.svelte.ts
-    private static create_valid_model(webview: WhammWebviewPanel): valid_model{
+    private static create_valid_model(webview: WasmWebviewPanel): valid_model{
         let injected_wat = webview.model.injected_wat_content;
         let lines_injected: number[] = [];
         for (let injection of webview.model.whamm_live_response.injecting_injections){

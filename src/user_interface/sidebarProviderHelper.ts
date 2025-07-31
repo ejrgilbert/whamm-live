@@ -1,10 +1,9 @@
 // Helper functions for sidebar provider for user interace event handling
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
-import { WhammWebviewPanel } from './webviewPanel'; 
+import { WasmWebviewPanel } from './wasmWebviewPanel'; 
 import { APIModel } from '../model/model';
-import { ModelHelper } from '../model/utils/model_helper';
-import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
+import { handleDocumentChanges } from '../extensionListeners/documentChangesListener';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 
 // Open whamm file using file dialog and VS Code API
@@ -56,20 +55,20 @@ export class Helper_sidebar_provider{
         if (path){
             // Check if webview for this path already exists
             // if it does, then just reveal and make that active
-            for (let webview of WhammWebviewPanel.webviews){
+            for (let webview of WasmWebviewPanel.webviews){
                 if (webview.fileName === path){
                     webview.webviewPanel.reveal();
                     return;
                 }
             }
-            let panel = new WhammWebviewPanel(path);
+            let panel = new WasmWebviewPanel(path);
             await panel.init();
-            panel.loadHTML();
+            panel.setupHTML();
         }
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
-            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
+            if (WasmWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
                 LineHighlighterDecoration.clear_all_decorations();
             }
             
@@ -85,7 +84,7 @@ export class Helper_sidebar_provider{
             Helper_sidebar_provider.helper_update_whamm_workspace_state(filePath.fsPath);
 
             // Update the webview model data if there are any open
-            if (WhammWebviewPanel.number_of_webviews > 0){
+            if (WasmWebviewPanel.number_of_webviews > 0){
                 await handleDocumentChanges();
             }
 
@@ -127,7 +126,7 @@ export class Helper_sidebar_provider{
             ExtensionContext.context.workspaceState.get('whamm-file'),
         )
         Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+                WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
     static async helper_get_whamm_file_contents(): Promise<string | null>{
@@ -166,7 +165,7 @@ export class Helper_sidebar_provider{
             switch (choice){
                 case soft_reset_message:
                     {
-                        for (let webview of WhammWebviewPanel.webviews){
+                        for (let webview of WasmWebviewPanel.webviews){
                             webview.webviewPanel.dispose();
                             Helper_sidebar_provider.helper_reset_sidebar_webview_state();
                         }

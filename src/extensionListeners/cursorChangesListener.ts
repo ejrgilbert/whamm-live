@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { isExtensionActive } from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
 import { APIModel} from '../model/model';
-import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { WasmWebviewPanel } from '../user_interface/wasmWebviewPanel';
 import { Cell, Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
 import { highlights_info, inj_circle_highlights_info, jagged_array, WhammLiveInjection } from '../model/types';
@@ -45,7 +45,7 @@ export function handleCursorChange(){
         let best_effort_highlight_data = BestEffortHighlight.run(all_injections, null_jagged_array);
 
         let webview_index = 0;
-        for (let webview of WhammWebviewPanel.webviews){
+        for (let webview of WasmWebviewPanel.webviews){
 
             // No need to perform highlighting if api is out of date 
             // or the code mirror code isn't updated yet!
@@ -92,7 +92,7 @@ export function handleCursorChange(){
 function sort_all_whamm_live_injections(line: number, col: number): WhammLiveInjection[] {
     let sorted_injections: [WhammLiveInjection, (Cell|null)[][]][]= [];
 
-    for (let webview of WhammWebviewPanel.webviews){
+    for (let webview of WasmWebviewPanel.webviews){
         let cell = webview.model.jagged_array[line-1][col-1];
         if (!cell) continue;
 
