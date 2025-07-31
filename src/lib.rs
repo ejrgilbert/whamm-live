@@ -1,5 +1,7 @@
 use whamm_server::{run, setup, wat2watandwasm, wasm2watandwasm, no_change, end, update_whamm};
 
+use crate::{whamm_server::setup_wizard};
+
 mod whamm_server;
 // Use a procedural macro to generate bindings for the world we specified in `whamm-server.wit`
 wit_bindgen::generate!({
@@ -11,28 +13,32 @@ struct WhammServer;
 
 impl Guest for WhammServer {
 
-	fn setup(app_name: String, app_bytes: Vec<u8>, script: String, opts: Options) -> Result<String, ErrorCode> {
+	fn setup(app_name: String, app_bytes: Vec<u8>, script: String) -> Result<String, ErrorCode> {
 		log("Starting whamm setup");
-		let result = setup(app_name, app_bytes, script, opts);
+		let result = setup(app_name, app_bytes, script);
 		log("Finished whamm setup");
 		result
 	}
 
-	fn no_change(new_script: String, app_name: String) -> bool{
-		no_change(new_script, app_name)
+	fn setup_wizard(script: String) -> Result<String, ErrorCode>{
+		setup_wizard(script)
 	}
 
-	fn update_whamm(new_script:String, app_name: String) {
-		update_whamm(new_script, app_name);
+	fn no_change(new_script: String, target: WhammTarget) -> bool{
+		no_change(new_script, target)
 	}
 
-	fn end(app_name: String){
-		end(app_name);
+	fn update_whamm(new_script:String, target: WhammTarget) {
+		update_whamm(new_script, target);
 	}
 
-	fn run(script: String, app_name: String, script_path: String) -> Result<Vec<InjectionPair>, ErrorWrapper>{
+	fn end(target: WhammTarget){
+		end(target);
+	}
+
+	fn run(script: String, script_path: String, target: WhammTarget) -> Result<Vec<InjectionPair>, ErrorWrapper>{
 		log("Starting whamm run");
-		let result = run(script, app_name, script_path);
+		let result = run(script, script_path, target);
 		log("Finished whamm run");
 		result
 	}

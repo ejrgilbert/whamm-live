@@ -9,7 +9,7 @@ interface types {
 		no-change(string)
 	}
 
-	variant target{
+	variant whamm-target{
 		wizard,
 		// filename
 		wasm(string)
@@ -194,17 +194,17 @@ interface types {
 }
 
 world whamm-server {
-	use types.{ error-code, injection-pair, error-wrapper, target};
+	use types.{ error-code, injection-pair, error-wrapper, whamm-target};
 	import log: func(msg: string);
 
 	export setup: func(app-name: string, app-bytes: list<u8>, script: string) -> result<string, error-code>;
 	export setup-wizard: func(script: string) -> result<string, error-code>;
 
-	export end: func(target: target);
+	export end: func(target: whamm-target);
 	// No hash map support in wit. So, we usea list of key-value pairs
-	export run: func(script: string, target: target, script-path: string) -> result<list<injection-pair>, error-wrapper>;
-	export no-change: func(new-script: string, target: target) -> bool;
-	export update-whamm: func(new-script: string, target: target);
+	export run: func(script: string, script-path: string, target: whamm-target) -> result<list<injection-pair>, error-wrapper>;
+	export no-change: func(new-script: string, target: whamm-target) -> bool;
+	export update-whamm: func(new-script: string, target: whamm-target);
 
 	export wat2watandwasm: func(content: string) -> result<tuple<string, list<u8>>, error-code>;
 	export wasm2watandwasm: func(content: list<u8>) -> result<tuple<string, list<u8>>, error-code>;

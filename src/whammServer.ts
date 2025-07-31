@@ -65,7 +65,7 @@ export namespace Types {
 		}
 	}
 
-	export namespace Target {
+	export namespace WhammTarget {
 		export const wizard = 'wizard' as const;
 		export type Wizard = { readonly tag: typeof wizard } & _common;
 		export function Wizard(): Wizard {
@@ -85,8 +85,8 @@ export namespace Types {
 		export type _tt = typeof wizard | typeof wasm;
 		export type _vt = string | undefined;
 		type _common = Omit<VariantImpl, 'tag' | 'value'>;
-		export function _ctor(t: _tt, v: _vt): Target {
-			return new VariantImpl(t, v) as Target;
+		export function _ctor(t: _tt, v: _vt): WhammTarget {
+			return new VariantImpl(t, v) as WhammTarget;
 		}
 		class VariantImpl {
 			private readonly _tag: _tt;
@@ -102,14 +102,14 @@ export namespace Types {
 				return this._value;
 			}
 			isWizard(): this is Wizard {
-				return this._tag === Target.wizard;
+				return this._tag === WhammTarget.wizard;
 			}
 			isWasm(): this is Wasm {
-				return this._tag === Target.wasm;
+				return this._tag === WhammTarget.wasm;
 			}
 		}
 	}
-	export type Target = Target.Wizard | Target.Wasm;
+	export type WhammTarget = WhammTarget.Wizard | WhammTarget.Wasm;
 
 	/**
 	 * injected related tyoes
@@ -399,8 +399,8 @@ export namespace whammServer {
 	export type InjectionPair = Types.InjectionPair;
 	export type ErrorWrapper = Types.ErrorWrapper;
 	export const ErrorWrapper = Types.ErrorWrapper;
-	export type Target = Types.Target;
-	export const Target = Types.Target;
+	export type WhammTarget = Types.WhammTarget;
+	export const WhammTarget = Types.WhammTarget;
 	export type Imports = {
 		log: (msg: string) => void;
 	};
@@ -419,15 +419,15 @@ export namespace whammServer {
 		 * @throws ErrorCode.Error_
 		 */
 		setupWizard: (script: string) => string;
-		end: (target: Target) => void;
+		end: (target: WhammTarget) => void;
 		/**
 		 * No hash map support in wit. So, we usea list of key-value pairs
 		 *
 		 * @throws ErrorWrapper.Error_
 		 */
-		run: (script: string, target: Target, scriptPath: string) => InjectionPair[];
-		noChange: (newScript: string, target: Target) => boolean;
-		updateWhamm: (newScript: string, target: Target) => void;
+		run: (script: string, scriptPath: string, target: WhammTarget) => InjectionPair[];
+		noChange: (newScript: string, target: WhammTarget) => boolean;
+		updateWhamm: (newScript: string, target: WhammTarget) => void;
 		/**
 		 * @throws ErrorCode.Error_
 		 */
@@ -447,7 +447,7 @@ export namespace whammServer {
 
 export namespace Types.$ {
 	export const ErrorCode = new $wcm.VariantType<Types.ErrorCode, Types.ErrorCode._tt, Types.ErrorCode._vt>([['invalid', $wcm.wstring], ['unexpected', $wcm.wstring], ['noChange', $wcm.wstring]], Types.ErrorCode._ctor);
-	export const Target = new $wcm.VariantType<Types.Target, Types.Target._tt, Types.Target._vt>([['wizard', undefined], ['wasm', $wcm.wstring]], Types.Target._ctor);
+	export const WhammTarget = new $wcm.VariantType<Types.WhammTarget, Types.WhammTarget._tt, Types.WhammTarget._vt>([['wizard', undefined], ['wasm', $wcm.wstring]], Types.WhammTarget._ctor);
 	export const FuncBodyInstrumentationMode = new $wcm.EnumType<Types.FuncBodyInstrumentationMode>(['before', 'after', 'alternate', 'semanticAfter', 'blockEntry', 'blockExit', 'blockAlt']);
 	export const FuncInstrumentationMode = new $wcm.EnumType<Types.FuncInstrumentationMode>(['entry', 'exit']);
 	export const LineColData = new $wcm.RecordType<Types.LineColData>([
@@ -571,7 +571,7 @@ export namespace Types._ {
 	export const witName = 'types' as const;
 	export const types: Map<string, $wcm.AnyComponentModelType> = new Map<string, $wcm.AnyComponentModelType>([
 		['ErrorCode', $.ErrorCode],
-		['Target', $.Target],
+		['WhammTarget', $.WhammTarget],
 		['FuncBodyInstrumentationMode', $.FuncBodyInstrumentationMode],
 		['FuncInstrumentationMode', $.FuncInstrumentationMode],
 		['LineColData', $.LineColData],
@@ -604,7 +604,7 @@ export namespace whammServer.$ {
 	export const ErrorCode = Types.$.ErrorCode;
 	export const InjectionPair = Types.$.InjectionPair;
 	export const ErrorWrapper = Types.$.ErrorWrapper;
-	export const Target = Types.$.Target;
+	export const WhammTarget = Types.$.WhammTarget;
 	export namespace imports {
 		export const log = new $wcm.FunctionType<whammServer.Imports['log']>('log',[
 			['msg', $wcm.wstring],
@@ -620,20 +620,20 @@ export namespace whammServer.$ {
 			['script', $wcm.wstring],
 		], new $wcm.ResultType<string, whammServer.ErrorCode>($wcm.wstring, ErrorCode, Types.ErrorCode.Error_));
 		export const end = new $wcm.FunctionType<whammServer.Exports['end']>('end',[
-			['target', Target],
+			['target', WhammTarget],
 		], undefined);
 		export const run = new $wcm.FunctionType<whammServer.Exports['run']>('run',[
 			['script', $wcm.wstring],
-			['target', Target],
 			['scriptPath', $wcm.wstring],
+			['target', WhammTarget],
 		], new $wcm.ResultType<whammServer.InjectionPair[], whammServer.ErrorWrapper>(new $wcm.ListType<whammServer.InjectionPair>(InjectionPair), ErrorWrapper, Types.ErrorWrapper.Error_));
 		export const noChange = new $wcm.FunctionType<whammServer.Exports['noChange']>('no-change',[
 			['newScript', $wcm.wstring],
-			['target', Target],
+			['target', WhammTarget],
 		], $wcm.bool);
 		export const updateWhamm = new $wcm.FunctionType<whammServer.Exports['updateWhamm']>('update-whamm',[
 			['newScript', $wcm.wstring],
-			['target', Target],
+			['target', WhammTarget],
 		], undefined);
 		export const wat2watandwasm = new $wcm.FunctionType<whammServer.Exports['wat2watandwasm']>('wat2watandwasm',[
 			['content', $wcm.wstring],
@@ -684,10 +684,10 @@ export namespace whammServer._ {
 	export type Exports = {
 		'setup': (appName_ptr: i32, appName_len: i32, appBytes_ptr: i32, appBytes_len: i32, script_ptr: i32, script_len: i32, result: ptr<result<string, ErrorCode>>) => void;
 		'setup-wizard': (script_ptr: i32, script_len: i32, result: ptr<result<string, ErrorCode>>) => void;
-		'end': (target_Target_case: i32, target_Target_0: i32, target_Target_1: i32) => void;
-		'run': (script_ptr: i32, script_len: i32, target_Target_case: i32, target_Target_0: i32, target_Target_1: i32, scriptPath_ptr: i32, scriptPath_len: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
-		'no-change': (newScript_ptr: i32, newScript_len: i32, target_Target_case: i32, target_Target_0: i32, target_Target_1: i32) => i32;
-		'update-whamm': (newScript_ptr: i32, newScript_len: i32, target_Target_case: i32, target_Target_0: i32, target_Target_1: i32) => void;
+		'end': (target_WhammTarget_case: i32, target_WhammTarget_0: i32, target_WhammTarget_1: i32) => void;
+		'run': (script_ptr: i32, script_len: i32, scriptPath_ptr: i32, scriptPath_len: i32, target_WhammTarget_case: i32, target_WhammTarget_0: i32, target_WhammTarget_1: i32, result: ptr<result<InjectionPair[], ErrorWrapper>>) => void;
+		'no-change': (newScript_ptr: i32, newScript_len: i32, target_WhammTarget_case: i32, target_WhammTarget_0: i32, target_WhammTarget_1: i32) => i32;
+		'update-whamm': (newScript_ptr: i32, newScript_len: i32, target_WhammTarget_case: i32, target_WhammTarget_0: i32, target_WhammTarget_1: i32) => void;
 		'wat2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 		'wasm2watandwasm': (content_ptr: i32, content_len: i32, result: ptr<result<[string, Uint8Array], ErrorCode>>) => void;
 	};
