@@ -62,11 +62,10 @@ export class Helper_sidebar_provider{
                     return;
                 }
             }
+            let panel = new WhammWebviewPanel(path);
+            await panel.init();
+            panel.loadHTML();
         }
-
-        let panel = new WhammWebviewPanel(path);
-        await panel.init();
-        panel.loadHTML();
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{

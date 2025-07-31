@@ -68,7 +68,7 @@ export class APIModel{
         if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content && whamm_contents){
             try{
                 // setup in rust side
-                ExtensionContext.api.setup(this.webview.fileName, this.valid_wasm_content, whamm_contents, {asMonitorModule: false});
+                ExtensionContext.api.setup(this.webview.fileName, this.valid_wasm_content, whamm_contents);
 
                 // use the fsm to have the mappings ready
                 this.fsm_mappings = new FSM(this.valid_wat_content)
@@ -108,10 +108,10 @@ export class APIModel{
                 file_contents = await APIModel.loadFileAsString(file_path, ExtensionContext.context);
             }
 
-            if (force_update || !ExtensionContext.api.noChange(file_contents, this.webview.fileName)){
+            if (force_update || !ExtensionContext.api.noChange(file_contents, Types.WhammTarget.Wasm(this.webview.fileName))){
                 try{
                     // Call the whamm API to get the response
-                    var response = ExtensionContext.api.run(file_contents, this.webview.fileName, file_path);
+                    var response = ExtensionContext.api.run(file_contents, file_path, Types.WhammTarget.Wasm(this.webview.fileName));
                     let whamm_live_mappings = ModelHelper.create_whamm_data_type_to_whamm_injection_mapping(response);
                     // store the new fsm mappings to account for funcID changes
                     if (this.fsm_mappings != null){

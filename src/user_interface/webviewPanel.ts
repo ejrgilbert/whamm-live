@@ -3,6 +3,7 @@ import { ExtensionContext } from '../extensionContext';
 import { APIModel } from '../model/model';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { SvelteModel } from '../model/svelte_model';
+import { Types } from '../whammServer';
 
 export class WhammWebviewPanel{
 
@@ -26,7 +27,7 @@ export class WhammWebviewPanel{
 
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
-            `live-whamm-webview-${WhammWebviewPanel.getNone()}`,
+            `live-whamm-webview-${WhammWebviewPanel.getNonce()}`,
             'Live Whamm',
             vscode.ViewColumn.Active,
             {
@@ -39,15 +40,6 @@ export class WhammWebviewPanel{
         // Handle disposing of the panel afterwards
         this.webviewPanel.onDidDispose(()=>{
                 WhammWebviewPanel.removePanel(this);
-                ExtensionContext.api.end(this.fileName);
-                // update the sidebar
-                SvelteModel.update_sidebar_model();
-
-                // remove highlights if no webviews open
-                if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WhammWebviewPanel.number_of_webviews == 0){
-                    // remove decorations if any
-                    LineHighlighterDecoration.clear_whamm_decorations();
-                }
         })
 
         let success = await this.model.loadWatAndWasm();
@@ -70,10 +62,20 @@ export class WhammWebviewPanel{
     static removePanel(webview: WhammWebviewPanel){
         WhammWebviewPanel.number_of_webviews--;
         WhammWebviewPanel.webviews.splice(WhammWebviewPanel.webviews.indexOf(webview), 1)
+
+        ExtensionContext.api.end(Types.WhammTarget.Wasm(webview.fileName));
+        // update the sidebar
+        SvelteModel.update_sidebar_model();
+
+        // remove highlights if no webviews open
+        if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WhammWebviewPanel.number_of_webviews == 0){
+            // remove decorations if any
+            LineHighlighterDecoration.clear_whamm_decorations();
+        }
     }
 
     // Method used from online
-    static getNone(){
+    static getNonce(){
         let text = "";
         const possible =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -121,7 +123,6 @@ export class WhammWebviewPanel{
                 command: 'init-data',
                 show_wizard: this.fileName === undefined,
                 wat_content: this.model.valid_wat_content,
-                file_name: this.fileName
         });
 
         this.webviewPanel.webview.onDidReceiveMessage(

@@ -106,7 +106,7 @@ export function show_and_handle_error_response(file_contents: string, whamm_erro
         // Store the new error response for all the webviews
         for (let webview of WhammWebviewPanel.webviews){
             ModelHelper.handle_error_response(webview.model, whamm_errors);
-            if (webview.fileName) ExtensionContext.api.updateWhamm(file_contents, webview.fileName);
+            if (webview.fileName) ExtensionContext.api.updateWhamm(file_contents, Types.WhammTarget.Wasm(webview.fileName));
         }
         
         APIModel.set_api_out_of_date(false);
