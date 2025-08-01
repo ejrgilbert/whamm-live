@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { isExtensionActive, DiagnosticCollection} from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
-import { APIModel } from '../model/model';
 import { WasmWebviewPanel } from '../user_interface/wasmWebviewPanel';
 import { Types } from '../whammServer';
 import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
 import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
+import { APIModel } from '../model/api_model/model';
 
 export function shouldUpdateModel(): boolean{
     let is_extension_active = isExtensionActive();

@@ -1,6 +1,6 @@
 import { Types } from "../../whammServer";
+import { APIWasmModel } from "../api_model/model_wasm";
 import { FSM } from "../fsm";
-import { APIModel } from "../model";
 import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, jagged_array, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from "../types";
 
 export class ModelHelper{
@@ -635,7 +635,8 @@ export class ModelHelper{
     }
 
     // error handlers
-    static handle_error_response(instance: APIModel, errors: Types.WhammApiError[]){
+    // @todo supprt wizard
+    static handle_error_response(instance: APIWasmModel, errors: Types.WhammApiError[]){
         let lines_injected: injected_lines_info = {total_lines_injected:0, number_of_func_lines_and_data_sections_injected: 0};
         instance.whamm_live_response = {
             lines_injected: lines_injected,

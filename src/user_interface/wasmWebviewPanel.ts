@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
-import { APIModel } from '../model/model';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { SvelteModel } from '../model/svelte_model';
 import { Types } from '../whammServer';
 import { WebviewPanel } from './webviewPanel';
+import { APIWasmModel } from '../model/api_model/model_wasm';
 
 export class WasmWebviewPanel extends WebviewPanel{
 
@@ -12,7 +12,7 @@ export class WasmWebviewPanel extends WebviewPanel{
     is_wasm: boolean;
     
     // model which contains all the necessary information for APImodel data
-    model: APIModel;
+    model: APIWasmModel;
 
     static number_of_webviews: number = 0;
     static webviews: WasmWebviewPanel[] = [];
@@ -21,7 +21,7 @@ export class WasmWebviewPanel extends WebviewPanel{
         super();
         this.fileName = fileName;
         this.is_wasm = this.fileName.endsWith(".wasm") || false;
-        this.model = new APIModel(this);
+        this.model = new APIWasmModel(this);
     }
 
     async init(){
@@ -71,7 +71,7 @@ export class WasmWebviewPanel extends WebviewPanel{
         super.loadHTML();
         super.postMessage({
                 command: 'init-data',
-                show_wizard: true,
+                show_wizard: false,
                 wat_content: this.model.valid_wat_content,
         });
         this.addListeners();

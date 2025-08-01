@@ -5,7 +5,7 @@ import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { isExtensionActive } from './listenerHelper';
 import { ModelHelper } from '../../model/utils/model_helper';
 import { Types } from '../../whammServer';
-import { APIModel } from '../../model/model';
+import { APIModel } from '../../model/api_model/model';
 
 export class LineHighlighterDecoration{
 

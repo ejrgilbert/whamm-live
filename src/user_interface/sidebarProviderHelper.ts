@@ -2,9 +2,9 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
 import { WasmWebviewPanel } from './wasmWebviewPanel'; 
-import { APIModel } from '../model/model';
 import { handleDocumentChanges } from '../extensionListeners/documentChangesListener';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
+import { APIModel } from '../model/api_model/model';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
