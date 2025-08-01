@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext';
+import { SvelteModel } from '../model/svelte_model';
+import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
+import { Types } from '../whammServer';
 
 export class WebviewPanel{
 
@@ -68,4 +71,12 @@ export class WebviewPanel{
         return text; 
     }
 
+    static endPanel(target: Types.WhammTarget){
+        ExtensionContext.api.end(target);
+        // update the sidebar
+        SvelteModel.update_sidebar_model();
+
+        // remove highlights if no webviews open
+        LineHighlighterDecoration.clear_whamm_decorations_if_necessary();
+    }
 }

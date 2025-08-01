@@ -6,6 +6,7 @@ import { isExtensionActive } from './listenerHelper';
 import { ModelHelper } from '../../model/utils/model_helper';
 import { Types } from '../../whammServer';
 import { APIModel } from '../../model/api_model/model';
+import { WizardWebviewPanel } from '../../user_interface/wizardWebviewPanel';
 
 export class LineHighlighterDecoration{
 
@@ -142,6 +143,13 @@ export class LineHighlighterDecoration{
     static clear_all_decorations(){
         LineHighlighterDecoration.clear_whamm_decorations();
         this.clear_wasm_line_decorations();
+    }
+
+    static clear_whamm_decorations_if_necessary(){
+        if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WasmWebviewPanel.number_of_webviews == 0 && WizardWebviewPanel.webview === null){
+            // remove decorations if any
+            LineHighlighterDecoration.clear_whamm_decorations();
+        }
     }
 
     //Create a **many-to-one mapping** from wat line number to color to show in the webview 

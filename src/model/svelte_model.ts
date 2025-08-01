@@ -14,6 +14,7 @@ export class SvelteModel{
     }
 
     static update_svelte_models(){
+        // @todo update wizard model as well
         SvelteModel.update_sidebar_model();
         for (let webview of WasmWebviewPanel.webviews)
             SvelteModel.update_wasm_webview_model(webview);

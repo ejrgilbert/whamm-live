@@ -55,15 +55,7 @@ export class WasmWebviewPanel extends WebviewPanel{
         WasmWebviewPanel.number_of_webviews--;
         WasmWebviewPanel.webviews.splice(WasmWebviewPanel.webviews.indexOf(webview), 1)
 
-        ExtensionContext.api.end(Types.WhammTarget.Wasm(webview.fileName));
-        // update the sidebar
-        SvelteModel.update_sidebar_model();
-
-        // remove highlights if no webviews open
-        if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WasmWebviewPanel.number_of_webviews == 0){
-            // remove decorations if any
-            LineHighlighterDecoration.clear_whamm_decorations();
-        }
+        WebviewPanel.endPanel(Types.WhammTarget.Wasm(webview.fileName));
     }
 
     // Main method to load the html
