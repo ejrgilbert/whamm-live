@@ -5,9 +5,6 @@ import { APIWizardModel } from '../model/api_model/model_wizard';
 
 export class WizardWebviewPanel extends WebviewPanel{
 
-    // model which contains all the necessary information for APImodel data
-    // model @todo
-
     static webview: WizardWebviewPanel | null = null;
     model: APIWizardModel;
 
@@ -39,7 +36,7 @@ export class WizardWebviewPanel extends WebviewPanel{
         WizardWebviewPanel.webview = webview;
     }
 
-static removePanel(webview: WizardWebviewPanel){
+    static removePanel(webview: WizardWebviewPanel){
         WizardWebviewPanel.webview = null;
         WebviewPanel.endPanel(Types.WhammTarget.Wizard());
     }

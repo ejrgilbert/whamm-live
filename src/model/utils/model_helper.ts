@@ -1,5 +1,6 @@
 import { Types } from "../../whammServer";
 import { APIWasmModel } from "../api_model/model_wasm";
+import { APIWizardModel } from "../api_model/model_wizard";
 import { FSM } from "../fsm";
 import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, jagged_array, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponseWasm, WhammLiveResponseWizard } from "../types";
 import { WatGenerator } from "./wat_generator";
@@ -610,7 +611,17 @@ export class ModelHelper{
     }
 
     // error handlers
-    // @todo supprt wizard
+    static handle_error_response_wizard(instance: APIWizardModel, errors: Types.WhammApiError[]){
+        instance.whamm_live_response = {
+            injected_wat: "",
+            id_to_injection: new Map(),
+            injections: [],
+            wat_to_injection: new Map(),
+            is_err: true,
+            whamm_errors: errors};
+        instance.jagged_array = [];
+    }
+
     static handle_error_response(instance: APIWasmModel, errors: Types.WhammApiError[]){
         let lines_injected: injected_lines_info = {total_lines_injected:0, number_of_func_lines_and_data_sections_injected: 0};
         instance.whamm_live_response = {

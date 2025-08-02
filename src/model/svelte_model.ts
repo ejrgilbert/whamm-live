@@ -1,3 +1,4 @@
+import { get_all_webviews } from "../extensionListeners/documentChangesListener";
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
 import { WasmWebviewPanel } from "../user_interface/wasmWebviewPanel";
 import { WizardWebviewPanel } from "../user_interface/wizardWebviewPanel";
@@ -15,16 +16,19 @@ export class SvelteModel{
     }
 
     static update_svelte_models(){
-        // @todo update wizard model as well
         SvelteModel.update_sidebar_model();
-        for (let webview of WasmWebviewPanel.webviews)
+        for (let webview of get_all_webviews())
             SvelteModel.update_wasm_webview_model(webview);
     }
 
     static update_sidebar_model(){
         // nofify the sidebar side of the change
-        Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+        let message = WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]);
+        if (WizardWebviewPanel.webview !== null) {
+            message.push(["wizard", WizardWebviewPanel.webview.model.__api_response_out_of_date]);
+        }
+
+        Helper_sidebar_provider.post_message('whamm-api-models-update', message);
     }
 
     private static update_wasm_webview_model(webview: WasmWebviewPanel | WizardWebviewPanel){

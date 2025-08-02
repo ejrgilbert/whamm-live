@@ -3,8 +3,8 @@ import { ModelHelper } from "../utils/model_helper";
 import { WhammLiveInjection } from "../types";
 import { Cell } from "../utils/cell";
 import { SvelteModel } from '../svelte_model';
-import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { Helper_sidebar_provider } from '../../user_interface/sidebarProviderHelper';
+import { get_all_webviews } from '../../extensionListeners/documentChangesListener';
 
 // Class to store API responses [ MVC pattern's model ] 
 export abstract class APIModel{
@@ -16,7 +16,6 @@ export abstract class APIModel{
     // svelte side code updated or not
     codemirror_code_updated!: boolean;
 
-    injected_wat_content!: string;
     jagged_array: (Cell|null)[][];
 
     constructor(){
@@ -63,7 +62,9 @@ export abstract class APIModel{
 
     // set all models's api out of date and notify the related svelte side(s) only once!
     static set_api_out_of_date(value: boolean){
-        for (let webview of WasmWebviewPanel.webviews){
+
+        let all_webviews = get_all_webviews();
+        for (let webview of all_webviews){
             webview.model.__api_response_out_of_date = value;
             webview.model.codemirror_code_updated = false;
         }

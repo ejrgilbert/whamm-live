@@ -6,6 +6,7 @@ import { Types } from "../../whammServer";
 import { APIModel } from "./model";
 import { WizardWebviewPanel } from "../../user_interface/wizardWebviewPanel";
 import { SvelteModel } from "../svelte_model";
+import { show_and_handle_error_response } from "../../extensionListeners/documentChangesListener";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIWizardModel extends APIModel{
@@ -25,14 +26,18 @@ export class APIWizardModel extends APIModel{
             try{
                 // setup in rust side
                 ExtensionContext.api.setupWizard(whamm_contents);
-                let success = await this.update(true);
-                if (success) {
+                this.update(true).then((success)=>{
+                    if (!success) {
+                        vscode.window.showInformationMessage("Error: Failed to update the model");
+                        this.webview.webviewPanel.dispose();
+                        return;
+                    }
                     this.api_response_out_of_date = false;
-                    // @todo : handle error response for whamm live response for wizard
-                    // show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
-                    this.api_response_setup_completed = true;
-                    return [true, "success"];
-                }
+                   show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
+                })
+                this.api_response_setup_completed = true;
+                return [true, "success"];
+
             } catch(error){
                 // do nothing since webviewPanel will handle all the related stuff with disposing
             }
@@ -68,8 +73,7 @@ export class APIWizardModel extends APIModel{
 
                 } catch (err){
                     if(err instanceof Types.ErrorWrapper.Error_){
-                        // @todo : handle wizard error response
-                        // ModelHelper.handle_error_response(this, err.cause.value);
+                        ModelHelper.handle_error_response_wizard(this, err.cause.value);
                         return true;
                     } else
                         return false;

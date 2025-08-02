@@ -7,6 +7,7 @@ import { ModelHelper } from '../model/utils/model_helper';
 import { Helper_sidebar_provider } from '../user_interface/sidebarProviderHelper';
 import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
 import { APIModel } from '../model/api_model/model';
+import { WizardWebviewPanel } from '../user_interface/wizardWebviewPanel';
 
 export function shouldUpdateModel(): boolean{
     let is_extension_active = isExtensionActive();
@@ -42,7 +43,9 @@ export async function handleDocumentChanges(){
     // It won't be null if this function is called
     let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
     if (!whamm_contents) throw new Error("This function cannot be called without a whamm file");
-    for (let webview of WasmWebviewPanel.webviews){
+
+    let all_webviews = get_all_webviews();
+    for (let webview of all_webviews){
         if (!webview.model.api_response_setup_completed) continue;
 
         let success = await webview.model.update();
@@ -104,12 +107,24 @@ export function show_and_handle_error_response(file_contents: string, whamm_erro
     // by displaying the red swiggly lines in the appropriate source code
     if (whamm_errors.length > 0){
         // Store the new error response for all the webviews
+        if (WizardWebviewPanel.webview){
+            ModelHelper.handle_error_response_wizard(WizardWebviewPanel.webview.model, whamm_errors);
+            ExtensionContext.api.updateWhamm(file_contents, Types.WhammTarget.Wizard());
+        }
+
         for (let webview of WasmWebviewPanel.webviews){
             ModelHelper.handle_error_response(webview.model, whamm_errors);
             if (webview.fileName) ExtensionContext.api.updateWhamm(file_contents, Types.WhammTarget.Wasm(webview.fileName));
         }
-        
         APIModel.set_api_out_of_date(false);
         displayErrorInWhammFile(whamm_errors);
     }
+}
+
+export function get_all_webviews(): (WasmWebviewPanel | WizardWebviewPanel)[]{
+    let all_webviews : (WasmWebviewPanel | WizardWebviewPanel) [] = [];
+    if (WizardWebviewPanel.webview !== null) all_webviews.push(WizardWebviewPanel.webview);
+        all_webviews.push(...WasmWebviewPanel.webviews);
+
+    return all_webviews;
 }

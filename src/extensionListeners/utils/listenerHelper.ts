@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { ExtensionContext } from '../../extensionContext';
+import { WizardWebviewPanel } from '../../user_interface/wizardWebviewPanel';
 
 export function debounce(callback: Function, delay: number){
   let timer: number;
@@ -16,7 +17,7 @@ export function debounce(callback: Function, delay: number){
 // one webview open for our extension to be "active"
 export function isExtensionActive():boolean{
     return ((ExtensionContext.context.workspaceState.get('whamm-file') !== undefined)
-            && (WasmWebviewPanel.number_of_webviews >= 1))
+            && (WasmWebviewPanel.number_of_webviews >= 1 || (WizardWebviewPanel.webview !== null)))
 }
 
 export class DiagnosticCollection{

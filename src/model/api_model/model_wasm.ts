@@ -6,7 +6,6 @@ import { ModelHelper } from "../utils/model_helper";
 import { WhammLiveInjection, WhammLiveResponseWasm } from "../types";
 import { Types } from "../../whammServer";
 import { show_and_handle_error_response } from "../../extensionListeners/documentChangesListener";
-import { Helper_sidebar_provider } from "../../user_interface/sidebarProviderHelper";
 import { APIModel } from "./model";
 import { SvelteModel } from "../svelte_model";
 
@@ -15,6 +14,7 @@ export class APIWasmModel extends APIModel{
     // will be null if wizard option chosen
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
+    injected_wat_content!: string;
     whamm_live_response!: WhammLiveResponseWasm;
     webview: WasmWebviewPanel;
 
@@ -70,8 +70,8 @@ export class APIWasmModel extends APIModel{
                    show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
                 });
                 this.api_response_setup_completed = true;
-
                 return [true, "success"];
+
             } catch(error){
                 // do nothing since webviewPanel will handle all the related stuff with disposing
             }
