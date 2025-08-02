@@ -2,6 +2,7 @@ import { Types } from "../../whammServer";
 import { APIWasmModel } from "../api_model/model_wasm";
 import { FSM } from "../fsm";
 import { injected_lines_info, InjectionFuncValue, InjectionRecord, InjectionRecordDanglingType, InjectType, InjectTypeDanglingType, jagged_array, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponseWasm, WhammLiveResponseWizard } from "../types";
+import { WatGenerator } from "./wat_generator";
 
 export class ModelHelper{
 
@@ -125,7 +126,7 @@ export class ModelHelper{
 
                             case Types.WhammDataType.functionType:
                                 {
-                                    let func_injection = injection.functionData as Types.FunctionRecord;
+                                    let [func_injection, wat_code] = WatGenerator.generateWat(injection);
                                     var whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         func_injection,
                                         inject_type,
@@ -133,29 +134,14 @@ export class ModelHelper{
                                         injection_id++,
                                         id_to_injection_mapping
                                     )
-                                    // construct the function body and update the # of lines injected and it's wat range accordingly
-                                    const name = func_injection.fname ? `$${func_injection.fname}`: `$func${func_injection.id}`;
-                                    const id = ` (;${func_injection.id};)`;
-                                    const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
-                                    const result = func_injection.sig[1].length ? ` (result ${func_injection.sig[1].join(" ")})` : "";
+                                    whamm_live_instance.code = wat_code.split('\n');
+                                    whamm_live_instance.wat_range.l2 = number_of_lines_injected + whamm_live_instance.code.length - 1;
+                                    number_of_lines_injected = whamm_live_instance.wat_range.l2;
 
-                                    whamm_live_instance.code.push(`\t(func ${name}${id}${param}${result}`);
-                                    wat_to_whamm_mapping.set(number_of_lines_injected, whamm_live_instance);
-
-                                    if (func_injection.locals.length >0){ 
-                                        whamm_live_instance.code.push(`\t\t(local ${func_injection.locals.join(" ")})`);
-                                        wat_to_whamm_mapping.set(++number_of_lines_injected, whamm_live_instance);
-                                    }
-                                    for (let each_line of func_injection.body){
-                                        whamm_live_instance.code.push(`\t\t${each_line}`);
-                                        wat_to_whamm_mapping.set(++number_of_lines_injected, whamm_live_instance);
-                                    }
-
-                                    whamm_live_instance.code.push(')');
-                                    wat_to_whamm_mapping.set(++number_of_lines_injected, whamm_live_instance);
-
-                                    whamm_live_instance.wat_range.l2 = number_of_lines_injected;
                                     whamm_live_instance.code.forEach((elem)=>injected_wat.push(elem));
+                                    for (let line_number=whamm_live_instance.wat_range.l1; line_number <= whamm_live_instance.wat_range.l2; line_number++){
+                                        wat_to_whamm_mapping.set(line_number, whamm_live_instance)
+                                    }
                                 }
                                 break;
 
@@ -169,80 +155,7 @@ export class ModelHelper{
                             case Types.WhammDataType.activeDataType:
                             case Types.WhammDataType.globalType:
                                 {
-                                    var inj_record: InjectionRecord;
-                                    switch (injection.dataType){
-
-                                        case Types.WhammDataType.exportType:
-                                        {
-                                            let export_injection = injection.exportData as Types.ExportRecord;
-                                            var wat_code = `\t(export "${export_injection.name}" (${export_injection.kind} ${export_injection.index}))`;
-                                            inj_record = export_injection;
-                                        }
-                                        break;
-                                        case Types.WhammDataType.typeType:
-                                        {
-                                            let type_injection = injection.typeData as Types.TypeRecord;
-                                            var wat_code = `\t(type ${type_injection.ty})`;
-                                            inj_record = type_injection;
-                                        }
-                                        break;
-                                        case Types.WhammDataType.memoryType:
-                                        {
-                                            let memory_injection = injection.memoryData as Types.MemoryRecord;
-                                            var wat_code = `\t(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`;
-                                            inj_record = memory_injection;
-                                        }
-                                        break;
-                                        case Types.WhammDataType.tableType:
-                                        {
-                                            inj_record = injection.tableData as Types.TableRecord;
-                                            var wat_code = "\t(table )";
-                                        }
-                                        break;
-                                        case Types.WhammDataType.elementType:
-                                        {
-                                            inj_record = injection.elementData as Types.ElementRecord;
-                                            var wat_code = "\t(elem )";
-                                        }
-                                        break;
-                                        case Types.WhammDataType.activeDataType:
-                                            {
-                                            let activedata_injection= injection.activeData as Types.ActiveDataRecord;
-                                            let offset = `(${activedata_injection.offsetExpr.join(" ")})`;
-                                            let byte_literal: string =[...activedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
-        .join("");
-                                            var wat_code = `\t(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`;
-                                            inj_record = activedata_injection;
-                                        }
-                                        break;
-                                        case Types.WhammDataType.globalType:
-                                            {
-                                            let global_injection = injection.globalData as Types.GlobalRecord;
-                                            let type_string = `(${global_injection.mutable ? "mut " : ""}${global_injection.ty})`
-                                            var wat_code = `\t(global $global${global_injection.id} ${type_string} (${global_injection.initExpr.join(" ")})`;
-                                            inj_record = global_injection;
-                                            }
-                                        break;
-                                        case Types.WhammDataType.passiveDataType:
-                                            {
-                                            let passivedata_injection = injection.passiveData as Types.PassiveDataRecord;
-                                            let byte_literal: string =[...passivedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
-        .join("");
-                                            var wat_code = `\t(data "${byte_literal}")`;
-                                            inj_record = passivedata_injection;
-                                            }
-                                            break;
-                                        // import type
-                                        // case Types.WhammDataType.importType:
-                                        default:
-                                        {
-                                            let import_record = injection.importData as Types.ImportRecord;
-                                            var wat_code = `\t(import "${import_record.module}" "${import_record.name}" (${import_record.typeRef.toLowerCase()}))`;
-                                            inj_record = import_record;
-                                        }
-                                        break;
-                                    }
-
+                                    var [inj_record, wat_code] = WatGenerator.generateWat(injection);
                                     var whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
                                         inj_record,
                                         inject_type,

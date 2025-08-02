@@ -1,12 +1,8 @@
 import { ExtensionContext } from "../../extensionContext";
-import { WasmWebviewPanel } from "../../user_interface/wasmWebviewPanel";
-import { FSM } from "../../model/fsm";
 import * as vscode from 'vscode';
 import { ModelHelper } from "../utils/model_helper";
-import { WhammLiveInjection, WhammLiveResponseWasm, WhammLiveResponseWizard } from "../types";
+import { WhammLiveResponseWizard } from "../types";
 import { Types } from "../../whammServer";
-import { show_and_handle_error_response } from "../../extensionListeners/documentChangesListener";
-import { Helper_sidebar_provider } from "../../user_interface/sidebarProviderHelper";
 import { APIModel } from "./model";
 import { WizardWebviewPanel } from "../../user_interface/wizardWebviewPanel";
 import { SvelteModel } from "../svelte_model";
