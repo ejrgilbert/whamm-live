@@ -5,6 +5,7 @@ import { WasmWebviewPanel } from './wasmWebviewPanel';
 import { handleDocumentChanges } from '../extensionListeners/documentChangesListener';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { APIModel } from '../model/api_model/model';
+import { WizardWebviewPanel } from './wizardWebviewPanel';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -52,6 +53,7 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_wasm_file(path: string | undefined){
+        let panel: WasmWebviewPanel | WizardWebviewPanel;
         if (path){
             // Check if webview for this path already exists
             // if it does, then just reveal and make that active
@@ -61,10 +63,18 @@ export class Helper_sidebar_provider{
                     return;
                 }
             }
-            let panel = new WasmWebviewPanel(path);
-            await panel.init();
-            panel.setupHTML();
+            panel = new WasmWebviewPanel(path);
+        } else{
+            if (WizardWebviewPanel.webview !== null){
+                WizardWebviewPanel.webview.webviewPanel.reveal();
+                return;
+            }
+            else {
+                panel = new WizardWebviewPanel();
+            }
         }
+        await panel.init();
+        panel.setupHTML();
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{

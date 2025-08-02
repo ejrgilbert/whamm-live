@@ -1,5 +1,6 @@
 import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper";
 import { WasmWebviewPanel } from "../user_interface/wasmWebviewPanel";
+import { WizardWebviewPanel } from "../user_interface/wizardWebviewPanel";
 import { Types } from "../whammServer";
 import { injection_circle, valid_model, WhammLiveInjection } from "./types";
 
@@ -8,7 +9,7 @@ import { injection_circle, valid_model, WhammLiveInjection } from "./types";
 // This class handles communicating those changes with the svelte webviews side
 export class SvelteModel{
 
-    static update_svelte_model(webview: WasmWebviewPanel){
+    static update_svelte_model(webview: WasmWebviewPanel | WizardWebviewPanel){
         SvelteModel.update_sidebar_model();
         SvelteModel.update_wasm_webview_model(webview);
     }
@@ -26,13 +27,17 @@ export class SvelteModel{
                 WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
-    private static update_wasm_webview_model(webview: WasmWebviewPanel){
-        webview.webviewPanel.webview.postMessage({
-            command: 'api-response-update',
-            response: {out_of_date: webview.model.__api_response_out_of_date,
-                        model: (webview.model.__api_response_out_of_date || webview.model.whamm_live_response.is_err) ? null : SvelteModel.create_valid_model(webview)
-            }
-        })
+    private static update_wasm_webview_model(webview: WasmWebviewPanel | WizardWebviewPanel){
+        if (webview instanceof WasmWebviewPanel)
+            webview.webviewPanel.webview.postMessage({
+                command: 'api-response-update',
+                response: {out_of_date: webview.model.__api_response_out_of_date,
+                            model: (webview.model.__api_response_out_of_date || webview.model.whamm_live_response.is_err) ? null : SvelteModel.create_valid_model(webview)
+                }
+            })
+        else {
+            // @todo
+        }
     }
 
     // Create model to be used in the svelte side by the webview

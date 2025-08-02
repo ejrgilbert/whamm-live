@@ -4,9 +4,10 @@ import { WhammLiveInjection } from "../types";
 import { Cell } from "../utils/cell";
 import { SvelteModel } from '../svelte_model';
 import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
+import { Helper_sidebar_provider } from '../../user_interface/sidebarProviderHelper';
 
 // Class to store API responses [ MVC pattern's model ] 
-export class APIModel{
+export abstract class APIModel{
     static whamm_file_changing: boolean = false;
     static whamm_cached_content: string;
 
@@ -14,15 +15,19 @@ export class APIModel{
     __api_response_out_of_date!: boolean;
     // svelte side code updated or not
     codemirror_code_updated!: boolean;
-    // @todo add wizard
-    webview!: WasmWebviewPanel;
 
     injected_wat_content!: string;
     jagged_array: (Cell|null)[][];
 
-    constructor(webview: WasmWebviewPanel){
+    constructor(){
         this.jagged_array = [];
-        this.webview = webview;
+    }
+
+    async setup_init(){
+        this.api_response_out_of_date = true;
+        this.codemirror_code_updated = false;
+        // loadWatAndWasm should have been called to load the content
+        return await Helper_sidebar_provider.helper_get_whamm_file_contents();
     }
 
     async update_jagged_array(injections: WhammLiveInjection[], file_contents: string){
@@ -53,17 +58,8 @@ export class APIModel{
     }}
 
     /* getter and setters */
-    get api_response_out_of_date(){
-        return this.__api_response_out_of_date;
-    }
-
-    // Updates the variables as well as notifies the svelte side by posting the messages
-    set api_response_out_of_date(value: boolean){
-        this.__api_response_out_of_date = value;
-        this.codemirror_code_updated = false;
-        // @todo: wizard side will also have an webview
-        SvelteModel.update_svelte_model(this.webview);
-    }
+    abstract get api_response_out_of_date();
+    abstract set api_response_out_of_date(value: boolean);
 
     // set all models's api out of date and notify the related svelte side(s) only once!
     static set_api_out_of_date(value: boolean){

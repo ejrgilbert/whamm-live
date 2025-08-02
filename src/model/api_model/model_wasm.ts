@@ -3,18 +3,20 @@ import { WasmWebviewPanel } from "../../user_interface/wasmWebviewPanel";
 import { FSM } from "../../model/fsm";
 import * as vscode from 'vscode';
 import { ModelHelper } from "../utils/model_helper";
-import { WhammLiveInjection, WhammLiveResponse } from "../types";
+import { WhammLiveInjection, WhammLiveResponseWasm } from "../types";
 import { Types } from "../../whammServer";
 import { show_and_handle_error_response } from "../../extensionListeners/documentChangesListener";
 import { Helper_sidebar_provider } from "../../user_interface/sidebarProviderHelper";
 import { APIModel } from "./model";
+import { SvelteModel } from "../svelte_model";
 
 // Class to store API responses [ MVC pattern's model ] 
 export class APIWasmModel extends APIModel{
     // will be null if wizard option chosen
     valid_wat_content!: string ;
     valid_wasm_content!: Uint8Array;
-    whamm_live_response!: WhammLiveResponse;
+    whamm_live_response!: WhammLiveResponseWasm;
+    webview: WasmWebviewPanel;
 
     // key is the wat line number and value is the whamm live injection at that line number
     wat_to_whamm_mapping: Map<number, WhammLiveInjection> = new Map();
@@ -24,7 +26,8 @@ export class APIWasmModel extends APIModel{
     injected_fsm_mappings: FSM | null;
 
     constructor(webview: WasmWebviewPanel){
-        super(webview);
+        super();
+        this.webview = webview;
         this.fsm_mappings = this.injected_fsm_mappings = null;
     }
 
@@ -46,11 +49,7 @@ export class APIWasmModel extends APIModel{
 
     // setup initial mappings and other necessary stuff
     async setup(): Promise<[boolean, string]>{
-        this.api_response_out_of_date = true;
-        this.codemirror_code_updated = false;
-
-        // loadWatAndWasm should have been called to load the content
-        let whamm_contents = await Helper_sidebar_provider.helper_get_whamm_file_contents();
+        let whamm_contents = await super.setup_init();
         if (this.webview.fileName && this.valid_wasm_content && this.valid_wat_content && whamm_contents){
             try{
                 // setup in rust side
@@ -135,5 +134,16 @@ export class APIWasmModel extends APIModel{
         }
         // unable to update since no whamm file
         return false;
+    }
+
+    get api_response_out_of_date(): boolean{
+        return this.__api_response_out_of_date;
+    }
+
+    // Updates the variables as well as notifies the svelte side by posting the messages
+    set api_response_out_of_date(value: boolean){
+        this.__api_response_out_of_date = value;
+        this.codemirror_code_updated = false;
+        SvelteModel.update_svelte_model(this.webview);
     }
 }

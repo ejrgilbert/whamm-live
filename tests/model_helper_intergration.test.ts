@@ -4,7 +4,7 @@ import {ModelHelper} from '../src/model/utils/model_helper';
 import { Types } from '../src/whammServer';
 import { FSM } from '../src/model/fsm';
 import toml from 'toml';
-import { InjectionRecord, InjectionRecordDanglingType, InjectType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponse } from '../src/model/types';
+import { InjectionRecord, InjectionRecordDanglingType, InjectType, span, WatLineRange, WhammDataTypes, WhammLiveInjection, WhammLiveResponseWasm } from '../src/model/types';
 
 const toml_file_path = path.resolve(__dirname, 'model_helper.test.toml'); 
 const config = toml.parse(fs.readFileSync(toml_file_path, 'utf-8'));
@@ -76,7 +76,7 @@ function load_whamm_api_response(app_name: string, script: string): Types.Inject
   return data;
 }
 
-function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveResponse){
+function validate_whamm_live_injection_instances(fsm: FSM, injection_mappings: Map<string, Types.WhammInjection[]>, response: WhammLiveResponseWasm){
     // validate in section order
     // 0th element is index for the injections to be injected in wat
     // 1st element is index for the injections to not be injected in wat
@@ -183,7 +183,7 @@ function validate_whamm_span(whamm_live_instance: WhammLiveInjection, injection_
 
 // Get the correct injection record and also the corresponding wat line number using the fsm
 // Also handles wat line values for locals, funcProbes and opBodyProbes which are inserted by whamm using the injected funcid to wat mapping if the funcID doesn't exist in the FSM
-function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM, response: WhammLiveResponse) : [InjectionRecord | undefined, undefined| number]{
+function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjection, fsm: FSM, response: WhammLiveResponseWasm) : [InjectionRecord | undefined, undefined| number]{
   switch (record.dataType) {
       case Types.WhammDataType.typeType:
         return [record.typeData, fsm.section_to_line_mapping.get(InjectType.Type)];
@@ -251,7 +251,7 @@ function get_injection_record_and_fsm_wat_line_number(record: Types.WhammInjecti
 
 // Get the correct whamm live injection object from `response` since it contains two arrays:
 // one for injections to inject in the wat file and one for injections to show as dangling pointers
-function get_whamm_live_instance(inject_type: Types.WhammDataType, response: WhammLiveResponse, indexes: [number, number]){
+function get_whamm_live_instance(inject_type: Types.WhammDataType, response: WhammLiveResponseWasm, indexes: [number, number]){
   switch (inject_type){
     case Types.WhammDataType.opProbeType:
     case Types.WhammDataType.funcProbeType:

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponse } from "../../model/types";
+import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponseWasm } from "../../model/types";
 import { ExtensionContext } from '../../extensionContext';
 import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { isExtensionActive } from './listenerHelper';
@@ -213,7 +213,7 @@ type highlightCompleteData = {
     all_wat_lines: number[];
 }
 
-function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponse, whamm_span: span): WhammLiveInjection[]{
+function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponseWasm, whamm_span: span): WhammLiveInjection[]{
     let return_injections : WhammLiveInjection[] = [];
 
     for (const array of ["injecting_injections", "other_injections"]){

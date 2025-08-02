@@ -109,12 +109,21 @@ export type injected_lines_info={
     number_of_func_lines_and_data_sections_injected: number
 }
 
-export type WhammLiveResponse = {
+export type WhammLiveResponseWasm = {
     lines_injected: injected_lines_info;
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
     id_to_injection: Map<number, WhammLiveInjection>;
+    whamm_errors: Types.WhammApiError[],
+    is_err: boolean,
+}
+
+export type WhammLiveResponseWizard = {
+    injected_wat: string,
+    id_to_injection: Map<number, WhammLiveInjection>;
+    injections: WhammLiveInjection[];
+    wat_to_injection: Map<number, WhammLiveInjection>;
     whamm_errors: Types.WhammApiError[],
     is_err: boolean,
 }

@@ -1,13 +1,20 @@
 import * as vscode from 'vscode';
 import { Types } from '../whammServer';
 import { WebviewPanel } from './webviewPanel';
+import { APIWizardModel } from '../model/api_model/model_wizard';
 
 export class WizardWebviewPanel extends WebviewPanel{
 
     // model which contains all the necessary information for APImodel data
     // model @todo
 
-    static webview: WizardWebviewPanel | null;
+    static webview: WizardWebviewPanel | null = null;
+    model: APIWizardModel;
+
+    constructor(){
+        super();
+        this.model = new APIWizardModel(this);
+    }
 
     async init(){
 
@@ -20,7 +27,7 @@ export class WizardWebviewPanel extends WebviewPanel{
         })
 
         // setup model: @todo
-        let [success, message] = [true, "success"];
+        let [success, message] = await this.model.setup();
         if (!success) {
             vscode.window.showErrorMessage(message);
             this.webviewPanel.dispose();
@@ -32,7 +39,7 @@ export class WizardWebviewPanel extends WebviewPanel{
         WizardWebviewPanel.webview = webview;
     }
 
-    static removePanel(webview: WizardWebviewPanel){
+static removePanel(webview: WizardWebviewPanel){
         WizardWebviewPanel.webview = null;
         WebviewPanel.endPanel(Types.WhammTarget.Wizard());
     }
@@ -40,11 +47,12 @@ export class WizardWebviewPanel extends WebviewPanel{
     // Main method to load the html
     async setupHTML(){
         super.loadHTML();
-        super.postMessage({
-                command: 'init-data',
-                show_wizard: false,
-                // @todo send wat content
-        });
+        // @todo
+        // super.postMessage({
+        //         command: 'init-data',
+        //         show_wizard: false,
+        //         // @todo send wat content
+        // });
         this.addListeners();
     }
 
