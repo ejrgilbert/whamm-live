@@ -229,8 +229,8 @@ export class ModelHelper{
                             case Types.WhammDataType.importType:
                                 {
                                     // get the required injection record as well as the fsm line to inject at
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.importData, InjectType.Import, fsm);
-                                    let import_injection = inj as Types.ImportRecord;
+                                    let start_wat_line = ModelHelper.get_wat_line(injection.importData, InjectType.Import, fsm);
+                                    let import_injection = injection.importData as Types.ImportRecord;
 
                                     // create whamm live instance with empty code block
                                     let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
@@ -246,128 +246,70 @@ export class ModelHelper{
                                     // add the funcID value if the import is a function
                                     let id = (/^func/i.test(import_injection.typeRef)) ?
                                             `(;${fsm.number_of_func_imports + (number_of_func_imports_injected++)};)` : "";
-
                                     // add the new whamm live instance and add it's relevant code
                                     let wat_code = `\t(import "${import_injection.module}" "${import_injection.name}" (${import_injection.typeRef.toLowerCase()}${id}))`;
+
                                     whamm_live_instance.code.push(wat_code);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
 
                             case Types.WhammDataType.exportType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.exportData, InjectType.Export, fsm);
-                                    let export_injection = inj as Types.ExportRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        export_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    whamm_live_instance.code.push(
-                                        `\t(export "${export_injection.name}" (${export_injection.kind} ${export_injection.index}))`
-                                    )
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                }
-                                break;
-
                             case Types.WhammDataType.typeType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.typeData, InjectType.Type, fsm);
-                                    let type_injection = inj as Types.TypeRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        type_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    whamm_live_instance.code.push(`\t(type ${type_injection.ty})`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                }
-                                break;
-                            
                             case Types.WhammDataType.memoryType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.memoryData, InjectType.Memory, fsm);
-                                    let memory_injection = inj as Types.MemoryRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        memory_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    whamm_live_instance.code.push(`\t(memory $mem${memory_injection.id} ${memory_injection.initial} ${memory_injection.maximum ? memory_injection.maximum: ''})`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                }
-                                break;
-
-                            case Types.WhammDataType.activeDataType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.activeData, InjectType.Data, fsm);
-                                    let activedata_injection = inj as Types.ActiveDataRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        activedata_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    const offset = `(${activedata_injection.offsetExpr.join(" ")})`;
-                                    const byte_literal: string =[...activedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
-  .join("");
-                                    whamm_live_instance.code.push(`\t(data (memory ${activedata_injection.memoryIndex}) (offset ${offset}) "${byte_literal}")`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                    number_of_func_lines_and_data_sections_injected += 1;
-                                }
-                                break;
-
                             case Types.WhammDataType.passiveDataType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.passiveData, InjectType.Data, fsm);
-                                    let passivedata_injection = inj as Types.PassiveDataRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        passivedata_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    const byte_literal: string =[...passivedata_injection.data].map(b => `\\${b.toString(16).padStart(2, "0")}`)
-  .join("");
-                                    whamm_live_instance.code.push(`\t(data "${byte_literal}")`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                    number_of_func_lines_and_data_sections_injected += 1;
-                                }
-                                break;
-
+                            case Types.WhammDataType.activeDataType:
                             case Types.WhammDataType.globalType:
+                            case Types.WhammDataType.tableType:
+                            case Types.WhammDataType.elementType:
                                 {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.globalData, InjectType.Global, fsm);
-                                    let global_injection = inj as Types.GlobalRecord;
+                                    let start_wat_line!: number;
+                                    switch (injection.dataType){
+                                        case Types.WhammDataType.exportType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.exportData, InjectType.Export, fsm);
+                                            break;
+                                        case Types.WhammDataType.typeType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.typeData, InjectType.Type, fsm);
+                                            break;
+                                        case Types.WhammDataType.memoryType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.memoryData, InjectType.Memory, fsm);
+                                            break;
+                                        case Types.WhammDataType.activeDataType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.activeData, InjectType.Data, fsm);
+                                            break;
+                                        case Types.WhammDataType.passiveDataType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.passiveData, InjectType.Data, fsm);
+                                            break;
+                                        case Types.WhammDataType.globalType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.globalData, InjectType.Global, fsm);
+                                            break;
+                                        case Types.WhammDataType.tableType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.tableData, InjectType.Table, fsm);
+                                            break;
+                                        case Types.WhammDataType.elementType:
+                                            start_wat_line = ModelHelper.get_wat_line(injection.elementData, InjectType.Element, fsm);
+                                            break;
+                                    }
+                                    let [inj_record, wat_code] = WatGenerator.generateWat(injection);
+
                                     let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        global_injection,
+                                        inj_record,
                                         inject_type,
                                         start_wat_line + (number_of_lines_injected++),
                                         injection_id++,
                                         id_to_injection_mapping
                                     )
-                                    
-                                    let type_string = `(${global_injection.mutable ? "mut " : ""}${global_injection.ty})`
-                                    whamm_live_instance.code.push(
-                                        `\t(global $global${global_injection.id}} ${type_string} (${global_injection.initExpr.join(" ")})`);
+                                    whamm_live_instance.code.push(wat_code);
                                     whamm_live_injections_to_inject.push(whamm_live_instance);
                                 }
                                 break;
 
                             case Types.WhammDataType.functionType:
                                 {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.functionData, InjectType.Func, fsm);
-                                    let func_injection = inj as Types.FunctionRecord;
+                                    let start_wat_line = ModelHelper.get_wat_line(injection.functionData, InjectType.Func, fsm);
+                                    let [inj_record, wat_code] = WatGenerator.generateWat(injection);
                                     let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        func_injection,
+                                        inj_record,
                                         inject_type,
                                         start_wat_line + number_of_lines_injected,
                                         injection_id++,
@@ -375,21 +317,11 @@ export class ModelHelper{
                                     )
                                     let local_start_line = start_wat_line + number_of_lines_injected;
 
-                                    // construct the function body and update the # of lines injected and it's wat range accordingly
-                                    const name = func_injection.fname ? `$${func_injection.fname}`: `$func${func_injection.id}`;
-                                    const id = ` (;${func_injection.id};)`;
-                                    const param = func_injection.sig[0].length ? ` (param ${func_injection.sig[0].join(" ")})` : "";
-                                    const result = func_injection.sig[1].length ? ` (result ${func_injection.sig[1].join(" ")})` : "";
 
-                                    whamm_live_instance.code.push(`\t(func ${name}${id}${param}${result}`);
-                                    if (func_injection.locals.length >0){ 
-                                        whamm_live_instance.code.push(`\t\t(local ${func_injection.locals.join(" ")})`);
+                                    whamm_live_instance.code = wat_code.split('\n');
+                                    let local_regex = /^\s*\(local/;
+                                    if (whamm_live_instance.code.length > 2 && local_regex.test(whamm_live_instance.code[1]))
                                         local_start_line++;
-                                    }
-
-                                    for (let each_line of func_injection.body)
-                                        whamm_live_instance.code.push(`\t\t${each_line}`);
-                                    whamm_live_instance.code.push(')');
 
                                     number_of_lines_injected = number_of_lines_injected + whamm_live_instance.code.length;
                                     number_of_func_lines_and_data_sections_injected += whamm_live_instance.code.length;
@@ -399,7 +331,7 @@ export class ModelHelper{
 
                                     // Also insert values in the `injected_func_id_to_wat_mapping` map to keep track of the **exact** line func starts, body starts and ends, and locals start
                                     injected_func_id_to_wat_mapping.set(
-                                        func_injection.id, {func: whamm_live_instance.wat_range.l1,
+                                        (inj_record as Types.FunctionRecord).id, {func: whamm_live_instance.wat_range.l1,
                                                             local: local_start_line,
                                                             probe: [local_start_line+1, whamm_live_instance.wat_range.l2]
                                     })
@@ -407,76 +339,37 @@ export class ModelHelper{
                                 }
                                 break;
 
-                            case Types.WhammDataType.tableType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.tableData, InjectType.Table, fsm);
-                                    let table_injection = inj as Types.TableRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        table_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    
-                                    whamm_live_instance.code.push(
-                                        `\t(table )`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                }
-                                break;
-
-                            case Types.WhammDataType.elementType:
-                                {
-                                    let [inj , start_wat_line] = ModelHelper.get_required_inject_data_and_wat_line(injection.elementData, InjectType.Element, fsm);
-                                    let elem_injection = inj as Types.ElementRecord;
-                                    let whamm_live_instance = ModelHelper.__new_whamm_live_injection_instance(
-                                        elem_injection,
-                                        inject_type,
-                                        start_wat_line + (number_of_lines_injected++),
-                                        injection_id++,
-                                        id_to_injection_mapping
-                                    )
-                                    
-                                    whamm_live_instance.code.push(
-                                        `\t(elem )`);
-                                    whamm_live_injections_to_inject.push(whamm_live_instance);
-                                }
-                                break;
-
                             case Types.WhammDataType.localType:
                             case Types.WhammDataType.opProbeType:
                             case Types.WhammDataType.funcProbeType:
                                 {
-                                    let record: Types.LocalRecord | Types.OpProbeRecord | Types.FuncProbeRecord | undefined;
+                                    let inj: Types.LocalRecord | Types.OpProbeRecord | Types.FuncProbeRecord | undefined;
                                     let inject: InjectType.Local | InjectType.FuncBodyProbe | InjectType.FuncProbe;
                                     switch (inject_type) {
                                         case Types.WhammDataType.localType:
-                                                record=injection.localData;
+                                                inj=injection.localData;
                                                 inject= InjectType.Local;
                                                 break;
                                         case Types.WhammDataType.opProbeType:
-                                                record=injection.opProbeData;
+                                                inj=injection.opProbeData;
                                                 inject= InjectType.FuncBodyProbe;
                                                 break;
                                         case Types.WhammDataType.funcProbeType:
-                                                record=injection.funcProbeData;
+                                                inj=injection.funcProbeData;
                                                 inject= InjectType.FuncProbe;
                                                 break;
                                     }
-                                    
-                                    let inj!: InjectionRecord;
                                     let wat_line!: number;
                                     try{
-                                        [inj , wat_line] = ModelHelper.get_required_inject_data_and_wat_line(record, inject, fsm);
+                                        wat_line = ModelHelper.get_wat_line(inj, inject, fsm);
                                         wat_line = wat_line + number_of_lines_injected - number_of_func_lines_and_data_sections_injected;
                                     } catch (e){
                                         // error if fsm mapping not present
-                                        if (e instanceof Error && e.message.includes('FSM error') && record)
+                                        if (e instanceof Error && e.message.includes('FSM error') && inj)
                                         {
                                             // If so, check if the mapping present in the `injected_func_id_wat_mapping`
                                             // because the funcID could have belonged to a injected function
-                                            wat_line = ModelHelper.get_wat_line_without_fsm(record, inject, injected_func_id_to_wat_mapping),
-                                            inj = record;
+                                            wat_line = ModelHelper.get_wat_line_without_fsm(inj, inject, injected_func_id_to_wat_mapping);
                                         } else
                                             throw e;
                                     }
@@ -628,7 +521,7 @@ export class ModelHelper{
     }
 
     // helps throw error otherwise just gives record data and fsm line for the given section
-    private static get_required_inject_data_and_wat_line(injection_data: undefined | InjectionRecord, injection_type: InjectType, fsm: FSM): [InjectionRecord, number]{
+    private static get_wat_line(injection_data: undefined | InjectionRecord, injection_type: InjectType, fsm: FSM): number{
         if (injection_data === undefined) throw new Error(`API response error: ${InjectType[injection_type]} injection expected to be defined`);
         // use FSM to find where this injection should be injected
         let start_wat_line;
@@ -666,7 +559,7 @@ export class ModelHelper{
         if (start_wat_line === undefined) {
             throw new Error("FSM error: fsm mapping not present");
         }
-        return [injection_data, start_wat_line + offset];
+        return start_wat_line + offset;
     }
 
     private static get_wat_line_without_fsm(

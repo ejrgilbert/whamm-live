@@ -95,6 +95,7 @@ export class WatGenerator{
                     inj_record = func_injection;
                     wat_code = wat_code_array.join("\n");
                 }
+                break;
             case Types.WhammDataType.localType:
             case Types.WhammDataType.opProbeType:
             case Types.WhammDataType.funcProbeType:
