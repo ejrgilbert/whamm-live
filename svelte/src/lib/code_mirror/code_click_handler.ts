@@ -19,14 +19,14 @@ export const code_click_handler = EditorView.domEventHandlers({
 });
 
 function is_okay_to_send_data(): boolean{
-    return api_response.codemirror_code_updated && !api_response.out_of_date && (api_response.model != null);
+    return api_response.codemirror_code_updated && !api_response.out_of_date && (api_response.wasm_model!= null);
 }
 
 function handle_line_click(line: number){
     // Send the line number to the extension side so that it can handle it
     if (is_okay_to_send_data()) {
         // Don't do anything if line is already highlighted or it is not an injected line
-        if (highlight_data.lines[line] || (!api_response.model?.lines_injected.includes(line))) return;
+        if (highlight_data.lines[line] || (!api_response.wasm_model?.lines_injected.includes(line))) return;
         post_highlight_message(line);
     }
 }

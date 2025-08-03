@@ -1,11 +1,11 @@
 // Helper functions for sidebar provider for user interace event handling
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
-import { WhammWebviewPanel } from './webviewPanel'; 
-import { APIModel } from '../model/model';
-import { ModelHelper } from '../model/utils/model_helper';
-import { handleDocumentChanges, shouldUpdateModel } from '../extensionListeners/documentChangesListener';
+import { WasmWebviewPanel } from './wasmWebviewPanel'; 
+import { get_all_webviews, handleDocumentChanges } from '../extensionListeners/documentChangesListener';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
+import { APIModel } from '../model/api_model/model';
+import { WizardWebviewPanel } from './wizardWebviewPanel';
 
 // Open whamm file using file dialog and VS Code API
 // Returns true if whamm file opens, false otherwise
@@ -53,24 +53,32 @@ export class Helper_sidebar_provider{
     }
 
     static async helper_show_wasm_file(path: string | undefined){
+        let panel: WasmWebviewPanel | WizardWebviewPanel;
         if (path){
             // Check if webview for this path already exists
             // if it does, then just reveal and make that active
-            for (let webview of WhammWebviewPanel.webviews){
+            for (let webview of WasmWebviewPanel.webviews){
                 if (webview.fileName === path){
                     webview.webviewPanel.reveal();
                     return;
                 }
             }
+            panel = new WasmWebviewPanel(path);
+        } else{
+            if (WizardWebviewPanel.webview !== null){
+                WizardWebviewPanel.webview.webviewPanel.reveal();
+                return;
+            }
+            else {
+                panel = new WizardWebviewPanel();
+            }
         }
-
-        let panel = new WhammWebviewPanel(path);
         await panel.init();
-        panel.loadHTML();
+        panel.setupHTML();
     }
 
     static async helper_show_whamm_file(filePath: vscode.Uri) : Promise<boolean>{
-            if (WhammWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
+            if (WasmWebviewPanel.number_of_webviews > 0 && ExtensionContext.get_editors().length > 0){
                 LineHighlighterDecoration.clear_all_decorations();
             }
             
@@ -86,7 +94,7 @@ export class Helper_sidebar_provider{
             Helper_sidebar_provider.helper_update_whamm_workspace_state(filePath.fsPath);
 
             // Update the webview model data if there are any open
-            if (WhammWebviewPanel.number_of_webviews > 0){
+            if (WasmWebviewPanel.number_of_webviews > 0){
                 await handleDocumentChanges();
             }
 
@@ -128,7 +136,7 @@ export class Helper_sidebar_provider{
             ExtensionContext.context.workspaceState.get('whamm-file'),
         )
         Helper_sidebar_provider.post_message('whamm-api-models-update',
-                WhammWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
+                WasmWebviewPanel.webviews.map(view=> [view.fileName, view.model.__api_response_out_of_date]));
     }
 
     static async helper_get_whamm_file_contents(): Promise<string | null>{
@@ -167,10 +175,10 @@ export class Helper_sidebar_provider{
             switch (choice){
                 case soft_reset_message:
                     {
-                        for (let webview of WhammWebviewPanel.webviews){
+                        for (let webview of get_all_webviews())
                             webview.webviewPanel.dispose();
-                            Helper_sidebar_provider.helper_reset_sidebar_webview_state();
-                        }
+
+                        Helper_sidebar_provider.helper_reset_sidebar_webview_state();
                     }
                     break;
                 case hard_reset_message:

@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import { isExtensionActive } from './utils/listenerHelper';
 import { ExtensionContext } from '../extensionContext';
-import { APIModel} from '../model/model';
-import { WhammWebviewPanel } from '../user_interface/webviewPanel';
+import { WasmWebviewPanel } from '../user_interface/wasmWebviewPanel';
 import { Cell, Node } from '../model/utils/cell';
 import { LineHighlighterDecoration } from './utils/lineHighlighterDecoration';
-import { highlights_info, inj_circle_highlights_info, jagged_array, WhammLiveInjection } from '../model/types';
+import { highlights_info, inj_circle_highlights_info, WhammLiveInjection } from '../model/types';
 import { ModelHelper } from '../model/utils/model_helper';
 import { BestEffortHighlight } from './utils/bestEffortHighlight';
+import { APIModel } from '../model/api_model/model';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -45,7 +45,7 @@ export function handleCursorChange(){
         let best_effort_highlight_data = BestEffortHighlight.run(all_injections, null_jagged_array);
 
         let webview_index = 0;
-        for (let webview of WhammWebviewPanel.webviews){
+        for (let webview of WasmWebviewPanel.webviews){
 
             // No need to perform highlighting if api is out of date 
             // or the code mirror code isn't updated yet!
@@ -92,7 +92,8 @@ export function handleCursorChange(){
 function sort_all_whamm_live_injections(line: number, col: number): WhammLiveInjection[] {
     let sorted_injections: [WhammLiveInjection, (Cell|null)[][]][]= [];
 
-    for (let webview of WhammWebviewPanel.webviews){
+    for (let webview of WasmWebviewPanel.webviews){
+        if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
         let cell = webview.model.jagged_array[line-1][col-1];
         if (!cell) continue;
 

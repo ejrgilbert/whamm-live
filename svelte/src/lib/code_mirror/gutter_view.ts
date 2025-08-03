@@ -6,13 +6,13 @@
  */
 
 import {EditorView, GutterMarker, gutter, keymap} from "@codemirror/view"
-import {type valid_model} from "../api_response.svelte"
 import {StateField, StateEffect, RangeSetBuilder, EditorState} from "@codemirror/state"
 import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../highlight_data.svelte";
 import { handle_circle_click } from "./code_click_handler";
 import { basicSetup } from "codemirror";
 import { wast } from "@codemirror/lang-wast";
 import { search, searchKeymap } from "@codemirror/search";
+import type { valid_wasm_model } from "../api_response.svelte";
 declare const vscode: any;
 
 // `injectionCircleEffect` contains all of my dangling injections
@@ -160,7 +160,7 @@ export function clearInjectedCircles(view: EditorView){
     })
 }
 
-export function addDanglingCircleInjections(view: EditorView, model: valid_model){
+export function addDanglingCircleInjections(view: EditorView, model: valid_wasm_model){
     view.dispatch({
         effects: injectionCircleEffect.of(model.wat_to_injection_circle)
     })
@@ -168,7 +168,7 @@ export function addDanglingCircleInjections(view: EditorView, model: valid_model
 
 // Record contains the circle's injection IDs that need to be highlighted
 // So, if the id matches for the injection circles, we highlight them!!
-export function updateInjectionCircles(view: EditorView, model: valid_model, record: inj_circle_highlights_info){
+export function updateInjectionCircles(view: EditorView, model: valid_wasm_model, record: inj_circle_highlights_info){
 
     for (let injection_circles of Object.values(model.wat_to_injection_circle)){
       for (let injection_circle of injection_circles){

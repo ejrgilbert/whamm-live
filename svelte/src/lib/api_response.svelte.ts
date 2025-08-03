@@ -1,22 +1,47 @@
 import type { injection_circle } from "./highlight_data.svelte";
 
-export type valid_model = {
+export type valid_wasm_model = {
 	injected_wat: string,
 	lines_injected: number[],
     wat_to_injection_circle: Record<number, injection_circle[]>
 }
 
+export type valid_wizard_model = {
+	injected_wat: string,
+	whamm_file_related_lines: number[],
+}
+
 type APIResponse = {
 	out_of_date: boolean,
 	codemirror_code_updated: boolean,
-	original_wat: string,
-	model: valid_model | null,
+	wat: string,
+	wasm_model: valid_wasm_model | null,
+	wizard_model: valid_wizard_model | null,
 }
+
+type configuration = {
+	show_wizard: boolean,
+	init_complete: boolean,
+}
+
+export const config : configuration = $state({
+	show_wizard: false,
+	init_complete: false
+});
 
 export var api_response: APIResponse = $state({
 	out_of_date: true,
 	codemirror_code_updated: false,
-	original_wat: '',
+	wat: '',
 // if model is null, this means either error, or fetching API response
-	model: null
+	wasm_model: null,
+	wizard_model: null
 });
+
+export function post_codemirror_updated(){
+	//@ts-ignore
+	vscode.postMessage({
+		command: "codemirror-code-updated"
+	});
+}
+

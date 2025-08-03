@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import toml from 'toml';
 import {span, WatLineRange, WhammLiveInjection} from '../src/model/types';
-import {ModelHelper} from '../src/model/utils/model_helper';
 import {Cell, Node} from '../src/model/utils/cell';
 import { Types } from '../src/whammServer';
 
@@ -51,9 +50,10 @@ describe('testing linked list implementation for a cell', () => {
 });
 
 // Helper functions
-
+var id = 1;
 var create_dummy_whamm_live_injection = (span_size: number): WhammLiveInjection => {
     return {
+        id: id++,
         type: Types.WhammDataType.opProbeType,
         mode: null,
         code: [],

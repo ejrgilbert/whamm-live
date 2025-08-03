@@ -109,12 +109,21 @@ export type injected_lines_info={
     number_of_func_lines_and_data_sections_injected: number
 }
 
-export type WhammLiveResponse = {
+export type WhammLiveResponseWasm = {
     lines_injected: injected_lines_info;
     injecting_injections: WhammLiveInjection[];
     other_injections: WhammLiveInjection[];
     injected_funcid_wat_map: Map<number, InjectionFuncValue>;
     id_to_injection: Map<number, WhammLiveInjection>;
+    whamm_errors: Types.WhammApiError[],
+    is_err: boolean,
+}
+
+export type WhammLiveResponseWizard = {
+    injected_wat: string,
+    id_to_injection: Map<number, WhammLiveInjection>;
+    injections: WhammLiveInjection[];
+    wat_to_injection: Map<number, WhammLiveInjection>;
     whamm_errors: Types.WhammApiError[],
     is_err: boolean,
 }
@@ -137,8 +146,14 @@ export type highlights_info = Record<number, string>;
 // [ used for opBodyProbes, locals and funcProbes that are represented via dangling circles ]
 export type inj_circle_highlights_info = Record<number, string>;
 
-export type valid_model = {
+export type valid_wasm_model = {
 	injected_wat: string,
 	lines_injected: number[],
     wat_to_injection_circle: Record<number, injection_circle[]>
+}
+
+export type valid_wizard_model = {
+	injected_wat: string,
+    // lines that are a result of something in the whamm file (cause is not whamm itself)
+	whamm_file_related_wat_lines: number[],
 }

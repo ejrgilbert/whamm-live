@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponse } from "../../model/types";
+import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponseWasm } from "../../model/types";
 import { ExtensionContext } from '../../extensionContext';
-import { WhammWebviewPanel } from '../../user_interface/webviewPanel';
+import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { isExtensionActive } from './listenerHelper';
 import { ModelHelper } from '../../model/utils/model_helper';
 import { Types } from '../../whammServer';
-import { APIModel } from '../../model/model';
+import { APIModel } from '../../model/api_model/model';
+import { WizardWebviewPanel } from '../../user_interface/wizardWebviewPanel';
 
 export class LineHighlighterDecoration{
 
@@ -75,7 +76,7 @@ export class LineHighlighterDecoration{
         }
     }
 
-    static highlight_wasm_webview_lines(webview: WhammWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
+    static highlight_wasm_webview_lines(webview: WasmWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
             line_data: data1,
@@ -90,7 +91,7 @@ export class LineHighlighterDecoration{
      * @param number_value : is either the injection id or the wat line number
      * @param is_id 
      */
-    static highlight_whamm_live_injection(original_webview: WhammWebviewPanel, number_value: number, is_id: boolean=false){
+    static highlight_whamm_live_injection(original_webview: WasmWebviewPanel, number_value: number, is_id: boolean=false){
         // If this is called because of the svelte communication, 
         // it is guaranteed to be a valid injection
         var original_injection: WhammLiveInjection | undefined;
@@ -109,7 +110,7 @@ export class LineHighlighterDecoration{
 
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too
-                for (let webview of WhammWebviewPanel.webviews){
+                for (let webview of WasmWebviewPanel.webviews){
                     if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
 
                     let injections: WhammLiveInjection[] = [];
@@ -144,6 +145,13 @@ export class LineHighlighterDecoration{
         this.clear_wasm_line_decorations();
     }
 
+    static clear_whamm_decorations_if_necessary(){
+        if ((ExtensionContext.context.workspaceState.get("whamm-file") !== undefined) && WasmWebviewPanel.number_of_webviews == 0 && WizardWebviewPanel.webview === null){
+            // remove decorations if any
+            LineHighlighterDecoration.clear_whamm_decorations();
+        }
+    }
+
     //Create a **many-to-one mapping** from wat line number to color to show in the webview 
     // and store it in the record
     // Also create a one-to-one injection ID to highlight color mapping for "circle" injections
@@ -172,12 +180,12 @@ export class LineHighlighterDecoration{
     }
 
     static clear_wasm_line_decorations(){
-        for (let webview of WhammWebviewPanel.webviews){
+        for (let webview of WasmWebviewPanel.webviews){
             LineHighlighterDecoration.clear_wasm_line_decoration(webview);
         }
     }
 
-    static clear_wasm_line_decoration(webview: WhammWebviewPanel){
+    static clear_wasm_line_decoration(webview: WasmWebviewPanel){
         LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
     }
 
@@ -191,7 +199,7 @@ export class LineHighlighterDecoration{
         LineHighlighterDecoration.decorations = [];
     }
 
-    static clear_whamm_and_webview_decorations(webview: WhammWebviewPanel){
+    static clear_whamm_and_webview_decorations(webview: WasmWebviewPanel){
         // clear the whamm line highlights
         LineHighlighterDecoration.clear_whamm_decorations();
         // clear the svelte webview side highlights
@@ -205,7 +213,7 @@ type highlightCompleteData = {
     all_wat_lines: number[];
 }
 
-function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponse, whamm_span: span): WhammLiveInjection[]{
+function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponseWasm, whamm_span: span): WhammLiveInjection[]{
     let return_injections : WhammLiveInjection[] = [];
 
     for (const array of ["injecting_injections", "other_injections"]){
