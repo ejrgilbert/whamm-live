@@ -37,3 +37,11 @@ export var api_response: APIResponse = $state({
 	wasm_model: null,
 	wizard_model: null
 });
+
+export function post_codemirror_updated(){
+	//@ts-ignore
+	vscode.postMessage({
+		command: "codemirror-code-updated"
+	});
+}
+

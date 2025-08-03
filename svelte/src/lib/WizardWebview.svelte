@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Circle3 } from "svelte-loading-spinners";
   import { fade } from "svelte/transition";
-  import { config } from "./api_response.svelte";
+  import { api_response, config, post_codemirror_updated } from "./api_response.svelte";
   import InjectCodeButton from "./InjectCodeButton.svelte";
 
     const { view } = $props();
@@ -10,7 +10,17 @@
     }
 
     function update_codemirror(){
+        api_response.codemirror_code_updated = true;
 
+        // Update codemirror content
+        const transaction = view.state.update({
+            changes: { from: 0, to: view.state.doc.length, insert: (api_response.wizard_model) ? api_response.wizard_model.injected_wat : ";; Error on whamm side!\n ;; Make sure your whamm file doesn't have any errors"}
+        });
+        view.dispatch(transaction);
+        // clear highlights, stars @todo
+
+        // update the extension side about the update
+        post_codemirror_updated();
     }
 
 </script>

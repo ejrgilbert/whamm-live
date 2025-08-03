@@ -35,7 +35,7 @@ export class APIWizardModel extends APIModel{
                         this.api_response_out_of_date = false;
                         show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
                         // render wat content!
-                        this.webview.sendWatContent();
+                        this.webview.initWizardComplete();
                     });
                     this.api_response_setup_completed = true;
                 }, 0);

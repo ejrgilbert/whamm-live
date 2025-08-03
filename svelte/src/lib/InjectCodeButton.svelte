@@ -4,7 +4,6 @@
 
     const { callback } = $props();
 
-// @todo: button- nothing injected for wizard!!!!!
 </script>
 {#if !api_response.out_of_date}
    <div id="inject-code-button" transition:fade>
@@ -13,7 +12,7 @@
         {:else if ((!config.show_wizard && !api_response.wasm_model))}
             <p transition:fade>🚫 Nothing injected </p>
         {:else if (config.show_wizard && !api_response.wizard_model)}
-            <p transition:fade>🚫 Error on whamm side !!</p>
+            <p transition:fade>🚫 Error !!</p>
         {/if}
     </div>
 {/if}

@@ -146,8 +146,14 @@ export type highlights_info = Record<number, string>;
 // [ used for opBodyProbes, locals and funcProbes that are represented via dangling circles ]
 export type inj_circle_highlights_info = Record<number, string>;
 
-export type valid_model = {
+export type valid_wasm_model = {
 	injected_wat: string,
 	lines_injected: number[],
     wat_to_injection_circle: Record<number, injection_circle[]>
+}
+
+export type valid_wizard_model = {
+	injected_wat: string,
+    // lines that are a result of something in the whamm file (cause is not whamm itself)
+	whamm_file_related_wat_lines: number[],
 }

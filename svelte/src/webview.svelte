@@ -66,7 +66,6 @@
                         api_response.codemirror_code_updated = false;
                         if (config.show_wizard)
                             {
-                                // @todo
                                 api_response.wizard_model = message.response.model;
                                 api_response.wasm_model = null;
                             }

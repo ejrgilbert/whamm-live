@@ -51,15 +51,23 @@ export class WizardWebviewPanel extends WebviewPanel{
     }
 
     // init the wat content after the **first** model update
-    initWatContent(){
+    initWizardComplete(){
         super.postMessage({
             command: 'init-wat-wizard',
-            wat_content: this.model.whamm_live_response.injected_wat,
         })
     }
 
     addListeners() {
-        // @todo- cursor changes and code mirror updated
+        // @todo- cursor changes line highlight 
+        this.webviewPanel.webview.onDidReceiveMessage(
+            message => {
+                switch (message.command){
+                    case 'codemirror-code-updated':
+                        this.model.codemirror_code_updated = true;
+                        break;
+                }
+            }
+        )
     }
 
 }

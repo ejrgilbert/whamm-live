@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { api_response } from "./api_response.svelte";
+  import { api_response, post_codemirror_updated } from "./api_response.svelte";
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
   import { addDanglingCircleInjections, clearInjectedCircles} from "./code_mirror/gutter_view";
   import { highlight_data } from "./highlight_data.svelte";
@@ -36,14 +36,7 @@
         }
 
         // update the extension side about the update
-        post_message_to_extension();
-    }
-
-    function post_message_to_extension(){
-        //@ts-ignore
-        vscode.postMessage({
-            command: "codemirror-code-updated"
-        });
+        post_codemirror_updated();
     }
 
     // Cursor highlight related functions

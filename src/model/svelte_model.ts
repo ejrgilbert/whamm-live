@@ -3,7 +3,7 @@ import { Helper_sidebar_provider } from "../user_interface/sidebarProviderHelper
 import { WasmWebviewPanel } from "../user_interface/wasmWebviewPanel";
 import { WizardWebviewPanel } from "../user_interface/wizardWebviewPanel";
 import { Types } from "../whammServer";
-import { injection_circle, valid_model, WhammLiveInjection } from "./types";
+import { injection_circle, valid_wasm_model, valid_wizard_model, WhammLiveInjection } from "./types";
 
 // Class that is related with the APIModel
 // APIModel handles the model from the whamm API
@@ -32,21 +32,25 @@ export class SvelteModel{
     }
 
     private static update_wasm_webview_model(webview: WasmWebviewPanel | WizardWebviewPanel){
-        if (webview instanceof WasmWebviewPanel)
-            webview.webviewPanel.webview.postMessage({
-                command: 'api-response-update',
-                response: {out_of_date: webview.model.__api_response_out_of_date,
-                            model: (webview.model.__api_response_out_of_date || webview.model.whamm_live_response.is_err) ? null : SvelteModel.create_valid_model(webview)
-                }
-            })
-        else {
-            // @todo
-        }
+
+        let model : valid_wasm_model | valid_wizard_model | null;
+
+        if (webview.model.__api_response_out_of_date || webview.model.whamm_live_response.is_err)
+            model = null;
+        else
+            model = (webview instanceof WasmWebviewPanel) ? (SvelteModel.create_valid_wasm_model(webview)) : (SvelteModel.create_valid_wizard_model(webview)); 
+
+        webview.webviewPanel.webview.postMessage({
+            command: 'api-response-update',
+            response: {out_of_date: webview.model.__api_response_out_of_date,
+                        model: model
+            }
+        })
     }
 
     // Create model to be used in the svelte side by the webview
     // Check svelte/src/lib/api_response.svelte.ts
-    private static create_valid_model(webview: WasmWebviewPanel): valid_model{
+    private static create_valid_wasm_model(webview: WasmWebviewPanel): valid_wasm_model{
         let injected_wat = webview.model.injected_wat_content;
         let lines_injected: number[] = [];
         for (let injection of webview.model.whamm_live_response.injecting_injections){
@@ -81,9 +85,25 @@ export class SvelteModel{
             injected_wat: injected_wat,
             lines_injected: lines_injected,
             wat_to_injection_circle
-        } as valid_model;
+        } as valid_wasm_model;
     }
 
+    private static create_valid_wizard_model(webview: WizardWebviewPanel): valid_wizard_model{
+       // Get all the lines from the injections who causes aren't `whamm` but rather some logic in the whamm file
+       let whamm_file_related_wat_lines: Set<number> = new Set();
+       for (let injection of webview.model.whamm_live_response.injections){
+        if (injection.whamm_span !== null){
+            for (let i=injection.wat_range.l1; i <= injection.wat_range.l2; i++){
+                whamm_file_related_wat_lines.add(i);
+            }
+        }
+       }
+
+       return {
+            injected_wat: webview.model.whamm_live_response.injected_wat,
+            whamm_file_related_wat_lines: Array.from(whamm_file_related_wat_lines),
+        }  as valid_wizard_model;
+    }
 }
 
 // Helper functions
