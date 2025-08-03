@@ -18,7 +18,7 @@
 
     function update_codemirror(){
         api_response.codemirror_code_updated = true;
-        let wat_content: string = (api_response.model) ? api_response.model.injected_wat : api_response.original_wat;
+        let wat_content: string = (api_response.model) ? api_response.model.injected_wat : api_response.wat;
 
         // Update codemirror content
         const transaction = view.state.update({

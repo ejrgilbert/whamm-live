@@ -1,3 +1,4 @@
+import { Shadow } from "svelte-loading-spinners";
 import type { injection_circle } from "./highlight_data.svelte";
 
 export type valid_model = {
@@ -9,14 +10,24 @@ export type valid_model = {
 type APIResponse = {
 	out_of_date: boolean,
 	codemirror_code_updated: boolean,
-	original_wat: string,
+	wat: string,
 	model: valid_model | null,
 }
+
+type configuration = {
+	show_wizard: boolean,
+	init_complete: boolean,
+}
+
+export const config : configuration = $state({
+	show_wizard: false,
+	init_complete: false
+});
 
 export var api_response: APIResponse = $state({
 	out_of_date: true,
 	codemirror_code_updated: false,
-	original_wat: '',
+	wat: '',
 // if model is null, this means either error, or fetching API response
 	model: null
 });

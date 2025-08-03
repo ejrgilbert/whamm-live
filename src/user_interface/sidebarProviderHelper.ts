@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from '../extensionContext'; 
 import { WasmWebviewPanel } from './wasmWebviewPanel'; 
-import { handleDocumentChanges } from '../extensionListeners/documentChangesListener';
+import { get_all_webviews, handleDocumentChanges } from '../extensionListeners/documentChangesListener';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { APIModel } from '../model/api_model/model';
 import { WizardWebviewPanel } from './wizardWebviewPanel';
@@ -175,10 +175,10 @@ export class Helper_sidebar_provider{
             switch (choice){
                 case soft_reset_message:
                     {
-                        for (let webview of WasmWebviewPanel.webviews){
+                        for (let webview of get_all_webviews())
                             webview.webviewPanel.dispose();
-                            Helper_sidebar_provider.helper_reset_sidebar_webview_state();
-                        }
+
+                        Helper_sidebar_provider.helper_reset_sidebar_webview_state();
                     }
                     break;
                 case hard_reset_message:

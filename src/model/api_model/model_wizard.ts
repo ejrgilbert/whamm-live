@@ -11,7 +11,6 @@ import { show_and_handle_error_response } from "../../extensionListeners/documen
 // Class to store API responses [ MVC pattern's model ] 
 export class APIWizardModel extends APIModel{
     webview: WizardWebviewPanel;
-    // @todo change it to Wizard
     whamm_live_response!: WhammLiveResponseWizard;
 
     constructor(webview: WizardWebviewPanel){
@@ -26,16 +25,21 @@ export class APIWizardModel extends APIModel{
             try{
                 // setup in rust side
                 ExtensionContext.api.setupWizard(whamm_contents);
-                this.update(true).then((success)=>{
-                    if (!success) {
-                        vscode.window.showInformationMessage("Error: Failed to update the model");
-                        this.webview.webviewPanel.dispose();
-                        return;
-                    }
-                    this.api_response_out_of_date = false;
-                   show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
-                })
-                this.api_response_setup_completed = true;
+                setTimeout(()=>{
+                    this.update(true).then((success)=>{
+                        if (!success) {
+                            vscode.window.showInformationMessage("Error: Failed to update the model");
+                            this.webview.webviewPanel.dispose();
+                            return;
+                        }
+                        this.api_response_out_of_date = false;
+                        show_and_handle_error_response(whamm_contents, this.whamm_live_response.whamm_errors);
+                        // render wat content!
+                        this.webview.sendWatContent();
+                    });
+                    this.api_response_setup_completed = true;
+                }, 0);
+
                 return [true, "success"];
 
             } catch(error){

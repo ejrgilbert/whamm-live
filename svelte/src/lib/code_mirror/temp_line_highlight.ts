@@ -17,7 +17,6 @@ export const tempLineBackgroundField = StateField.define<DecorationSet>({
           let lineNum = parseInt(lineStr);
           if (lineNum < 1 || lineNum > tr.startState.doc.lines) continue;
           const line = tr.startState.doc.line(lineNum);
-          // TODO set 
           builder.add(line.from, line.from, 
             Decoration.line({
               attributes: { style: `background-color: ${color}` }

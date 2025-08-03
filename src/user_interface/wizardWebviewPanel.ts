@@ -23,7 +23,6 @@ export class WizardWebviewPanel extends WebviewPanel{
                 WizardWebviewPanel.removePanel(this);
         })
 
-        // setup model: @todo
         let [success, message] = await this.model.setup();
         if (!success) {
             vscode.window.showErrorMessage(message);
@@ -44,13 +43,18 @@ export class WizardWebviewPanel extends WebviewPanel{
     // Main method to load the html
     async setupHTML(){
         super.loadHTML();
-        // @todo
-        // super.postMessage({
-        //         command: 'init-data',
-        //         show_wizard: false,
-        //         // @todo send wat content
-        // });
+        super.postMessage({
+                command: 'init-data',
+                show_wizard: true,
+        });
         this.addListeners();
+    }
+
+    sendWatContent(){
+        super.postMessage({
+            command: 'init-wat-wizard',
+            wat_content: this.model.whamm_live_response.injected_wat,
+        })
     }
 
     addListeners() {

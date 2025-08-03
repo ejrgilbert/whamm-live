@@ -5,7 +5,7 @@
     import {EditorView, basicSetup} from "codemirror"
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
-    import { api_response } from "./lib/api_response.svelte";
+    import { api_response, config} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
@@ -13,9 +13,16 @@
     import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
     import  { code_click_handler } from './lib/code_mirror/code_click_handler';
 
-    let wizard_tab = $state(false);
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
+    function update_codemirror_content(wat_content: string){
+        if (view){
+            const transaction = view.state.update({
+                changes: { from: 0, to: view.state.doc.length, insert: wat_content }
+            });
+            view.dispatch(transaction);
+        }
+    }
 
     // event listener to update html on change to workspace data
     window.addEventListener("message" , (event)=>{
@@ -24,31 +31,33 @@
                     case 'init-data':
                         {const message = event.data;
                         if (message) {
-                            if (message.show_wizard)
-                                wizard_tab = true;
-                            else {
-                                api_response.original_wat = message.wat_content;
-
-                                //Create codemirror code block for the parsed wat content
-                                view = new EditorView({
-                                    parent: document.getElementById("wasm-webview-code-editor") || document.body,
-                                    doc: api_response.original_wat,
-                                    extensions: [basicSetup, wast(), 
-                                                highlight_style,
-                                                EditorView.editable.of(false),
-                                                EditorView.contentAttributes.of({tabindex: "0"}),
-                                                EditorState.readOnly.of(true),
-                                                search({top: false}),
-                                                keymap.of(searchKeymap),
-                                                lineBackgroundField,
-                                                tempLineBackgroundField,
-                                                code_click_handler,
-                                                
-                                                // gutters
-                                                lineNumbers(),
-                                                injectionCircleGutter]
-                                })
+                            if (message.show_wizard){
+                                config.show_wizard = true;
                             }
+                            else {
+                                api_response.wat = message.wat_content;
+                                config.init_complete = true;
+                            }
+
+                            //Create codemirror code block for the parsed wat content
+                            view = new EditorView({
+                                parent: document.getElementById("wasm-webview-code-editor") || document.body,
+                                doc: api_response.wat,
+                                extensions: [basicSetup, wast(), 
+                                            highlight_style,
+                                            EditorView.editable.of(false),
+                                            EditorView.contentAttributes.of({tabindex: "0"}),
+                                            EditorState.readOnly.of(true),
+                                            search({top: false}),
+                                            keymap.of(searchKeymap),
+                                            lineBackgroundField,
+                                            tempLineBackgroundField,
+                                            code_click_handler,
+                                            
+                                            // gutters
+                                            lineNumbers(),
+                                            injectionCircleGutter]
+                            })
                         }
                         }
                     break;
@@ -67,14 +76,21 @@
                         updateInjectionCircles(view, api_response.model, highlight_data.circles);
                     }
                 }
+                case 'init-wat-wizard':
+                    {
+                        config.init_complete = true;
+                        api_response.wat = message.wat_content;
+                        update_codemirror_content(api_response.wat);
+                    }
+                    break;
             }
     });
 
 </script>
 
 <main>
-    {#if wizard_tab}
-       <WizardWebview />
+    {#if config.show_wizard}
+       <WizardWebview view={view}/>
     {:else}
        <WasmWebview view={view}/>
     {/if}
