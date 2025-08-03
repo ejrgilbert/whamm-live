@@ -64,23 +64,36 @@
                 case 'api-response-update':{
                         api_response.out_of_date = message.response.out_of_date;
                         api_response.codemirror_code_updated = false;
-                        api_response.model = message.response.model;
+                        if (config.show_wizard)
+                            {
+                                // @todo
+                                api_response.wizard_model = message.response.model;
+                                api_response.wasm_model = null;
+                            }
+                        else
+                            {
+                                api_response.wasm_model = message.response.model;
+                                api_response.wizard_model = null;
+                            }
                         reset_highlight_data();
                     }
                     break;
                 // Will be called to clear out the line highlights and circle highlights as well
                 case 'temp-line-highlight':{
-                    update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
-                    if (view && api_response.model && api_response.codemirror_code_updated) {
-                        setTempBackgroundColorForLines(view, highlight_data.lines);
-                        updateInjectionCircles(view, api_response.model, highlight_data.circles);
+                    if (config.show_wizard){
+                        // @todo
+
+                    } else{
+                        update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
+                        if (view && api_response.wasm_model && api_response.codemirror_code_updated) {
+                            setTempBackgroundColorForLines(view, highlight_data.lines);
+                            updateInjectionCircles(view, api_response.wasm_model, highlight_data.circles);
+                        }
                     }
                 }
                 case 'init-wat-wizard':
                     {
                         config.init_complete = true;
-                        api_response.wat = message.wat_content;
-                        update_codemirror_content(api_response.wat);
                     }
                     break;
             }

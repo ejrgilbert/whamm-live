@@ -50,7 +50,8 @@ export class WizardWebviewPanel extends WebviewPanel{
         this.addListeners();
     }
 
-    sendWatContent(){
+    // init the wat content after the **first** model update
+    initWatContent(){
         super.postMessage({
             command: 'init-wat-wizard',
             wat_content: this.model.whamm_live_response.injected_wat,
