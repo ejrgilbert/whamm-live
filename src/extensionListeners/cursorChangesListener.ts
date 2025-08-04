@@ -8,6 +8,7 @@ import { highlights_info, inj_circle_highlights_info, WhammLiveInjection } from 
 import { ModelHelper } from '../model/utils/model_helper';
 import { BestEffortHighlight } from './utils/bestEffortHighlight';
 import { APIModel } from '../model/api_model/model';
+import { get_all_webviews } from './documentChangesListener';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -82,7 +83,7 @@ export function handleCursorChange(){
 
         // Highlight the whamm file
         LineHighlighterDecoration.clear_whamm_decorations();
-        LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, null_jagged_array);
+        LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, null_jagged_array, best_effort_highlight_data.problematic_highlighting);
     }
 }
 
@@ -92,7 +93,7 @@ export function handleCursorChange(){
 function sort_all_whamm_live_injections(line: number, col: number): WhammLiveInjection[] {
     let sorted_injections: [WhammLiveInjection, (Cell|null)[][]][]= [];
 
-    for (let webview of WasmWebviewPanel.webviews){
+    for (let webview of get_all_webviews()){
         if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
         let cell = webview.model.jagged_array[line-1][col-1];
         if (!cell) continue;

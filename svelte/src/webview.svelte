@@ -42,7 +42,6 @@
                                             ]
                             // specific extensions
                             if (message.show_wizard){
-                                // @todo add link gutter
                                 extensions.push(lineNumbers());
 
                             } else{

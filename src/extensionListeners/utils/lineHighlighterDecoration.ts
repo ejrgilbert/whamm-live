@@ -41,7 +41,7 @@ export class LineHighlighterDecoration{
      * @param jagged_array : null filled jagged array representing the structure of the whamm file
      * @returns 
      */
-    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, jagged_array: jagged_array){
+    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, jagged_array: jagged_array, warn_user: boolean){
 
         // We need to apply the highlights from biggest span to the lowest span
         let sorted_spans_color = Object.entries(highlight_data).sort((b,a)=>{return a[1][1] - b[1][1]});
@@ -50,6 +50,8 @@ export class LineHighlighterDecoration{
             LineHighlighterDecoration.highlight_whamm_file_span(span[0],
                 LineHighlighterDecoration.highlightColors[parseInt(color_index)])
         }
+        if (warn_user)
+            vscode.window.showWarningMessage("Highlights may not be completely accurate. Try using only one target!")
     }
 
     static highlight_whamm_file_span(whamm_span: span, color: string, editor_should_be_active: boolean = true){
