@@ -40,20 +40,13 @@
                                             keymap.of(searchKeymap),
                                             lineBackgroundField,
                                             tempLineBackgroundField,
+                                            code_click_handler,
+                                            lineNumbers(),
                                             ]
                             // specific extensions
-                            if (message.show_wizard){
-                                extensions.push(lineNumbers());
+                            if (!message.show_wizard)
+                                extensions.push(injectionCircleGutter);
 
-                            } else{
-                                extensions.push(...[
-                                            code_click_handler,
-                                            
-                                            // gutters
-                                            lineNumbers(),
-                                            injectionCircleGutter]);
-
-                            }
                             //Create codemirror code block for the parsed wat content
                             view = new EditorView({
                                 parent: document.getElementById("wasm-webview-code-editor") || document.body,

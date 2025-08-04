@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponseWasm } from "../../model/types";
+import { type highlights_info, inj_circle_highlights_info, jagged_array, span, WhammLiveInjection, WhammLiveResponseWasm, WhammLiveResponseWizard } from "../../model/types";
 import { ExtensionContext } from '../../extensionContext';
 import { WasmWebviewPanel } from '../../user_interface/wasmWebviewPanel';
 import { isExtensionActive } from './listenerHelper';
@@ -8,6 +8,8 @@ import { Types } from '../../whammServer';
 import { APIModel } from '../../model/api_model/model';
 import { WizardWebviewPanel } from '../../user_interface/wizardWebviewPanel';
 import { get_all_webviews } from '../documentChangesListener';
+import { APIWasmModel } from '../../model/api_model/model_wasm';
+import { APIWizardModel } from '../../model/api_model/model_wizard';
 
 export class LineHighlighterDecoration{
 
@@ -95,14 +97,17 @@ export class LineHighlighterDecoration{
      * @param number_value : is either the injection id or the wat line number
      * @param is_id 
      */
-    static highlight_whamm_live_injection(original_webview: WasmWebviewPanel, number_value: number, is_id: boolean=false){
+    static highlight_whamm_live_injection(original_webview: WasmWebviewPanel | WizardWebviewPanel, number_value: number, is_id: boolean=false){
         // If this is called because of the svelte communication, 
         // it is guaranteed to be a valid injection
         var original_injection: WhammLiveInjection | undefined;
         if (is_id)
             original_injection = original_webview.model.whamm_live_response.id_to_injection.get(number_value);
         else
-            original_injection= original_webview.model.wat_to_whamm_mapping.get(number_value);
+            if (original_webview instanceof WasmWebviewPanel && original_webview.model instanceof APIWasmModel)
+                original_injection= original_webview.model.wat_to_whamm_mapping.get(number_value);
+            else if (original_webview instanceof WizardWebviewPanel && original_webview.model instanceof APIWizardModel)
+                original_injection= original_webview.model.whamm_live_response.wat_to_injection.get(number_value);
 
         let all_editors = ExtensionContext.get_editors();
         if (all_editors.length > 0 && original_injection && isExtensionActive() && (all_editors[0].document.getText() === APIModel.whamm_cached_content)){
@@ -115,11 +120,11 @@ export class LineHighlighterDecoration{
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too
                 // @todo: anything for wizard side?
-                for (let webview of WasmWebviewPanel.webviews){
+                for (let webview of get_all_webviews()){
                     if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
 
                     let injections: WhammLiveInjection[] = [];
-                    injections = get_injections_from_whamm_span(webview.model.whamm_live_response, original_injection.whamm_span);
+                    injections = get_injections_from_whamm_span(webview.model.whamm_live_response, original_injection.whamm_span, webview instanceof WizardWebviewPanel);
 
                     if (injections.length > 0){
                         let highlight_data: highlightCompleteData = LineHighlighterDecoration.get_highlight_data(injections);
@@ -222,10 +227,15 @@ type highlightCompleteData = {
     injection_start_wat_lines: number[];
 }
 
-function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponseWasm, whamm_span: span): WhammLiveInjection[]{
+function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponseWasm | WhammLiveResponseWizard, whamm_span: span, wizard_response: boolean): WhammLiveInjection[]{
     let return_injections : WhammLiveInjection[] = [];
 
-    for (const array of ["injecting_injections", "other_injections"]){
+    if (wizard_response){
+        var injection_array = ["injections"];
+    } else
+        var injection_array = ["injecting_injections", "other_injections"];
+
+    for (const array of injection_array){
         // @ts-ignore
         for (let injection of whamm_live_injections[array]){
             if (injection.whamm_span && ModelHelper.compare_live_whamm_spans(injection.whamm_span, whamm_span)){
