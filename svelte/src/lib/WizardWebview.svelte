@@ -26,8 +26,6 @@
         if (api_response.wizard_model !== null)
             setBackgroundColorForLines(view, api_response.wizard_model.whamm_file_related_wat_lines, "bg-injected");
 
-        // clear highlights, stars @todo
-
         // update the extension side about the update
         post_codemirror_updated();
     }

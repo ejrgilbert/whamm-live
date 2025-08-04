@@ -7,6 +7,7 @@ import { ModelHelper } from '../../model/utils/model_helper';
 import { Types } from '../../whammServer';
 import { APIModel } from '../../model/api_model/model';
 import { WizardWebviewPanel } from '../../user_interface/wizardWebviewPanel';
+import { get_all_webviews } from '../documentChangesListener';
 
 export class LineHighlighterDecoration{
 
@@ -78,7 +79,7 @@ export class LineHighlighterDecoration{
         }
     }
 
-    static highlight_wasm_webview_lines(webview: WasmWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
+    static highlight_wasm_webview_lines(webview: WasmWebviewPanel | WizardWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
             line_data: data1,
@@ -112,6 +113,7 @@ export class LineHighlighterDecoration{
 
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too
+                // @todo: anything for wizard side?
                 for (let webview of WasmWebviewPanel.webviews){
                     if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
 
@@ -182,12 +184,12 @@ export class LineHighlighterDecoration{
     }
 
     static clear_wasm_line_decorations(){
-        for (let webview of WasmWebviewPanel.webviews){
+        for (let webview of get_all_webviews()){
             LineHighlighterDecoration.clear_wasm_line_decoration(webview);
         }
     }
 
-    static clear_wasm_line_decoration(webview: WasmWebviewPanel){
+    static clear_wasm_line_decoration(webview: WasmWebviewPanel | WizardWebviewPanel){
         LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
     }
 

@@ -46,7 +46,7 @@ export function handleCursorChange(){
         let best_effort_highlight_data = BestEffortHighlight.run(all_injections, null_jagged_array);
 
         let webview_index = 0;
-        for (let webview of WasmWebviewPanel.webviews){
+        for (let webview of get_all_webviews()){
 
             // No need to perform highlighting if api is out of date 
             // or the code mirror code isn't updated yet!
