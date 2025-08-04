@@ -7,7 +7,7 @@
     import { keymap, lineNumbers} from "@codemirror/view";
     import { api_response, config} from "./lib/api_response.svelte";
     import { EditorState} from "@codemirror/state";
-    import { clearBackgroundColors, lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
+    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
     import { highlight_data , highlight_style, reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
     import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
@@ -83,7 +83,7 @@
                 case 'temp-line-highlight':{
                     // circle data will be {} for wizard target which is okay!
                     // because we can use the same approach for both wasm and wizard target
-                    update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines);
+                    update_highlight_data(message.line_data, message.circle_data, message.all_wat_lines, message.injection_start_wat_lines);
                     if (view && api_response.codemirror_code_updated) {
                         if ((config.show_wizard && api_response.wizard_model) || (!config.show_wizard && api_response.wasm_model)){
                             setTempBackgroundColorForLines(view, highlight_data.lines);

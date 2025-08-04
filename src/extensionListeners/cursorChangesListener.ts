@@ -58,7 +58,8 @@ export function handleCursorChange(){
 
             let wasm_line_highlight_data: highlights_info = {};
             let inj_circle_highlight_data: inj_circle_highlights_info = {};
-            let all_wat_lines: number[] = []
+            let all_wat_lines: number[] = [];
+            let injection_start_wat_lines: number[] = [];
 
             // Nodes are sorted from biggest span to least span
             let current_node : Node | null= injections.head;
@@ -70,14 +71,14 @@ export function handleCursorChange(){
                     let color_index = best_effort_highlight_data.span_to_color_index[current_node.whamm_spansize];
 
                     // Save wat line and color information for every value in the node
-                    LineHighlighterDecoration.store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, current_node.values, color_index);
+                    LineHighlighterDecoration.store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, injection_start_wat_lines, current_node.values, color_index);
                 }
                 // Traverse to the next node
                 current_node = current_node.next;
             }
 
             // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines.sort());
+            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines.sort(), injection_start_wat_lines.sort());
             webview_index++;
         }
 

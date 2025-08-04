@@ -79,12 +79,13 @@ export class LineHighlighterDecoration{
         }
     }
 
-    static highlight_wasm_webview_lines(webview: WasmWebviewPanel | WizardWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[] ){
+    static highlight_wasm_webview_lines(webview: WasmWebviewPanel | WizardWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[], injection_start_wat_lines: number[]){
         webview.webviewPanel.webview.postMessage({
             command: 'temp-line-highlight',
             line_data: data1,
             circle_data: data2,
-            all_wat_lines: all_wat_lines
+            all_wat_lines: all_wat_lines,
+            injection_start_wat_lines: injection_start_wat_lines,
         });
     }
 
@@ -122,7 +123,7 @@ export class LineHighlighterDecoration{
 
                     if (injections.length > 0){
                         let highlight_data: highlightCompleteData = LineHighlighterDecoration.get_highlight_data(injections);
-                        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, highlight_data.highlight_info, highlight_data.inj_circle_highlights_info, highlight_data.all_wat_lines);
+                        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, highlight_data.highlight_info, highlight_data.inj_circle_highlights_info, highlight_data.all_wat_lines, highlight_data.injection_start_wat_lines);
                     }
                 }
             }
@@ -135,12 +136,14 @@ export class LineHighlighterDecoration{
         let inj_circle_highlight_data: inj_circle_highlights_info = {};
         let highlight_data: highlights_info = {};
         let all_wat_lines: number[] = [];
-        LineHighlighterDecoration.store_line_highlight_data(highlight_data, inj_circle_highlight_data, all_wat_lines, injections, 0);
+        let injection_start_wat_lines: number[] = [];
+        LineHighlighterDecoration.store_line_highlight_data(highlight_data, inj_circle_highlight_data, all_wat_lines, injection_start_wat_lines, injections, 0);
 
         return {
             all_wat_lines: all_wat_lines.sort(),
             highlight_info: highlight_data,
-            inj_circle_highlights_info: inj_circle_highlight_data
+            inj_circle_highlights_info: inj_circle_highlight_data,
+            injection_start_wat_lines: injection_start_wat_lines,
         } as highlightCompleteData;
     }
 
@@ -159,7 +162,7 @@ export class LineHighlighterDecoration{
     //Create a **many-to-one mapping** from wat line number to color to show in the webview 
     // and store it in the record
     // Also create a one-to-one injection ID to highlight color mapping for "circle" injections
-    static store_line_highlight_data(line_record: highlights_info, inj_circle_record: inj_circle_highlights_info, all_wat_lines: number[], injections: WhammLiveInjection[], color_index: number){
+    static store_line_highlight_data(line_record: highlights_info, inj_circle_record: inj_circle_highlights_info, all_wat_lines: number[], injection_start_wat_lines: number[], injections: WhammLiveInjection[], color_index: number){
         for (let live_injection of injections){
             switch(live_injection.type){
                 case Types.WhammDataType.funcProbeType:
@@ -180,6 +183,7 @@ export class LineHighlighterDecoration{
                     }
                 break;
             }
+            injection_start_wat_lines.push(live_injection.wat_range.l1);
         }
     }
 
@@ -190,7 +194,7 @@ export class LineHighlighterDecoration{
     }
 
     static clear_wasm_line_decoration(webview: WasmWebviewPanel | WizardWebviewPanel){
-        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, []);
+        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, {}, {}, [], []);
     }
 
     static clear_whamm_decorations(){
@@ -215,6 +219,7 @@ type highlightCompleteData = {
     highlight_info: highlights_info;
     inj_circle_highlights_info: inj_circle_highlights_info;
     all_wat_lines: number[];
+    injection_start_wat_lines: number[];
 }
 
 function get_injections_from_whamm_span(whamm_live_injections: WhammLiveResponseWasm, whamm_span: span): WhammLiveInjection[]{
