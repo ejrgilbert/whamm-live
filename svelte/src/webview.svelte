@@ -15,14 +15,6 @@
 
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
-    function update_codemirror_content(wat_content: string){
-        if (view){
-            const transaction = view.state.update({
-                changes: { from: 0, to: view.state.doc.length, insert: wat_content }
-            });
-            view.dispatch(transaction);
-        }
-    }
 
     // event listener to update html on change to workspace data
     window.addEventListener("message" , (event)=>{
@@ -39,11 +31,7 @@
                                 config.init_complete = true;
                             }
 
-                            //Create codemirror code block for the parsed wat content
-                            view = new EditorView({
-                                parent: document.getElementById("wasm-webview-code-editor") || document.body,
-                                doc: api_response.wat,
-                                extensions: [basicSetup, wast(), 
+                            let extensions= [basicSetup, wast(), 
                                             highlight_style,
                                             EditorView.editable.of(false),
                                             EditorView.contentAttributes.of({tabindex: "0"}),
@@ -51,12 +39,27 @@
                                             search({top: false}),
                                             keymap.of(searchKeymap),
                                             lineBackgroundField,
+                                            ]
+                            // specific extensions
+                            if (message.show_wizard){
+                                // @todo add link gutter
+                                extensions.push(lineNumbers());
+
+                            } else{
+                                extensions.push(...[
                                             tempLineBackgroundField,
                                             code_click_handler,
                                             
                                             // gutters
                                             lineNumbers(),
-                                            injectionCircleGutter]
+                                            injectionCircleGutter]);
+
+                            }
+                            //Create codemirror code block for the parsed wat content
+                            view = new EditorView({
+                                parent: document.getElementById("wasm-webview-code-editor") || document.body,
+                                doc: api_response.wat,
+                                extensions: extensions,
                             })
                         }
                         }

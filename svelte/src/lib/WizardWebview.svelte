@@ -3,6 +3,7 @@
   import { fade } from "svelte/transition";
   import { api_response, config, post_codemirror_updated } from "./api_response.svelte";
   import InjectCodeButton from "./InjectCodeButton.svelte";
+  import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
 
     const { view } = $props();
     const load_html = function(node: HTMLElement){
@@ -17,6 +18,12 @@
             changes: { from: 0, to: view.state.doc.length, insert: (api_response.wizard_model) ? api_response.wizard_model.injected_wat : ";; Error on whamm side!\n ;; Make sure your whamm file doesn't have any errors"}
         });
         view.dispatch(transaction);
+
+        clearBackgroundColors(view);
+        // visualize lines caused by some logic in the whamm script!
+        if (api_response.wizard_model !== null)
+            setBackgroundColorForLines(view, api_response.wizard_model.whamm_file_related_wat_lines, "bg-injected");
+
         // clear highlights, stars @todo
 
         // update the extension side about the update
