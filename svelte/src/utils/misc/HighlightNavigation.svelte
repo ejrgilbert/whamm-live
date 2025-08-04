@@ -1,17 +1,26 @@
 <script>
   import { highlight_data } from "../data/highlight_data.svelte";
+  import {config} from "../data/api_response.svelte";
   import { highlight_navigation_data, reset_highlight_navigation_data, scrollToAnotherHighlight } from "../data/highlight_navigation_data.svelte";
   const {view} = $props();
 
 </script>
-{#if highlight_data.all_wat_lines.length > 0}
+{#if (!config.show_wizard && highlight_data.all_wat_lines.length > 0)
+    || (config.show_wizard && highlight_data.injection_start_wat_lines.length >0)}
+
     <div use:reset_highlight_navigation_data id="footer">
-    <div class="button-container">
-        <button onclick={() => {scrollToAnotherHighlight(false, view)}}>⬅️</button>
-        <button onclick={() => {scrollToAnotherHighlight(true, view)}}>➡️</button>
+        <div class="button-container">
+            <button onclick={() => {scrollToAnotherHighlight(false, view)}}>⬅️</button>
+            <button onclick={() => {scrollToAnotherHighlight(true, view)}}>➡️</button>
+        </div>
+        <div id="cursorHighlightInfo">
+            {highlight_navigation_data.cursor_highlight_button_clicked ? "Current" : "Next"} cursor highlight at: 
+            <span style="color:midnightblue;">Line {((!config.show_wizard) ? highlight_data.all_wat_lines : highlight_data.injection_start_wat_lines)[highlight_navigation_data.current_index]} 
+                <span style="font-size: xx-small;">({highlight_navigation_data.current_index+1}/{(config.show_wizard ? highlight_data.injection_start_wat_lines : highlight_data.all_wat_lines).length})</span>
+            </span>
+        </div>
     </div>
-    <div id="cursorHighlightInfo">{highlight_navigation_data.cursor_highlight_button_clicked ? "Current" : "Next"} cursor highlight at: <span style="color:midnightblue;">Line {highlight_data.all_wat_lines[highlight_navigation_data.current_index]} <span style="font-size: xx-small;">({highlight_navigation_data.current_index+1}/{highlight_data.all_wat_lines.length})</span></span></div>
-    </div>
+
 {/if}
 <style>
     #footer{

@@ -6,6 +6,7 @@
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
   import Legend from "./misc/Legend.svelte";
   import { legend_wizard_config } from "./data/legend_config.svelte";
+  import HighlightNavigation from "./misc/HighlightNavigation.svelte";
 
     const { view } = $props();
     const load_html = function(node: HTMLElement){
@@ -41,6 +42,7 @@
     <InjectCodeButton callback={update_codemirror} />
     <Legend legend_config={legend_wizard_config} />
     <div use:load_html id="wasm-webview-code-editor"></div>
+    <HighlightNavigation view={view}/>
 {/if}
 
 <style>

@@ -1,17 +1,17 @@
 <script lang="ts">
-    import WizardWebview from './lib/WizardWebview.svelte';
-    import WasmWebview from './lib/WasmWebview.svelte';
+    import WizardWebview from './utils/WizardWebview.svelte';
+    import WasmWebview from './utils/WasmWebview.svelte';
     import {wast} from "@codemirror/lang-wast";
     import {EditorView, basicSetup} from "codemirror"
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
     import { api_response, config} from "./utils/data/api_response.svelte";
     import { EditorState} from "@codemirror/state";
-    import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
-    import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
+    import { lineBackgroundField } from './utils/code_mirror/injected_line_highlight';
+    import { injectionCircleGutter, updateInjectionCircles } from './utils/code_mirror/gutter_view';
     import { highlight_data , highlight_style, reset_highlight_data, update_highlight_data } from './utils/data/highlight_data.svelte';
-    import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
-    import  { code_click_handler } from './lib/code_mirror/code_click_handler';
+    import { setTempBackgroundColorForLines, tempLineBackgroundField } from './utils/code_mirror/temp_line_highlight';
+    import  { code_click_handler } from './utils/code_mirror/code_click_handler';
 
     // svelte-ignore non_reactive_update
     var view : EditorView | undefined = undefined;
