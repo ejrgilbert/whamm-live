@@ -4,6 +4,8 @@
   import { api_response, config, post_codemirror_updated } from "./api_response.svelte";
   import InjectCodeButton from "./InjectCodeButton.svelte";
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
+  import Legend from "./Legend.svelte";
+  import { legend_wizard_config } from "./legend_config.svelte";
 
     const { view } = $props();
     const load_html = function(node: HTMLElement){
@@ -39,5 +41,13 @@
     </div>
 {:else}
     <InjectCodeButton callback={update_codemirror} />
+    <Legend legend_config={legend_wizard_config} />
     <div use:load_html id="wasm-webview-code-editor"></div>
 {/if}
+
+<style>
+#wasm-webview-code-editor{
+    width: 90%;
+    margin: auto;
+}
+</style>

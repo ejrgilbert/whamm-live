@@ -5,6 +5,8 @@
   import { highlight_data } from "./highlight_data.svelte";
   import { EditorView } from "codemirror";
   import InjectCodeButton from "./InjectCodeButton.svelte";
+  import { legend_wasm_config } from "./legend_config.svelte";
+  import Legend from "./Legend.svelte";
 
     // Code mirror view
     const { view } = $props();
@@ -69,6 +71,7 @@
 </script>
 
 <InjectCodeButton callback={update_codemirror}/>
+<Legend legend_config={legend_wasm_config} />
 
 <div use:load_html id="wasm-webview-code-editor"></div>
 
