@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { api_response, post_codemirror_updated } from "./api_response.svelte";
+  import { EditorView } from "codemirror";
+  import { api_response, post_codemirror_updated } from "./data/api_response.svelte";
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
   import { addDanglingCircleInjections, clearInjectedCircles} from "./code_mirror/gutter_view";
-  import { highlight_data } from "./highlight_data.svelte";
-  import { EditorView } from "codemirror";
-  import InjectCodeButton from "./InjectCodeButton.svelte";
-  import { legend_wasm_config } from "./legend_config.svelte";
-  import Legend from "./Legend.svelte";
+  import { highlight_data } from "./data/highlight_data.svelte";
+  import InjectCodeButton from "./misc/InjectCodeButton.svelte";
+  import { legend_wasm_config } from "./data/legend_config.svelte";
+  import Legend from "./misc/Legend.svelte";
 
     // Code mirror view
     const { view } = $props();

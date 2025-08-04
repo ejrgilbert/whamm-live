@@ -1,6 +1,6 @@
 import { EditorView } from "@codemirror/view";
-import { api_response } from "../api_response.svelte";
-import { highlight_data } from "../highlight_data.svelte";
+import { api_response } from "../data/api_response.svelte";
+import { highlight_data } from "../data/highlight_data.svelte";
 
 export const code_click_handler = EditorView.domEventHandlers({
 

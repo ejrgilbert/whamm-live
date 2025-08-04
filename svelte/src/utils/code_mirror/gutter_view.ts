@@ -7,12 +7,12 @@
 
 import {EditorView, GutterMarker, gutter, keymap} from "@codemirror/view"
 import {StateField, StateEffect, RangeSetBuilder, EditorState} from "@codemirror/state"
-import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../highlight_data.svelte";
+import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../data/highlight_data.svelte";
 import { handle_circle_click } from "./code_click_handler";
 import { basicSetup } from "codemirror";
 import { wast } from "@codemirror/lang-wast";
 import { search, searchKeymap } from "@codemirror/search";
-import type { valid_wasm_model } from "../api_response.svelte";
+import type { valid_wasm_model } from "../data/api_response.svelte";
 declare const vscode: any;
 
 // `injectionCircleEffect` contains all of my dangling injections

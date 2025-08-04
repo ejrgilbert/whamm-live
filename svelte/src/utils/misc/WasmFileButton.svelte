@@ -1,6 +1,6 @@
 <script lang="ts">
     import {slide} from 'svelte/transition';
-    import WhammApiTracker from './WhammApiTracker.svelte';
+    import WhammApiTracker from '../misc/WhammApiTracker.svelte';
 
     let show_wat_button = $state(true)
     let wat_button_text = $derived(show_wat_button ? "Open <i>.wat</i> or <i>.wasm</i> file</button>" : "Open Wizard wasm monitor");

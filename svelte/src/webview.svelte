@@ -5,11 +5,11 @@
     import {EditorView, basicSetup} from "codemirror"
     import { search, searchKeymap } from "@codemirror/search";
     import { keymap, lineNumbers} from "@codemirror/view";
-    import { api_response, config} from "./lib/api_response.svelte";
+    import { api_response, config} from "./utils/data/api_response.svelte";
     import { EditorState} from "@codemirror/state";
     import { lineBackgroundField } from './lib/code_mirror/injected_line_highlight';
     import { injectionCircleGutter, updateInjectionCircles } from './lib/code_mirror/gutter_view';
-    import { highlight_data , highlight_style, reset_highlight_data, update_highlight_data } from './lib/highlight_data.svelte';
+    import { highlight_data , highlight_style, reset_highlight_data, update_highlight_data } from './utils/data/highlight_data.svelte';
     import { setTempBackgroundColorForLines, tempLineBackgroundField } from './lib/code_mirror/temp_line_highlight';
     import  { code_click_handler } from './lib/code_mirror/code_click_handler';
 

@@ -1,6 +1,6 @@
 import { StateEffect, StateField, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, EditorView, type DecorationSet } from "@codemirror/view";
-import type { line_highlights_info } from "../highlight_data.svelte";
+import type { line_highlights_info } from "../data/highlight_data.svelte";
 
 const setTempLineBackgrounds = StateEffect.define<line_highlights_info>();
 const clearTempLineBackgrounds = StateEffect.define();

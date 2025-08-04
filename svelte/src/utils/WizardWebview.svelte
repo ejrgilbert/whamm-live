@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Circle3 } from "svelte-loading-spinners";
   import { fade } from "svelte/transition";
-  import { api_response, config, post_codemirror_updated } from "./api_response.svelte";
-  import InjectCodeButton from "./InjectCodeButton.svelte";
+  import { api_response, config, post_codemirror_updated } from "./data/api_response.svelte";
+  import InjectCodeButton from "./misc/InjectCodeButton.svelte";
   import { clearBackgroundColors, setBackgroundColorForLines } from "./code_mirror/injected_line_highlight";
-  import Legend from "./Legend.svelte";
-  import { legend_wizard_config } from "./legend_config.svelte";
+  import Legend from "./misc/Legend.svelte";
+  import { legend_wizard_config } from "./data/legend_config.svelte";
 
     const { view } = $props();
     const load_html = function(node: HTMLElement){
