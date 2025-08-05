@@ -19,7 +19,7 @@ export function mod (n: number, m: number): number{
 
 // Cursor highlight related functions
 export function scrollToAnotherHighlight(next: boolean, view: EditorView){
-    let appropriate_array = (config.show_wizard) ? highlight_data.all_wat_lines : highlight_data.injection_start_wat_lines;
+    let appropriate_array = (config.show_wizard) ? highlight_data.injection_start_wat_lines : highlight_data.all_wat_lines;
     if (!highlight_navigation_data.cursor_highlight_button_clicked){
         highlight_navigation_data.cursor_highlight_button_clicked = true;
     } else{
