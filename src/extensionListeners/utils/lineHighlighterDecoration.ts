@@ -14,6 +14,7 @@ import { APIWizardModel } from '../../model/api_model/model_wizard';
 export class LineHighlighterDecoration{
 
     static decorations: vscode.TextEditorDecorationType[] = [];
+    static ranges: vscode.Range[] = [];
     static colors: string[] = [
         "rgba(76, 175, 80, 1)",
         "rgba(142, 36, 170, 1)",
@@ -44,7 +45,7 @@ export class LineHighlighterDecoration{
      * @param jagged_array : null filled jagged array representing the structure of the whamm file
      * @returns 
      */
-    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, jagged_array: jagged_array, warn_user: boolean){
+    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, warn_user: boolean){
 
         // We need to apply the highlights from biggest span to the lowest span
         let sorted_spans_color = Object.entries(highlight_data).sort((b,a)=>{return a[1][1] - b[1][1]});
@@ -75,10 +76,30 @@ export class LineHighlighterDecoration{
             backgroundColor: color,
             isWholeLine: false,
         })
+
         LineHighlighterDecoration.decorations.push(decorationType);
+        LineHighlighterDecoration.ranges.push(range);
+
         for (let editor of editors){
-            editor.setDecorations(decorationType, [{range}]);
+            editor.setDecorations(decorationType, [range]);
         }
+    }
+
+    static restore_whamm_file_decorations(){
+        let editors = ExtensionContext.get_editors();
+        if (editors.length < 1) return;
+
+        let decorations = LineHighlighterDecoration.decorations;
+        let ranges = LineHighlighterDecoration.ranges;
+        LineHighlighterDecoration.clear_whamm_decorations();
+
+        for (let editor of editors){
+            for (let current_index=0; current_index < decorations.length; current_index++){
+                editor.setDecorations(decorations[current_index], [ranges[current_index]]);
+            }
+        }
+        LineHighlighterDecoration.decorations = decorations;
+        LineHighlighterDecoration.ranges = ranges;
     }
 
     static highlight_wasm_webview_lines(webview: WasmWebviewPanel | WizardWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[], injection_start_wat_lines: number[]){
@@ -210,6 +231,7 @@ export class LineHighlighterDecoration{
             }
         }
         LineHighlighterDecoration.decorations = [];
+        LineHighlighterDecoration.ranges = [];
     }
 
     static clear_whamm_and_webview_decorations(webview: WasmWebviewPanel){
