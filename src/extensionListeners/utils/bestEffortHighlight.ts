@@ -1,3 +1,8 @@
+/**
+ * @see: https://github.com/ejrgilbert/whamm-live/pull/44
+ * @remarks best effort highlighting approach!
+ * */ 
+
 import { jagged_array, span, WhammLiveInjection } from "../../model/types";
 import { ModelHelper } from "../../model/utils/model_helper";
 
@@ -5,6 +10,10 @@ type BestEffortHighlightData = {
     // Span size to color mapping
     span_to_color_index: Record<number, number>;
     color_index_to_span: Record<number, [span, number]>;
+    // if it is truly best effort i.e if there are two injections that only slightly overlap
+    // the approach we take basically combines them into one. Such an approach won't be accurate. So,
+    // if something like that is done, we should let the user know about it
+    problematic_highlighting: boolean;
 }
 
 export class BestEffortHighlight{
@@ -21,6 +30,7 @@ export class BestEffortHighlight{
         // color to whamm_span values for whamm file highlighting
         const color_index_to_whamm_spans: Record<number,span[]>= {};
         var color_index = 0;
+        var problematic_highlighting = false;
 
         var update_color_index_to_whamm_span = (color_index: number, current_pointer: WhammLiveInjection) =>{
                 let array = color_index_to_whamm_spans[color_index] ?? [];
@@ -56,6 +66,7 @@ export class BestEffortHighlight{
                     // same spansize but not the same span
                     // in this case, we **extend** the two spans to be part of one big span and do color highlighting based on that
                     if (current_span_size === previous_span_size){
+                        problematic_highlighting = true;
                         update_color_index_to_whamm_span(color_index, current_pointer);
 
                     // Note: Code isn't refactored so that the code is easy to follow
@@ -88,7 +99,7 @@ export class BestEffortHighlight{
                 color_index_to_whamm_span[i] = [unionized_span, ModelHelper.calculate_span_size(unionized_span, jagged_array)];
             }
         }
-        return {span_to_color_index: span_to_color_index, color_index_to_span: color_index_to_whamm_span} as BestEffortHighlightData;
+        return {span_to_color_index: span_to_color_index, color_index_to_span: color_index_to_whamm_span, problematic_highlighting: problematic_highlighting} as BestEffortHighlightData;
     }
 
     // Record's key is the color index[which is the priority index] and the value is the list of spans to color

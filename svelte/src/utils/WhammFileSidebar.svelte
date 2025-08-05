@@ -1,7 +1,7 @@
 <script lang="ts">
     import {fade} from 'svelte/transition';
-    import WasmFileButton from './WasmFileButton.svelte'
-  import RestartExtension from './RestartExtension.svelte';
+    import WasmFileButton from './misc/WasmFileButton.svelte'
+    import RestartExtension from './misc/RestartExtension.svelte';
 
     // Reactive variables
     let whamm_file = $state(null);

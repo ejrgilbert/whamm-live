@@ -8,7 +8,7 @@ export type valid_wasm_model = {
 
 export type valid_wizard_model = {
 	injected_wat: string,
-	whamm_file_related_lines: number[],
+	whamm_file_related_wat_lines: number[],
 }
 
 type APIResponse = {

@@ -7,12 +7,12 @@
 
 import {EditorView, GutterMarker, gutter, keymap} from "@codemirror/view"
 import {StateField, StateEffect, RangeSetBuilder, EditorState} from "@codemirror/state"
-import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../highlight_data.svelte";
+import { highlight_style, type inj_circle_highlights_info, type injection_circle } from "../data/highlight_data.svelte";
 import { handle_circle_click } from "./code_click_handler";
 import { basicSetup } from "codemirror";
 import { wast } from "@codemirror/lang-wast";
 import { search, searchKeymap } from "@codemirror/search";
-import type { valid_wasm_model } from "../api_response.svelte";
+import type { valid_wasm_model } from "../data/api_response.svelte";
 declare const vscode: any;
 
 // `injectionCircleEffect` contains all of my dangling injections
@@ -84,6 +84,7 @@ class injectionCircleMarker extends GutterMarker {
   private load_circle_element(injected_circle: injection_circle):HTMLDivElement{
 			const circle = document.createElement("div");
       let dimension = (injected_circle.highlighted) ? "17px" : "10px";
+      circle.style.cursor = "pointer";
       set_element_style(circle, {height: dimension, width: dimension, "border-radius": "50%", "background-color": injected_circle.color})
 
       if (injected_circle.highlighted){

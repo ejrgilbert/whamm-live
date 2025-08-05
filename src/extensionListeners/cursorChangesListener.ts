@@ -8,6 +8,7 @@ import { highlights_info, inj_circle_highlights_info, WhammLiveInjection } from 
 import { ModelHelper } from '../model/utils/model_helper';
 import { BestEffortHighlight } from './utils/bestEffortHighlight';
 import { APIModel } from '../model/api_model/model';
+import { get_all_webviews } from './documentChangesListener';
 
 export function shouldUpdateView():boolean{
     // shouldUpdateModel also works here because the extension will be active
@@ -38,52 +39,62 @@ export function handleCursorChange(){
         let cursor = editor.selection.active
         let line = cursor.line;
         let column = cursor.character;
+        handleHighlighting(line+1, column+1);
+    }
+}
+
+/**
+ * 
+ * @param line : 1 based line
+ * @param column : 1 based column value
+ */
+function handleHighlighting(line: number, column: number){
+    // VVIP: Sort all the injections and get necessary data for best effort highlighting for ALL TARGETS
+    let all_injections = sort_all_whamm_live_injections(line, column);
+    let null_jagged_array = ModelHelper.create_jagged_array(APIModel.whamm_cached_content);
+    let best_effort_highlight_data = BestEffortHighlight.run(all_injections, null_jagged_array);
+
+    let webview_index = 0;
+    for (let webview of get_all_webviews()){
+
+        // No need to perform highlighting if api is out of date 
+        // or the code mirror code isn't updated yet!
+        if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
+
+        // No need to perform highlighting if the jagged array doesn't have any contents for that location
         // account for offset
-        // VVIP: Sort all the injections and get necessary data for best effort highlighting for ALL TARGETS
-        let all_injections = sort_all_whamm_live_injections(line+1, column+1);
-        let null_jagged_array = ModelHelper.create_jagged_array(APIModel.whamm_cached_content);
-        let best_effort_highlight_data = BestEffortHighlight.run(all_injections, null_jagged_array);
+        let injections = webview.model.jagged_array[line-1][column-1];
+        if (!injections) continue;
 
-        let webview_index = 0;
-        for (let webview of WasmWebviewPanel.webviews){
+        let wasm_line_highlight_data: highlights_info = {};
+        let inj_circle_highlight_data: inj_circle_highlights_info = {};
+        let all_wat_lines: number[] = [];
+        let injection_start_wat_lines: number[] = [];
 
-            // No need to perform highlighting if api is out of date 
-            // or the code mirror code isn't updated yet!
-            if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
+        // Nodes are sorted from biggest span to least span
+        let current_node : Node | null= injections.head;
+        while (current_node != null){
 
-            // No need to perform highlighting if the jagged array doesn't have any contents for that location
-            let injections = webview.model.jagged_array[line][column];
-            if (!injections) continue;
+            let whamm_span = current_node.whamm_span;
+            if (whamm_span){
+                // use the best effort highlight data
+                let color_index = best_effort_highlight_data.span_to_color_index[current_node.whamm_spansize];
 
-            let wasm_line_highlight_data: highlights_info = {};
-            let inj_circle_highlight_data: inj_circle_highlights_info = {};
-            let all_wat_lines: number[] = []
-
-            // Nodes are sorted from biggest span to least span
-            let current_node : Node | null= injections.head;
-            while (current_node != null){
-
-                let whamm_span = current_node.whamm_span;
-                if (whamm_span){
-                    // use the best effort highlight data
-                    let color_index = best_effort_highlight_data.span_to_color_index[current_node.whamm_spansize];
-
-                    // Save wat line and color information for every value in the node
-                    LineHighlighterDecoration.store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, current_node.values, color_index);
-                }
-                // Traverse to the next node
-                current_node = current_node.next;
+                // Save wat line and color information for every value in the node
+                LineHighlighterDecoration.store_line_highlight_data(wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines, injection_start_wat_lines, current_node.values, color_index);
             }
-
-            // send wasm side highlight information to the webview
-            LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines.sort());
-            webview_index++;
+            // Traverse to the next node
+            current_node = current_node.next;
         }
 
-        // Highlight the whamm file
-        LineHighlighterDecoration.clear_whamm_decorations();
-        LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, null_jagged_array);
+        // send wasm side highlight information to the webview
+        LineHighlighterDecoration.highlight_wasm_webview_lines(webview, wasm_line_highlight_data, inj_circle_highlight_data, all_wat_lines.sort(), injection_start_wat_lines.sort());
+        webview_index++;
     }
+
+    // Highlight the whamm file
+    LineHighlighterDecoration.clear_whamm_decorations();
+    if (all_injections.length > 0) LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, best_effort_highlight_data.problematic_highlighting);
 }
 
 // sort all the whamm live injections based on their whamm span value based on the line, col value
@@ -92,7 +103,7 @@ export function handleCursorChange(){
 function sort_all_whamm_live_injections(line: number, col: number): WhammLiveInjection[] {
     let sorted_injections: [WhammLiveInjection, (Cell|null)[][]][]= [];
 
-    for (let webview of WasmWebviewPanel.webviews){
+    for (let webview of get_all_webviews()){
         if (webview.model.__api_response_out_of_date || (!webview.model.codemirror_code_updated) || (webview.model.whamm_live_response.is_err)) continue;
         let cell = webview.model.jagged_array[line-1][col-1];
         if (!cell) continue;

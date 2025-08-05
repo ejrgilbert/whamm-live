@@ -1,5 +1,5 @@
 <script lang="ts">
-  import WhammFileSidebar from './lib/WhammFileSidebar.svelte';
+  import WhammFileSidebar from './utils/WhammFileSidebar.svelte';
 </script>
 
 <main>

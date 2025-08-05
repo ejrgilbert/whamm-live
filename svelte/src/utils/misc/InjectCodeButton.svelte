@@ -1,6 +1,6 @@
 <script>
     import { fade } from "svelte/transition";
-    import { api_response, config} from "./api_response.svelte";
+    import { api_response, config} from "../data/api_response.svelte";
 
     const { callback } = $props();
 
