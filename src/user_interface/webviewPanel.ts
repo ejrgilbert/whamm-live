@@ -8,12 +8,12 @@ export class WebviewPanel{
 
     webviewPanel!: vscode.WebviewPanel;
 
-    constructor(){
+    constructor(title: string){
         // Create a new webview panel
         this.webviewPanel = vscode.window.createWebviewPanel(
             `live-whamm-webview-${WebviewPanel.getNonce()}`,
-            'Live Whamm',
-            vscode.ViewColumn.Active,
+            title,
+            vscode.ViewColumn.Beside,
             {
                 "enableScripts": true,
                 "retainContextWhenHidden": true,

@@ -10,7 +10,7 @@ export class WizardWebviewPanel extends WebviewPanel{
     model: APIWizardModel;
 
     constructor(){
-        super();
+        super("Target: Wizard");
         this.model = new APIWizardModel(this);
     }
 

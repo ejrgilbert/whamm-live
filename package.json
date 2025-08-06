@@ -3,7 +3,8 @@
 	"description": "VS Code extension for live programming with Whamm (a Bytecode Instrumentation DSL for WebAssembly)",
 	"author": "Elizabeth Gilbert",
 	"license": "MIT",
-	"version": "1.0.0",
+	"version": "0.1.0",
+	"icon": "media/whamm-logo.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/ejrgilbert/whamm-live"
@@ -16,8 +17,7 @@
 	"engines": {
 		"vscode": "^1.88.0"
 	},
-	"main": "./out/extension",
-	"browser": "./dist/web/extension",
+	"main": "./out/extension.js",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
@@ -70,7 +70,7 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
-		"build": "npm run compile && cargo build --target wasm32-unknown-unknown",
+		"build": "npm run compile && cargo build --target wasm32-unknown-unknown --release",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
 		"lint": "eslint",

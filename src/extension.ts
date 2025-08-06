@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { WasmContext, Memory, Options, TupleType } from '@vscode/wasm-component-model';
+import { WasmContext, Memory } from '@vscode/wasm-component-model';
 import { ExtensionContext} from './extensionContext';
 
 // Imports for the sidebar UI
@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 	context.subscriptions.push(log);
 
 	// Load the Wasm module
-	const filename = vscode.Uri.joinPath(context.extensionUri, 'target', 'wasm32-unknown-unknown', 'debug', 'whamm_server.wasm');
+	const filename = vscode.Uri.joinPath(context.extensionUri, 'target', 'wasm32-unknown-unknown', 'release', 'whamm_server.wasm');
 	const bits = await vscode.workspace.fs.readFile(filename);
 	const module = await WebAssembly.compile(bits);
 

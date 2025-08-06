@@ -17,7 +17,7 @@ export class WasmWebviewPanel extends WebviewPanel{
     static webviews: WasmWebviewPanel[] = [];
 
     constructor(fileName: string){
-        super();
+        super(`Target: ${WasmWebviewPanel.get_trimmed_file_name(fileName)}`);
         this.fileName = fileName;
         this.is_wasm = this.fileName.endsWith(".wasm") || false;
         this.model = new APIWasmModel(this);
@@ -88,6 +88,11 @@ export class WasmWebviewPanel extends WebviewPanel{
                 }
             }
         )
+    }
+
+    static get_trimmed_file_name(filename: string){
+        let file_path_array = filename.split('/');
+        return file_path_array[file_path_array.length -1];
     }
 
 }

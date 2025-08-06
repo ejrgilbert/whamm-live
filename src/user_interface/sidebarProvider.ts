@@ -162,7 +162,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider{
             </head>
             <body>
 
-            <div class="whamm-title-container">
+            <div class="whamm-title-container" style="margin-top: 5%">
             <div id="whamm-logo">
                 <img id="whamm" src=${img_src} alt="whamm" />
             </div>
