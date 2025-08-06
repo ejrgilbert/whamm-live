@@ -39,7 +39,7 @@ export function handleCursorChange(){
         let cursor = editor.selection.active
         let line = cursor.line;
         let column = cursor.character;
-        handleHighlighting(line+1, column+1);
+        handleHighlighting(line+1, column+1, true);
     }
 }
 
@@ -48,7 +48,7 @@ export function handleCursorChange(){
  * @param line : 1 based line
  * @param column : 1 based column value
  */
-function handleHighlighting(line: number, column: number){
+export function handleHighlighting(line: number, column: number, editor_should_be_active: boolean){
     // VVIP: Sort all the injections and get necessary data for best effort highlighting for ALL TARGETS
     let all_injections = sort_all_whamm_live_injections(line, column);
     let null_jagged_array = ModelHelper.create_jagged_array(APIModel.whamm_cached_content);
@@ -94,7 +94,7 @@ function handleHighlighting(line: number, column: number){
 
     // Highlight the whamm file
     LineHighlighterDecoration.clear_whamm_decorations();
-    if (all_injections.length > 0) LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, best_effort_highlight_data.problematic_highlighting);
+    if (all_injections.length > 0) LineHighlighterDecoration.highlight_whamm_file(best_effort_highlight_data.color_index_to_span, line, column, best_effort_highlight_data.problematic_highlighting, editor_should_be_active);
 }
 
 // sort all the whamm live injections based on their whamm span value based on the line, col value

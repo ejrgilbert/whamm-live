@@ -11,10 +11,14 @@ import { get_all_webviews } from '../documentChangesListener';
 import { APIWasmModel } from '../../model/api_model/model_wasm';
 import { APIWizardModel } from '../../model/api_model/model_wizard';
 
+// 1 based line and column value
+type whamm_highlight_data= {highlighed: boolean, line:number, column: number};
+
 export class LineHighlighterDecoration{
 
     static decorations: vscode.TextEditorDecorationType[] = [];
     static ranges: vscode.Range[] = [];
+    static whamm_highlight_data: whamm_highlight_data = {highlighed: false, line:-1, column: -1};
     static colors: string[] = [
         "rgba(76, 175, 80, 1)",
         "rgba(142, 36, 170, 1)",
@@ -45,20 +49,20 @@ export class LineHighlighterDecoration{
      * @param jagged_array : null filled jagged array representing the structure of the whamm file
      * @returns 
      */
-    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, warn_user: boolean){
+    static highlight_whamm_file(highlight_data: Record<number, [span, number]>, line: number, column: number, warn_user: boolean, editor_should_be_active: boolean){
 
         // We need to apply the highlights from biggest span to the lowest span
         let sorted_spans_color = Object.entries(highlight_data).sort((b,a)=>{return a[1][1] - b[1][1]});
 
         for (let [color_index, span] of sorted_spans_color){
             LineHighlighterDecoration.highlight_whamm_file_span(span[0],
-                LineHighlighterDecoration.highlightColors[parseInt(color_index)])
+                LineHighlighterDecoration.highlightColors[parseInt(color_index)], line, column, editor_should_be_active)
         }
         if (warn_user)
             vscode.window.showWarningMessage("Highlights may not be completely accurate. Try using only one target!")
     }
 
-    static highlight_whamm_file_span(whamm_span: span, color: string, editor_should_be_active: boolean = true){
+    static highlight_whamm_file_span(whamm_span: span, color: string, line: number, column: number, editor_should_be_active: boolean = true){
 
         var editors: vscode.TextEditor[];
         if (editor_should_be_active){
@@ -79,6 +83,7 @@ export class LineHighlighterDecoration{
 
         LineHighlighterDecoration.decorations.push(decorationType);
         LineHighlighterDecoration.ranges.push(range);
+        LineHighlighterDecoration.whamm_highlight_data = {highlighed: true, line: line, column: column};
 
         for (let editor of editors){
             editor.setDecorations(decorationType, [range]);
@@ -91,6 +96,8 @@ export class LineHighlighterDecoration{
 
         let decorations = LineHighlighterDecoration.decorations;
         let ranges = LineHighlighterDecoration.ranges;
+        let whamm_highlight_data = LineHighlighterDecoration.whamm_highlight_data;
+
         LineHighlighterDecoration.clear_whamm_decorations();
 
         for (let editor of editors){
@@ -100,6 +107,7 @@ export class LineHighlighterDecoration{
         }
         LineHighlighterDecoration.decorations = decorations;
         LineHighlighterDecoration.ranges = ranges;
+        LineHighlighterDecoration.whamm_highlight_data = whamm_highlight_data;
     }
 
     static highlight_wasm_webview_lines(webview: WasmWebviewPanel | WizardWebviewPanel, data1: highlights_info, data2: inj_circle_highlights_info, all_wat_lines: number[], injection_start_wat_lines: number[]){
@@ -136,7 +144,7 @@ export class LineHighlighterDecoration{
 
             if (original_injection.whamm_span !== null){
                 // highlight the whamm file
-                LineHighlighterDecoration.highlight_whamm_file_span(original_injection.whamm_span, LineHighlighterDecoration.highlightColors[0], false);
+                LineHighlighterDecoration.highlight_whamm_file_span(original_injection.whamm_span, LineHighlighterDecoration.highlightColors[0], original_injection.whamm_span.lc0.l, original_injection.whamm_span.lc0.c, false);
 
                 // highlight the line on the svelte side
                 // there might be other injections with the same whamm span and if they exist, highlight those too
@@ -232,6 +240,7 @@ export class LineHighlighterDecoration{
         }
         LineHighlighterDecoration.decorations = [];
         LineHighlighterDecoration.ranges = [];
+        LineHighlighterDecoration.whamm_highlight_data = {highlighed: false, line:-1, column: -1};
     }
 
     static clear_whamm_and_webview_decorations(webview: WasmWebviewPanel){

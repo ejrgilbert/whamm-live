@@ -64,7 +64,10 @@ export class WizardWebviewPanel extends WebviewPanel{
             message => {
                 switch (message.command){
                     case 'codemirror-code-updated':
-                        this.model.codemirror_code_updated = true;
+                        {
+                            this.model.codemirror_code_updated = true;
+                            this.handleHighlightingOnCodeInjection();
+                        }
                         break;
                     case 'wat-line-highlight':
                         LineHighlighterDecoration.highlight_whamm_live_injection(this, message.line);

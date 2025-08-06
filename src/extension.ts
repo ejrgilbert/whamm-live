@@ -100,21 +100,26 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
 	// Restore whamm decorations in the case the whamm monitor file was in the background
 	// (which would have erased any previous decorations!)
-	vscode.window.onDidChangeVisibleTextEditors((editors)=>{
-		if (!isExtensionActive()) return;
+	{
+		let callbackFn = () => {
+			if (!isExtensionActive()) return;
 
-		for (let editor of editors){
-			if (editor.document.uri.fsPath === ExtensionContext.context.workspaceState.get("whamm-file")
-				&& LineHighlighterDecoration.decorations.length > 0){
-					LineHighlighterDecoration.restore_whamm_file_decorations();
-					return;
+			let editors = ExtensionContext.get_editors();
+			if (editors.length > 0 && LineHighlighterDecoration.decorations.length > 0){
+						LineHighlighterDecoration.restore_whamm_file_decorations();
+						return;
 				}
-		}
-		// if we reach here, this means whamm file moved into the background!
-		// since whamm extension is active but we didn't find any text editor!
-		if (LineHighlighterDecoration.decorations.length > 0) {
-			// Warn the user that whamm highlights are active, but the file is in the background
-			vscode.window.showWarningMessage("No active whamm editor! Extension off momentarily!")
-		}
-	});
+			// if we reach here, this means whamm file moved into the background!
+			// since whamm extension is active but we didn't find any text editor!
+			if (LineHighlighterDecoration.decorations.length > 0) {
+				// Warn the user that whamm highlights are active, but the file is in the background
+				vscode.window.showWarningMessage("No active whamm editor! Extension off momentarily!")
+			}
+		};
+
+		let debounceFunction = debounce(callbackFn, 500)
+		vscode.window.onDidChangeVisibleTextEditors((editors)=>{
+			debounceFunction();
+		});
+	}
 }

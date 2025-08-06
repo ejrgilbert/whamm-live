@@ -3,6 +3,7 @@ import { ExtensionContext } from '../extensionContext';
 import { SvelteModel } from '../model/svelte_model';
 import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighlighterDecoration';
 import { Types } from '../whammServer';
+import { handleHighlighting } from '../extensionListeners/cursorChangesListener';
 
 export class WebviewPanel{
 
@@ -78,5 +79,15 @@ export class WebviewPanel{
 
         // remove highlights if no webviews open
         LineHighlighterDecoration.clear_whamm_decorations_if_necessary();
+    }
+
+    handleHighlightingOnCodeInjection(){
+        // extension is guaranteed to be active
+        // i.e whamm file is selected and at least one webview is open
+        // So, Only perform highlighting if editor is visible and it is highlighted
+        if (LineHighlighterDecoration.decorations.length > 0 && ExtensionContext.get_editors().length > 0){
+            console.log(LineHighlighterDecoration.whamm_highlight_data);
+            handleHighlighting(LineHighlighterDecoration.whamm_highlight_data.line, LineHighlighterDecoration.whamm_highlight_data.column, false);
+        }
     }
 }

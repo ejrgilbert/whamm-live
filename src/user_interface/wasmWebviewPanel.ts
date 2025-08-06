@@ -4,6 +4,7 @@ import { LineHighlighterDecoration } from '../extensionListeners/utils/lineHighl
 import { Types } from '../whammServer';
 import { WebviewPanel } from './webviewPanel';
 import { APIWasmModel } from '../model/api_model/model_wasm';
+import { handleCursorChange, handleHighlighting } from '../extensionListeners/cursorChangesListener';
 
 export class WasmWebviewPanel extends WebviewPanel{
 
@@ -74,7 +75,10 @@ export class WasmWebviewPanel extends WebviewPanel{
             message => {
                 switch (message.command){
                     case 'codemirror-code-updated':
-                        this.model.codemirror_code_updated = true;
+                        {
+                            this.model.codemirror_code_updated = true;
+                            this.handleHighlightingOnCodeInjection();
+                        }
                         break;
                     case 'wat-line-highlight':
                         LineHighlighterDecoration.highlight_whamm_live_injection(this, message.line);
@@ -94,5 +98,5 @@ export class WasmWebviewPanel extends WebviewPanel{
         let file_path_array = filename.split('/');
         return file_path_array[file_path_array.length -1];
     }
-
+    
 }
