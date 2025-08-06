@@ -12,5 +12,6 @@ crate-type = ["cdylib"]
 wirm = "1.0.0"
 wasmprinter = "0.235.0"
 wat = "1.235.0"
+# whamm = {path = "../whamm-forked"}
 wit-bindgen = "0.21.0"
 pest = "2.8.1"
