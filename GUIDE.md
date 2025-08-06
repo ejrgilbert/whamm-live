@@ -92,4 +92,30 @@ Bidirectional traceability is also preserved across all views. Clicking an injec
 This makes Live Whamm a powerful tool for debugging instrumentation across multiple targets.
 
 ## Live programming environment
-@TODO
+Live Whamm is designed to support live programming workflows. The idea is to give you live feedback as you modify with your whamm instrumentation logic.
+
+### Live editing & injection
+You can take full advantage of the extension by using it in a live editing loop:
+
+* Modify your Whamm script. For example, modify the logic inside a probe body.
+
+* Save the file.
+
+* Saving the file will trigger the extension to automatically reload the Whamm API for all previously selected targets.
+
+* Once the data is ready, simply click “Inject Code” again to see the updated results reflected immediately across all selected targets.
+
+### Language Server Support
+Live Whamm also acts as a lightweight language server for whamm scripts, displaying syntax and semantic errors within the Whamm script if the script is invalid.
+
+* Let's say we modified the logic in our probe body in the `.mm` script. However, let us say we made a semantic error by declaring the same variable twice.
+
+* Now, once we save the file, this will trigger the extension to update its data.
+
+* However, since our whamm script had an errors, Live Whamm will display those errors directly within the VSCode editor.
+
+![Live Whamm acting as a language server](media/guide/error-screenshot.png)
+<hr>
+
+> [!IMPORTANT]  
+> If you have any other questions/feedback, feel free to create an github [issue](https://github.com/ejrgilbert/whamm-live/issues) or message us :)
