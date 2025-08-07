@@ -1,54 +1,76 @@
-# whamm-live #
+# whamm-live
 Live programming with the [`Whamm` DSL](https://github.com/ejrgilbert/whamm)!
 
-## Setup ##
 
-### Configure `wit2ts`
-1. Clone: https://github.com/microsoft/vscode-wasm
-2. Build
+Whamm Live is a VSCode extension that provides live, bidirectional visibility between `Whamm` scripts and their instrumentation effects for the [`Wizard` engine](https://github.com/titzer/wizard-engine) target as well as other selected Wasm targets.
+
+## Install
+> [!NOTE]  
+> This extension is not yet available on the VS Code Marketplace. You will need to manually install the `.vsix` file.
+
+1. To get started, first download the `.vsix` file from the [releases](https://github.com/ejrgilbert/whamm-live/releases) page.
+
+2. Open your terminal
 ```bash
-cd vscode-wasm
-npm install
-cd wasm-component-model
-npm run clean
-npm run compile
-chmod +x ./bin/wit2s
-# Test running the binary
-./bin/wit2ts
+code --install-extension path/to/live-whamm-x.y.z.vsix
 ```
-3. Add `wit2ts` to `PATH`
+Related Resource(s): [Install from a vsix](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace#_install-from-a-vsix)
 
-### Setup `whamm-live` extension
-1. Clone this repo `git clone git@github.com:ejrgilbert/whamm-live.git`
-2. Setup
+## Guide
+
+[GUIDE.md](./GUIDE.md)
+
+## Development Setup
+Want to contribute or test locally? Here's how to set it up:
+
+1. Clone the repo:
+```bash
+git clone https://github.com/ejrgilbert/whamm-live.git
+cd whamm-live
+```
+
+2. Configure `wit2s`
+
+    1. Clone [vscode-wasm](https://github.com/microsoft/vscode-wasm)
+    2. Build
+
+    ```bash
+    cd vscode-wasm
+    npm install
+    cd wasm-component-model
+    npm run clean
+    npm run compile
+    chmod +x ./bin/wit2s
+    # Test running the binary
+    ./bin/wit2ts
+
+    # Add `wit2s` to `PATH`
+    export PATH="$PWD/bin:$PATH"
+    ```
+
+3. Setup svelte
+```bash
+    cd whamm-live/svelte
+    npm install
+    npm run build
+```
+For specific svelte stuff, look at [svelte/README.md](https://github.com/ejrgilbert/whamm-live/tree/main/svelte).
+
+4. Setup `Whamm`
+    1. Clone `Whamm`.
+    2. Add `Whamm` to Live-Whamm's `Cargo.toml` file
+```toml
+whamm={path="path/to/whamm/repo"}
+```
+
+5. Finally, to start the extension:
 ```bash
 npm install
 cargo build
 ```
-3. Run extension using `F5` key
+Run extension using `F5` key
 
-
-## To work on ##
-
-### MVP: Backend ###
-
-whamm backend:
-- [ ] Get whamm running as a Rust library dependency
-- [ ] Collect location metadata
-
-extension frontend:
-- [ ] Call whamm library
-- [ ] Pass probe locations to extension
-- [ ] Cache probes as `Map<Loc, Wat>`
-- [ ] Print all activated probes to console
-
-### MVP: UI ###
-
-- [ ] Open script
-- [ ] print app WAT in side-pane
-- [ ] overlay something with probe metadata
-
-### Improvements ###
+### Improvements
 
 - [ ] Execute Wasm code in a worker (make it async): [tutorial](https://code.visualstudio.com/blogs/2024/06/07/wasm-part2)
 - [ ] Reduce duplicated effort for re-creating an Orca module on every `run` invocationß

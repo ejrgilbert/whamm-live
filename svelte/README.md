@@ -16,6 +16,9 @@ If you want to edit an existing `.svelte` file like `sidebar.svelte` inside of `
 ```bash
 npx vite build --config vite.sidebar.config.js
 ```
+> [!TIP]
+> Consider running `npx vite build --watch --config vite.sidebar.config.js` so that vite builds the output file on file changes automatically.
+
 The output will be placed in the `svelte/dist` directory. Look at `svelte/src/sidebar.ts` file. That will tell you where the compiled `.js` file will inject the content inside any HTML.
 If you are interested in seeing how the compiled `.js` file is used in our sidebar webview, look at the `_get_html_content` method inside [`sidebarProvider.ts`](https://github.com/ejrgilbert/whamm-live/blob/main/src/sidebarProvider.ts)
 
